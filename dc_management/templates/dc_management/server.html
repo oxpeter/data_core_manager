@@ -1,0 +1,41 @@
+{% extends 'dc_management/base.html' %}
+
+{% load bootstrap3 %}
+
+{% block content %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+<h1>{{ server.node }}</h1>
+<p>{{ server.ip_address }}</p>
+<p>{{ server.name_address }}</p>
+
+<h2>Projects</h2>
+Number of projects on node: {{ server.project_set.all.count }}
+<ul>
+{% for p in server.project_set.all %}
+<li> <a href="{% url 'dc_management:project' p.pk %}">{{ p }}</a> </li>
+{% endfor %}
+</ul>
+
+<h2>Server Attributes:</h2>
+<ul>
+<li>CPUs: {{ server.processor_num }}</li>
+<li>RAM: {{ server.ram }}</li>
+<li>Disk Storage: {{ server.disk_storage }}</li>
+<li>Other Storage: {{ server.other_storage }}</li>
+<li>Connection date: {{ server.connection_date }}</li>
+<li>DNS name: {{ server.dns_name }}</li>
+<li>host: {{ server.host }}</li>
+</ul>
+
+<h3>Comments</h3>
+<p>{{ server.comments }}</p>
+
+{% endblock %}
+ 

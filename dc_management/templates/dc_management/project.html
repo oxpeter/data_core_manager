@@ -1,0 +1,43 @@
+{% extends 'dc_management/base.html' %}
+
+{% load bootstrap3 %}
+
+{% block content %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+<h1>{{ project.dc_prj_id }}</h1>
+<p>"{{ project.title }}"</p>
+
+<h2>Users</h2>
+Number of users: {{ project.users.all.count }}</li>
+<ul>
+{% for u in project.users.all %}
+<li> <a href="{% url 'dc_management:dcuser' u.pk %}">{{ u }}</a> </li>
+{% endfor %}
+</ul>
+
+<h2>Attributes:</h2>
+<ul>
+<li>Status: {{ project.get_status_display }}</li>
+<li>Environment: {{ project.get_env_type_display }}</li>
+<li>Subtype: {{ project.env_subtype }}</li>
+<li>PI: {{ project.pi }}</li>
+<li>Host: {{ project.host }}</li>
+</ul>
+
+<h2>Node Attributes:</h2>
+<ul>
+<li>Node: <a href="{% url 'dc_management:node' project.host.pk %}">{{ project.host.node }}</a> </li>
+<li>Address: {{ project.host.name_address }}</li>
+<li>IP: {{ project.host.ip_address }}</li>
+</ul>
+
+<h3>Comments</h3>
+<p>{{ project.comments }}</p>
+{% endblock %}

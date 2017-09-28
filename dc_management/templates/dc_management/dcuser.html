@@ -1,0 +1,43 @@
+{% extends 'dc_management/base.html' %}
+
+{# Load the tag library #}
+{% load bootstrap3 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+{% block content %}
+<h1>{{ dc_user.first_name }} {{ dc_user.last_name }}</h1>
+<p>{{ dc_user.cwid }}</p>
+
+<h2>Projects</h2>
+Number of projects: {{ dc_user.project_set.all.count }}
+<ul>
+{% for p in dc_user.project_set.all %}
+<li> <a href="{% url 'dc_management:project' p.pk %}">{{ p }}</a> ({{ p.host.ip_address }}) {{ p.title }} </li>
+{% endfor %}
+</ul>
+
+<h2>Attributes:</h2>
+<ul>
+<li>Affiliation: {{ dc_user.get_affiliation_display }}</li>
+<li>Role: {{ dc_user.get_role_display }}</li>
+</ul>
+
+<h3>Comments</h3>
+<p>{{ dc_user.comments }}</p>
+</br>
+</br>
+
+
+
+<a type="button" class="btn btn-warning" href="{% url 'dc_management:dc_user-update' dc_user.pk %}">Update user</a>
+
+<a type="button" class="btn btn-danger" href="{% url 'dc_management:usertoproject-add' dc_user.pk %}">Add user to project</a>
+
+{% endblock %}
+

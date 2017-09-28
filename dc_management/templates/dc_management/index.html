@@ -1,0 +1,40 @@
+{% extends 'dc_management/base.html' %}
+
+{% load bootstrap3 %}
+
+{% block content %}
+<h2>Active Projects</h2>
+{% if running_projects_list %}
+    <ul>
+    {% for project in running_projects_list %}
+        <li><a href="{% url 'dc_management:project' project.pk %}">{{ project.dc_prj_id }}</a> PI: {{ project.pi }}, {{ project.users.all.count }} users.</br>{{ project.title }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No projects are currently running.</p>
+{% endif %}
+
+
+<h2>Data Core Users</h2>
+{% if user_list %}
+    <ul>
+    {% for u in user_list %}
+        <li><a href="{% url 'dc_management:dcuser' u.pk %}">{{ u }}</a> {{ u.get_affiliation_display }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No users are currently in the database.</p>
+{% endif %}
+<a type="button" class="btn btn-primary" href="{% url 'dc_management:dc_user-add' %}">Add user</a>
+<h2>Servers</h2>
+{% if user_list %}
+    <ul>
+    {% for s in server_list %}
+        <li><a href="{% url 'dc_management:node' s.pk %}">{{ s }}</a> {{ u.get_affiliation_display }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No servers are currently in the database.</p>
+{% endif %}
+
+{% endblock %}
