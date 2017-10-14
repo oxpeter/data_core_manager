@@ -11,6 +11,19 @@ admin.site.site_header = 'Data Core Management Site'
 admin.site.site_title = "DCMS"
 admin.site.index_title = "Back end administration"
 
+# customize the individual model views:
+@admin.register(Governance_Doc)
+class GovDocAdmin(admin.ModelAdmin):
+    date_hierarchy = 'expiry_date'
+    list_display = ('doc_id', 
+                    'expiry_date',
+                    'project', 
+                    'defers_to_doc', 
+                    'allowed_user_string',
+                    )
+    list_filter = ('governance_type',)
+
+
 admin.site.register(Access_Log)
 admin.site.register(AccessPermission)
 admin.site.register(Audit_Log)
@@ -19,7 +32,6 @@ admin.site.register(DC_Administrator)
 admin.site.register(DC_User)
 admin.site.register(EnvtSubtype)
 admin.site.register(External_Access_Log)
-admin.site.register(Governance_Doc)
 admin.site.register(Project)
 admin.site.register(Server)
 admin.site.register(SN_Ticket)

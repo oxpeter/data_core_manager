@@ -8,36 +8,309 @@
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 
+{# load the custom filters for time #}
+{% load project_tags %}
+
 {# Display django.contrib.messages as Bootstrap alerts #}
 {% bootstrap_messages %}
 
-<h1>{{ project.dc_prj_id }}</h1>
-<p>"{{ project.title }}"</p>
+<style>
+/* styling of the tabs*/
+#exTab1 .tab-content {
+  color : black;
+  padding : 5px 15px;
+}
 
-<h2>Users</h2>
-Number of users: {{ project.users.all.count }}</li>
-<ul>
-{% for u in project.users.all %}
-<li> <a href="{% url 'dc_management:dcuser' u.pk %}">{{ u }}</a> </li>
-{% endfor %}
-</ul>
+#exTab1 .nav-tabs > li > a {
+  border-radius: 4px 4px 0 0;
+}
+</style>
 
-<h2>Attributes:</h2>
-<ul>
-<li>Status: {{ project.get_status_display }}</li>
-<li>Environment: {{ project.get_env_type_display }}</li>
-<li>Subtype: {{ project.env_subtype }}</li>
-<li>PI: {{ project.pi }}</li>
-<li>Host: {{ project.host }}</li>
-</ul>
 
-<h2>Node Attributes:</h2>
-<ul>
-<li>Node: <a href="{% url 'dc_management:node' project.host.pk %}">{{ project.host.node }}</a> </li>
-<li>Address: {{ project.host.name_address }}</li>
-<li>IP: {{ project.host.ip_address }}</li>
-</ul>
+<h1>
+    {{ project.dc_prj_id }}
+    <small class="text-muted">{{ project.title }}</small>
+</h1>
 
-<h3>Comments</h3>
-<p>{{ project.comments }}</p>
+<!-- Setup tabs for separating details and logs --!>
+<div id="exTab1" class="container">
+<ul  class="nav nav-tabs">
+			<li class="active">
+            <a  href="#details" data-toggle="tab">Details</a>
+			</li>
+			<li><a href="#logs" data-toggle="tab">Logs</a>
+			</li>
+		</ul>
+		
+		
+<div class="tab-content clearfix">
+  
+
+
+
+
+<!-- Attributes of project --!>
+<div class="tab-pane active" id="details">
+<div class="container">
+ <div class="panel panel-primary">
+  <div class="panel-heading">
+    <h4>Attributes:</h4>
+  </div>
+  <div class="panel-body">
+    <table class="table table-striped">
+        <tr>
+            <td>PI </td><td> {{ project.pi }}</td>
+        </tr>
+
+        {% if project.expected_completion|days_until:0 %}
+            <tr class="bg-danger" style="color:red;background:lightpink">
+                <td>Expiry</td><td> {{ project.expected_completion }}</td>
+            </tr>
+        {% elif project.expected_completion|days_until:10 %}
+            <tr class="bg-warning" style="color:orange;">
+                <td>Expiry</td><td> {{ project.expected_completion }}</td>
+            </tr>
+        {% elif project.expected_completion|days_until:90 %}
+            <tr class="bg-info" style="color:blue;">
+                <td>Expiry</td><td> {{ project.expected_completion}}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td>Expiry</td><td> {{ project.expected_completion}}</td>
+            </tr>
+        {% endif %}
+
+        <tr>
+            <td>Status </td><td> {{ project.get_status_display }}</td>
+        </tr>
+        <tr>
+            <td>Environment </td><td> {{ project.get_env_type_display }}</tdd>
+        </tr>
+        <tr>
+            <td>Subtype </td><td> {{ project.env_subtype }}</td>
+        </tr>
+        {% if project.governance_doc_set.all.count == 0 %}
+        <tr class="bg-danger" style="color:red;">
+            <td>Governance doc </td><td> None entered! </td>
+        </tr>
+        
+        {% else %}
+            {% for gd in project.governance_doc_set.all %}
+            <tr>
+                <td>Governance doc {{ forloop.counter }} </td><td> {{ gd }}</td>
+            </tr>
+            {% endfor %}
+        {% endif %}
+
+    </table>
+  </div>
+ </div>
+</div>
+
+<div class="container">
+ <div class="panel panel-primary">
+  <div class="panel-heading">
+    <h4>Node Attributes:</h4>
+  </div>
+  <div class="panel-body">
+    <table class="table table-striped"><ul>
+        <thead class="thead-default">
+        <tr>
+            <th>Node</th><th>Address</th><th>IP address</th>
+        </tr>
+        </thead>
+        <tr>
+            <td><a href="{% url 'dc_management:node' project.host.pk %}">{{ project.host.node }}</a></td>
+            <td>{{ project.host.name_address }}</td>
+            <td>{{ project.host.ip_address }}</td>
+        </tr>
+
+    </table>
+  </div>
+ </div>
+</div>
+
+<div class="container">
+ <div class="panel panel-primary">
+  <div class="panel-heading">
+    <h4>{{ project.users.all.count }} Users
+        <span class="pull-right">
+            <a type="button" class="btn btn-default" href="#">Remove user from project</a>
+            <a type="button" class="btn btn-danger" href="{% url 'dc_management:usertoproject-add'  %}">Add user to project</a>
+        </span>
+    </h4>
+  </div>
+  <div class="panel-body">
+    {% include "dc_management/user_list.html" %}
+  </div>
+ </div>
+</div>
+
+{% if project.governance_doc_set.all.count == 0 %}
+    </br>
+{% else %}
+    <div class="container">
+     <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h4>Project governance</h4>
+      </div>
+      <div class="panel-body">
+    {% for gd in project.governance_doc_set.all %}
+        <h5><a href="{% url 'dc_management:govdoc' gd.pk %}" target="_blank">{{ gd }}</a> </h5>
+        <table class="table table-striped">
+            <tr>
+                <td>ID </td><td> {{ gd.doc_id }}</td>
+            </tr>
+            
+                {% if gd.expiry_date|days_until:0 %}
+                    <tr class="bg-danger" style="color:red;">
+                        <td>Expiry</td><td> {{ gd.expiry_date }}</td>
+                    </tr>
+                {% elif gd.expiry_date|days_until:10 %}
+                    <tr class="bg-warning" style="color:orange;">
+                        <td>Expiry</td><td> {{ gd.expiry_date }}</td>
+                    </tr>
+                {% elif gd.expiry_date|days_until:90 %}
+                    <tr class="bg-info" style="color:blue;">
+                        <td>Expiry</td><td> {{ gd.expiry_date }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>Expiry</td><td> {{ gd.expiry_date }}</td>
+                    </tr>
+                {% endif %}
+            
+            <tr>
+                <td>Governance type </td><td> {{ gd.get_governance_type_display }}</td>
+            </tr>
+            <tr>
+                <td>Access allowed</td><td> {{ gd.access_allowed }}</td>
+            </tr>
+        </table>
+    {% endfor %}
+      </div>
+     </div>
+    </div>
+
+{% endif %}
+    
+{% if project.comments %}
+<div class="container">
+ <div class="panel panel-primary">
+  <div class="panel-heading">    
+    <h3>Comments</h3>
+  </div>
+  <div class="panel-body">
+    <p>{{ project.comments }}</p>
+  </div>
+ </div>
+</div>
+{% endif %}
+</div>
+
+
+<div class="tab-pane active" id="logs">
+<!-- project logs --!>
+ <h4>Access logs</h4>
+ <table class="table table-striped">
+  <thead class="thead-default">
+        <tr>
+            <th>Logged</th>
+            <th>Ticket</th>
+            <th>Activated</th>
+            <th>User</th>
+            <th>Change</th>
+        </tr>
+  </thead>
+  {% for l in project.access_log_set.all %}
+   <tr><td>{{ l.record_creation }}</td>
+       <td>{{ l.sn_ticket }}</td>
+       <td>{{ l.date_changed }}</td>
+       <td>{{ l.dc_user }}</td>
+       <td>{{ l.get_change_type_display }}</td>
+       </tr>
+  {% endfor %}
+ </table>
+
+ <h4>External access logs</h4>
+ <table class="table table-striped">
+  <thead class="thead-default">
+        <tr>
+            <th>Logged</th>
+            <th>Ticket</th>
+            <th>Connected</th>
+            <th>Disconnected</th>
+        </tr>
+  </thead>
+  {% for l in project.external_access_log_set.all %}
+   <tr><td>{{ l.record_creation }}</td>
+       <td>{{ l.sn_ticket }}</td>
+       <td>{{ l.date_connected }}</td>
+       <td>{{ l.date_disconnected }}</td>
+       </tr>
+  {% endfor %}
+ </table>
+ 
+ <h4>Software logs</h4>
+ <table class="table table-striped">
+  <thead class="thead-default">
+        <tr>
+            <th>Ticket</th>
+            <th>Changed</th>
+            <th>Software</th>
+        </tr>
+  </thead>
+  {% for l in project.software_log_set.all %}
+   <tr><td>{{ l.sn_ticket }}</td>
+       <td>{{ l.change_date }}</td>
+       <td>{{ l.software_changed }}</td>
+       </tr>
+  {% endfor %}
+ </table>
+
+ <h4>Storage logs</h4>
+ <table class="table table-striped">
+  <thead class="thead-default">
+        <tr>
+            <th>Logged</th>
+            <th>Ticket</th>
+            <th>Changed</th>
+            <th>Amount (GB)</th>
+            <th>Comments</th>
+        </tr>
+  </thead>
+  {% for l in project.storage_log_set.all %}
+   <tr><td>{{ l.record_creation }}</td>
+       <td>{{ l.sn_ticket }}</td>
+       <td>{{ l.date_changed }}</td>
+       <td>{{ l.storage_amount }}</td>
+       <td>{{ l.comments }}</td>
+       </tr>
+  {% endfor %}
+ </table>
+
+ <h4>Audit logs</h4>
+ <table class="table table-striped">
+  <thead class="thead-inverse">
+        <tr>
+            <th>Logged</th>
+            <th>Ticket</th>
+            <th>Audit Date</th>
+            <th>User</th>
+            <th>Comments</th>
+        </tr>
+  </thead>
+  {% for l in project.audit_log_set.all %}
+   <tr><td>{{ l.record_creation }}</td>
+       <td>{{ l.sn_ticket }}</td>
+       <td>{{ l.audit_date }}</td>
+       <td>{{ l.dc_user }}</td>
+       <td>{{ l.comments }}</td>
+       </tr>
+  {% endfor %}
+ </table>
+
+</div>
+</div>
+</div>
 {% endblock %}

@@ -2,3 +2,6 @@ manage.py
 db.sqlite3
 datacore/*
 .DS_store
+*.pyc
+.gitignore
+*/*.pyc

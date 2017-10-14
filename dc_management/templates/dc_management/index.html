@@ -3,38 +3,110 @@
 {% load bootstrap3 %}
 
 {% block content %}
-<h2>Active Projects</h2>
-{% if running_projects_list %}
-    <ul>
-    {% for project in running_projects_list %}
-        <li><a href="{% url 'dc_management:project' project.pk %}">{{ project.dc_prj_id }}</a> PI: {{ project.pi }}, {{ project.users.all.count }} users.</br>{{ project.title }}</li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No projects are currently running.</p>
-{% endif %}
+
+<style>
+/* styling of the tabs*/
+#exTab1 .tab-content {
+  color : black;
+  padding : 5px 15px;
+}
+
+#exTab1 .nav-tabs > li > a {
+  border-radius: 4px 4px 0 0;
+}
+</style>
 
 
-<h2>Data Core Users</h2>
-{% if user_list %}
-    <ul>
-    {% for u in user_list %}
-        <li><a href="{% url 'dc_management:dcuser' u.pk %}">{{ u }}</a> {{ u.get_affiliation_display }}</li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No users are currently in the database.</p>
-{% endif %}
-<a type="button" class="btn btn-primary" href="{% url 'dc_management:dc_user-add' %}">Add user</a>
-<h2>Servers</h2>
-{% if user_list %}
-    <ul>
-    {% for s in server_list %}
-        <li><a href="{% url 'dc_management:node' s.pk %}">{{ s }}</a> {{ u.get_affiliation_display }}</li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No servers are currently in the database.</p>
-{% endif %}
+<div id="exTab1" class="container">
+<ul  class="nav nav-tabs">
+			<li class="active">
+            <a  href="#overview" data-toggle="tab">Overview</a>
+			</li>
+			<li><a href="#projects" data-toggle="tab">Projects</a>
+			</li>
+			<li><a href="#users" data-toggle="tab">Users</a>
+			</li>
+  		    <li><a href="#servers" data-toggle="tab">Servers</a>
+			</li>
+		</ul>
+		
+		
+<div class="tab-content clearfix">
+  
+  <div class="tab-pane active" id="overview">
+      <p>overview dashboard will go here</p>
+  </div>
+  
+  <div class="tab-pane" id="projects">			  
+    <h2>Active Projects</h2>
+    <a type="button" class="btn btn-default" href="#">View all projects</a>
+    <a type="button" class="btn btn-default" href="#">Add new project</a>
+
+    {% if running_projects_list %}
+        <table class="table table-striped table-hover">
+        <thead class="thead-default">
+        <tr>
+            <th>Project</th>
+            <th>PI</th>
+            <th># users</th>
+            <th>Project title</th>
+        </tr>
+        </thead>
+
+        {% for project in running_projects_list %}
+          <tr>
+            <td><a href="{% url 'dc_management:project' project.pk %}">{{ project.dc_prj_id }}</a></td>
+            <td>{{ project.pi }} </td>
+            <td>{{ project.users.all.count }}</td> 
+            <td>{{ project.title }}</td>
+          </tr>
+        {% endfor %}
+        </table>
+    {% else %}
+        <p>No projects are currently running.</p>
+    {% endif %}
+    </br>
+  </div>
+  
+  <div class="tab-pane" id="users">
+    <h2>Data Core PIs</h2>
+    <a type="button" class="btn btn-primary" href="{% url 'dc_management:dc_user-add' %}">Create user</a>
+    <a type="button" class="btn btn-info" href="{% url 'dc_management:all_users' %}">View all users</a>
+    {% include "dc_management/user_list_multiproject.html" %}
+    </br>
+  </div>
+
+
+  <div class="tab-pane" id="servers">
+    <h2>Active Production Servers</h2>
+    <a type="button" class="btn btn-default" href="#">View all server nodes</a>
+    <a type="button" class="btn btn-default" href="#">Add new server</a>
+
+    {% if server_list %}
+        <table class="table table-striped table-hover" id="serverTable">
+        <thead class="thead-default">
+            <tr>
+                <th>Node</th>
+                <th>IP address</th>
+                <th># projects</th>
+            </tr>
+        </thead>
+    
+        {% for s in server_list %}
+            <tr>
+            <td><a href="{% url 'dc_management:node' s.pk %}">{{ s }}</a></td>
+            <td>{{ s.ip_address }}</td>
+            <td> {{ s.project_set.count }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% else %}
+        <p>No servers are currently in the database.</p>
+    {% endif %}
+  </div>
+</div>
+</div>  
+
+
 
 {% endblock %}

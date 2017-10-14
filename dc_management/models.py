@@ -140,7 +140,7 @@ class DC_User(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
 
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     cwid = models.CharField(max_length=16, unique=True)
     first_name = models.CharField(max_length=32)
     last_name = models.CharField(max_length=32)
@@ -172,15 +172,19 @@ class DC_User(models.Model):
     STUDENT = 'ST'
     STATISTICIAN = 'SN'
     VOLUNTEER = 'VO'
+    STAFF = 'SF'
+    EXPIRED = 'EX'
     OTHER = 'OT' # note this is also used in AFFILIATION_CHOICES
     ROLE_CHOICES = (
                 (FACULTY, 'Faculty'),
                 (STATISTICIAN, 'Statistician'),
                 (AFFILIATE, 'Affiliate'),
                 (RESEARCH_COORDINATOR, 'Research Coordinator'),
+                (STAFF, 'Staff'),
                 (STUDENT, 'Student'),
                 (VOLUNTEER, 'Volunteer'),
                 (OTHER, 'Other'),
+                (EXPIRED, 'Role Expired'),
     )
     role = models.CharField(
                             max_length=2,
@@ -202,7 +206,7 @@ class DC_User(models.Model):
 
 
 class Software_License_Type(models.Model):
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     name = models.CharField(max_length=32, unique=True)
     user_assigned = models.BooleanField()
     concurrent = models.BooleanField()
@@ -252,12 +256,7 @@ class SoftwarePurchase(models.Model):
     record_update = models.DateField(auto_now=True)
     
     date_purchased = models.DateField(auto_now=True)
-    sn_ticket = models.ForeignKey(
-                            SN_Ticket, 
-                            on_delete=models.CASCADE, 
-                            null=True, 
-                            blank=True,
-                            )
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     sw_purchased = models.ForeignKey(Software, on_delete=models.CASCADE)                        
     units_purchased = models.IntegerField()
     cost_per_unit = models.FloatField()
@@ -326,30 +325,12 @@ class Project(models.Model):
                             default = RUNNING,
     ) 
     
-    sn_tickets = models.ManyToManyField(SN_Ticket, blank=True)
-    predata_ticket = models.ForeignKey(
-                                SN_Ticket, 
-                                on_delete=models.CASCADE,
-                                related_name="predata_tickets",
-                                null=True,
-                                blank=True,
-    )
+    sn_tickets = models.CharField(max_length=32, null=True, blank=True)
+    predata_ticket = models.CharField(max_length=32, null=True, blank=True)
     predata_date = models.DateField(null=True, blank=True)
-    postdata_ticket = models.ForeignKey(
-                                SN_Ticket, 
-                                on_delete=models.CASCADE,
-                                related_name="postdata_tickets",
-                                null=True,
-                                blank=True,
-    )
+    postdata_ticket = models.CharField(max_length=32, null=True, blank=True)
     postdata_date = models.DateField(null=True, blank=True)
-    completion_ticket = models.ForeignKey(
-                                SN_Ticket, 
-                                on_delete=models.CASCADE,
-                                related_name="completion_tickets",
-                                null=True,
-                                blank=True,
-    )
+    completion_ticket = models.CharField(max_length=32, null=True, blank=True)
     completion_date = models.DateField(null=True, blank=True)
     host = models.ForeignKey(Server, on_delete=models.CASCADE, null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
@@ -372,7 +353,7 @@ class Governance_Doc(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
 
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     doc_id = models.CharField(max_length=64)
     date_issued = models.DateField()
     expiry_date = models.DateField()
@@ -395,7 +376,10 @@ class Governance_Doc(models.Model):
                             default = DCA,
     )
     
-    defers_to_doc = models.ForeignKey('self', on_delete=models.CASCADE)
+    defers_to_doc = models.ForeignKey('self', 
+                                        on_delete=models.CASCADE, 
+                                        null=True, 
+                                        blank=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     
     documentation = models.FileField(
@@ -409,6 +393,9 @@ class Governance_Doc(models.Model):
     def __str__(self):
             return "{}_{}".format(self.governance_type, self.doc_id)
 
+    def allowed_user_string(self):
+        return  ", ".join([u.cwid for u in self.users_permitted.all()])
+
     class Meta:
         verbose_name = 'Governance Document'
         verbose_name_plural = 'Governance Documents'
@@ -417,7 +404,7 @@ class DC_Administrator(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
 
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     cwid = models.CharField(max_length=32)
     first_name = models.CharField(max_length=32)
     last_name = models.CharField(max_length=32)
@@ -436,7 +423,7 @@ class External_Access_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
 
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     date_connected = models.DateField()
     date_disconnected = models.DateField()
     user_requesting = models.ForeignKey(DC_User, on_delete=models.CASCADE)
@@ -452,7 +439,7 @@ class External_Access_Log(models.Model):
         verbose_name_plural = 'External Access Logs'
         
 class Software_Log(models.Model):
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     change_date = models.DateField()
     applied_to_prj = models.ForeignKey(Project, on_delete=models.CASCADE)
     applied_to_node = models.ForeignKey(Server, on_delete=models.CASCADE)
@@ -483,7 +470,7 @@ class Software_Purchase(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
 
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     date_purchased = models.DateField()
     software = models.ForeignKey(Software, on_delete=models.CASCADE)
     num_licenses_purchased = models.IntegerField()
@@ -524,7 +511,7 @@ class Access_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
 
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     date_changed = models.DateField()
     dc_user = models.ForeignKey(DC_User, on_delete=models.CASCADE)
     prj_affected = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -553,7 +540,7 @@ class Audit_Log(models.Model):
     record_update = models.DateField(auto_now=True)
     
     performed_by = models.ForeignKey(DC_Administrator, on_delete=models.CASCADE)
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     audit_date = models.DateField()
     dc_user = models.ForeignKey(
                         DC_User, 
@@ -593,7 +580,7 @@ class Storage_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
 
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     date_changed = models.DateField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     storage_amount = models.IntegerField(null=True, blank=True)
@@ -611,7 +598,6 @@ class Data_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
 
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
     change_date = models.DateField()
 
     IMPORT = 'IM'
@@ -627,16 +613,8 @@ class Data_Log(models.Model):
     )
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    request_ticket = models.ForeignKey(
-                            SN_Ticket, 
-                            on_delete=models.CASCADE,
-                            related_name='request_ticket',
-                            )
-    transfer_ticket = models.ForeignKey(
-                            SN_Ticket, 
-                            on_delete=models.CASCADE,
-                            related_name='transfer_ticket',
-                            )
+    request_ticket = models.CharField(max_length=32, null=True, blank=True)
+    transfer_ticket = models.CharField(max_length=32, null=True, blank=True)
     authorized_by = models.ForeignKey(
                             DC_Administrator, 
                             on_delete=models.CASCADE,
@@ -676,7 +654,7 @@ class Data_Log(models.Model):
 
     
 class Server_Change_Log(models.Model):
-    sn_ticket = models.ForeignKey(SN_Ticket, on_delete=models.CASCADE, null=True, blank=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     change_date = models.DateField()
 
     node_changed = models.ForeignKey(Server, on_delete=models.CASCADE, null=True)

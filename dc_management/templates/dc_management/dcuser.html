@@ -37,7 +37,7 @@ Number of projects: {{ dc_user.project_set.all.count }}
 
 <a type="button" class="btn btn-warning" href="{% url 'dc_management:dc_user-update' dc_user.pk %}">Update user</a>
 
-<a type="button" class="btn btn-danger" href="{% url 'dc_management:usertoproject-add' dc_user.pk %}">Add user to project</a>
+<a type="button" class="btn btn-danger" href="{% url 'dc_management:thisusertoproject-add' dc_user.pk %}">Add user to project</a>
 
 {% endblock %}
 

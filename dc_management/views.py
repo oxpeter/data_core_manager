@@ -4,15 +4,14 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormVi
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse_lazy, reverse
 
-from django.http import HttpResponse
-from django.http import Http404
+from django.http import HttpResponse, Http404, FileResponse
 
 from django.urls import reverse_lazy
 from django.shortcuts import render, get_object_or_404
 
 from datetime import date
 
-from .models import Server, Project, DC_User, Access_Log
+from .models import Server, Project, DC_User, Access_Log, Governance_Doc
 from .forms import AddUserToProjectForm
 
 
@@ -27,12 +26,18 @@ class IndexView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
         context.update({
-            'user_list': DC_User.objects.order_by('first_name'),
-            'server_list': Server.objects.all(),
+            'user_list': DC_User.objects.filter(
+                                        project_pi__isnull=False,
+                                        ).order_by('first_name'),
+            'server_list': Server.objects.filter(
+                                        status="ON"
+                                        ).filter(
+                                            function="PR"
+                                        ).order_by('node'),
         })
         return context
         
-class DCUserView(generic.ListView):
+class AllDCUserView(generic.ListView):
     template_name = 'dc_management/all_users.html'
     context_object_name = 'user_list'
 
@@ -69,6 +74,7 @@ class DC_UserCreate(CreateView):
 class DC_UserUpdate(UpdateView):
     model = DC_User
     fields = ['first_name', 'last_name', 'cwid', 'affiliation', 'role', 'comments']  
+    #success_url = reverse('dc_management:dcuser', pk=self.pk)
     
 class AddUserToProject(FormView):
     template_name = 'dc_management/addusertoproject.html'
@@ -90,6 +96,9 @@ class AddUserToProject(FormView):
         )
         self.logger.save()
         
+        # check if user already on project
+        
+        
         # connect user to project
         prj = form.cleaned_data['project']
         prj.users.add(form.cleaned_data['dcuser'])
@@ -105,3 +114,22 @@ class AddUserToProject(FormView):
             fail_silently=True,
         )
         return super(AddUserToProject, self).form_valid(form)
+        
+class AddThisUserToProject(AddUserToProject):
+    template_name = 'dc_management/addusertoproject.html'
+    form_class = AddUserToProjectForm
+    success_url = '/info/'
+
+def pdf_view(request, pk):
+    gov_doc = Governance_Doc.objects.get(pk=pk)
+    print(gov_doc.documentation)
+    print(dir(gov_doc.documentation))
+    try:
+        # open(gov_doc.documentation.file, 'rb')
+        return FileResponse(gov_doc.documentation.file, content_type='application/pdf')
+    except FileNotFoundError:
+        raise Http404()
+    
+
+    
+    

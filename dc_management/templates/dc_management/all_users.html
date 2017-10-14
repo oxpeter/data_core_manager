@@ -1,18 +1,13 @@
-{% extends 'dc_management/index.html' %}
+{% extends 'dc_management/base.html' %}
 
 {% load bootstrap3 %}
 
-{% block all_users_content %}
-<h2>Data Core Users</h2>
-{% if user_list %}
-    <ul>
-    {% for u in user_list %}
-        <li><a href="{% url 'dc_management:dcuser' u.pk %}">{{ u }}</a> {{ u.get_affiliation_display }}</li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No users are currently in the database.</p>
-{% endif %}
+{% block content %}
+<h2>All Data Core Users</h2>
+<a type="button" class="btn btn-primary" href="{% url 'dc_management:dc_user-add' %}">Create user</a>
+{% include "dc_management/user_list_multiproject.html" %}
+
+
 {% endblock %}
 
 
