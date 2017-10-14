@@ -5,3 +5,4 @@ datacore/*
 *.pyc
 .gitignore
 */*.pyc
+media/
