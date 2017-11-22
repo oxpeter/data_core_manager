@@ -195,7 +195,7 @@ class DC_User(models.Model):
     comments = models.TextField(null=True, blank=True)
 
     def __str__(self):
-            return "{1} {2}({0})".format(self.cwid, self.first_name, self.last_name)
+            return "{1} {2} ({0})".format(self.cwid, self.first_name, self.last_name)
 
     class Meta:
         verbose_name = 'Data Core User'
@@ -379,7 +379,14 @@ class Governance_Doc(models.Model):
     defers_to_doc = models.ForeignKey('self', 
                                         on_delete=models.CASCADE, 
                                         null=True, 
-                                        blank=True)
+                                        blank=True,
+                                        related_name='overrules')
+    supersedes_doc = models.ForeignKey('self', 
+                                        on_delete=models.CASCADE, 
+                                        null=True, 
+                                        blank=True,
+                                        related_name='superseded_by')
+
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     
     documentation = models.FileField(
@@ -391,7 +398,7 @@ class Governance_Doc(models.Model):
     comments = models.TextField(null=True, blank=True)
 
     def __str__(self):
-            return "{}_{}".format(self.governance_type, self.doc_id)
+            return "{0}_{2}_{1}".format(self.governance_type, self.doc_id, self.project)
 
     def allowed_user_string(self):
         return  ", ".join([u.cwid for u in self.users_permitted.all()])
@@ -693,3 +700,61 @@ class Server_Change_Log(models.Model):
     class Meta:
         verbose_name = 'Server Change Log'
         verbose_name_plural = 'Server Change Logs'
+
+class AlertTagType(models.Model):
+    name = models.CharField(max_length=64)
+    description = models.TextField(null=True, blank=True)
+
+class AlertTag(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+
+    name = models.CharField(max_length=64, null=True, blank=True)   
+    type = models.ForeignKey(AlertTagType, 
+                            on_delete=models.CASCADE, 
+                            related_name="tagtype"
+                            )
+                            
+    description = models.TextField(null=True, blank=True)                   
+    affected_prj = models.ForeignKey(Project, 
+                            on_delete=models.CASCADE, 
+                            related_name="tagtype",
+                            null=True,
+                            blank=True,
+                            )
+    affected_dcuser = models.ForeignKey(DC_User, 
+                            on_delete=models.CASCADE, 
+                            related_name="tagtype",
+                            null=True,
+                            blank=True,
+                            )
+    affected_software = models.ForeignKey(Software, 
+                            on_delete=models.CASCADE, 
+                            related_name="tagtype",
+                            null=True,
+                            blank=True,
+                            )
+    affected_server = models.ForeignKey(Server, 
+                            on_delete=models.CASCADE, 
+                            related_name="tagtype",
+                            null=True,
+                            blank=True,
+                            )
+    affected_admin = models.ForeignKey(DC_Administrator, 
+                            on_delete=models.CASCADE, 
+                            related_name="tagtype",
+                            null=True,
+                            blank=True,
+                            )
+    affected_govdoc = models.ForeignKey(Governance_Doc, 
+                            on_delete=models.CASCADE, 
+                            related_name="tagtype",
+                            null=True,
+                            blank=True,
+                            )
+    affected_softwarelicensetype = models.ForeignKey(Software_License_Type, 
+                            on_delete=models.CASCADE, 
+                            related_name="tagtype",
+                            null=True,
+                            blank=True,
+                            )

@@ -12,25 +12,35 @@
 
 {% block content %}
 <h1>{{ dc_user.first_name }} {{ dc_user.last_name }}</h1>
-<p>{{ dc_user.cwid }}</p>
 
-<h2>Projects</h2>
-Number of projects: {{ dc_user.project_set.all.count }}
-<ul>
-{% for p in dc_user.project_set.all %}
-<li> <a href="{% url 'dc_management:project' p.pk %}">{{ p }}</a> ({{ p.host.ip_address }}) {{ p.title }} </li>
-{% endfor %}
-</ul>
+<table class="table table-striped table-hover">
+    <thead class="thead-default">
+    <tr>
+        <th>CWID</th>
+        <th>Role</th>
+        <th>Affiliation</th>
+    </tr>
+    </thead>
 
-<h2>Attributes:</h2>
-<ul>
-<li>Affiliation: {{ dc_user.get_affiliation_display }}</li>
-<li>Role: {{ dc_user.get_role_display }}</li>
-</ul>
+    <tr>
+        <td>{{ dc_user.cwid }}</td>
+        <td>{{ dc_user.get_role_display }}</td>
+        <td>{{ dc_user.get_affiliation_display }}</td>
+    </tr>
+</table>
 
+<h2>{{ dc_user.project_set.all.count }} projects</h2>
+
+{% with dc_user.project_set.all as project_list %}
+    {% include 'dc_management/project_list.html' %}
+{% endwith %}
+
+{% if dc_user.comments %}
 <h3>Comments</h3>
 <p>{{ dc_user.comments }}</p>
-</br>
+{% endif %}
+
+
 </br>
 
 

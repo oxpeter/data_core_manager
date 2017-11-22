@@ -34,38 +34,71 @@
 <div class="tab-content clearfix">
   
   <div class="tab-pane active" id="overview">
-      <p>overview dashboard will go here</p>
+
+    <p>Notes for future developments:</p>
+    <ul>
+    <li>In user pages, list all governance docs user is on.</li>
+    </ul>
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>User mounted twice on node</h4>
+      </div>
+      <div class="panel-body">
+
+      </div>
+     </div>
+    </div>
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>Projects expiring in less than 90 days</h4>
+      </div>
+      <div class="panel-body">
+
+      </div>
+     </div>
+    </div>
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>Governance docs missing / expiring</h4>
+      </div>
+      <div class="panel-body">
+
+      </div>
+     </div>
+    </div>
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>Users not audited in last 9 months</h4>
+      </div>
+      <div class="panel-body">
+
+      </div>
+     </div>
+    </div>
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>Items with missing tickets</h4>
+      </div>
+      <div class="panel-body">
+
+      </div>
+     </div>
+    </div>
+      
   </div>
   
   <div class="tab-pane" id="projects">			  
     <h2>Active Projects</h2>
-    <a type="button" class="btn btn-default" href="#">View all projects</a>
+    <a type="button" class="btn btn-info" href="{% url 'dc_management:all_projects' %}">View all projects</a>
     <a type="button" class="btn btn-default" href="#">Add new project</a>
 
-    {% if running_projects_list %}
-        <table class="table table-striped table-hover">
-        <thead class="thead-default">
-        <tr>
-            <th>Project</th>
-            <th>PI</th>
-            <th># users</th>
-            <th>Project title</th>
-        </tr>
-        </thead>
-
-        {% for project in running_projects_list %}
-          <tr>
-            <td><a href="{% url 'dc_management:project' project.pk %}">{{ project.dc_prj_id }}</a></td>
-            <td>{{ project.pi }} </td>
-            <td>{{ project.users.all.count }}</td> 
-            <td>{{ project.title }}</td>
-          </tr>
-        {% endfor %}
-        </table>
-    {% else %}
-        <p>No projects are currently running.</p>
-    {% endif %}
-    </br>
+    {% include "dc_management/project_list.html" %}
+    
   </div>
   
   <div class="tab-pane" id="users">
@@ -81,6 +114,9 @@
     <h2>Active Production Servers</h2>
     <a type="button" class="btn btn-default" href="#">View all server nodes</a>
     <a type="button" class="btn btn-default" href="#">Add new server</a>
+    <a type="button" class="btn btn-default" href="#">Decommission server</a>
+    <a type="button" class="btn btn-default" href="#">Suspend server</a>
+    <a type="button" class="btn btn-default" href="#">Reactivate server</a>
 
     {% if server_list %}
         <table class="table table-striped table-hover" id="serverTable">

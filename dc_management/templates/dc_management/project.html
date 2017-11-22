@@ -52,7 +52,7 @@
 <!-- Attributes of project --!>
 <div class="tab-pane active" id="details">
 <div class="container">
- <div class="panel panel-primary">
+ <div class="panel panel-info">
   <div class="panel-heading">
     <h4>Attributes:</h4>
   </div>
@@ -62,15 +62,15 @@
             <td>PI </td><td> {{ project.pi }}</td>
         </tr>
 
-        {% if project.expected_completion|days_until:0 %}
+        {% if project.expected_completion|days_until:0 and project.status == 'RU' %}
             <tr class="bg-danger" style="color:red;background:lightpink">
                 <td>Expiry</td><td> {{ project.expected_completion }}</td>
             </tr>
-        {% elif project.expected_completion|days_until:10 %}
+        {% elif project.expected_completion|days_until:10 and project.status == 'RU' %}
             <tr class="bg-warning" style="color:orange;">
                 <td>Expiry</td><td> {{ project.expected_completion }}</td>
             </tr>
-        {% elif project.expected_completion|days_until:90 %}
+        {% elif project.expected_completion|days_until:90 and project.status == 'RU' %}
             <tr class="bg-info" style="color:blue;">
                 <td>Expiry</td><td> {{ project.expected_completion}}</td>
             </tr>
@@ -108,7 +108,7 @@
 </div>
 
 <div class="container">
- <div class="panel panel-primary">
+ <div class="panel panel-info">
   <div class="panel-heading">
     <h4>Node Attributes:</h4>
   </div>
@@ -131,7 +131,7 @@
 </div>
 
 <div class="container">
- <div class="panel panel-primary">
+ <div class="panel panel-info">
   <div class="panel-heading">
     <h4>{{ project.users.all.count }} Users
         <span class="pull-right">
@@ -150,13 +150,15 @@
     </br>
 {% else %}
     <div class="container">
-     <div class="panel panel-primary">
+     <div class="panel panel-info">
       <div class="panel-heading">
         <h4>Project governance</h4>
       </div>
       <div class="panel-body">
     {% for gd in project.governance_doc_set.all %}
-        <h5><a href="{% url 'dc_management:govdoc' gd.pk %}" target="_blank">{{ gd }}</a> </h5>
+        <h5>
+        <a href="{% url 'dc_management:govdoc' gd.pk %}" target="_blank">{{ gd }}</a> 
+        </h5>
         <table class="table table-striped">
             <tr>
                 <td>ID </td><td> {{ gd.doc_id }}</td>
@@ -186,6 +188,9 @@
             <tr>
                 <td>Access allowed</td><td> {{ gd.access_allowed }}</td>
             </tr>
+            <tr>
+                <td>Users permitted</td><td>{{ gd.allowed_user_string }}</td>
+            </tr>
         </table>
     {% endfor %}
       </div>
@@ -196,7 +201,7 @@
     
 {% if project.comments %}
 <div class="container">
- <div class="panel panel-primary">
+ <div class="panel panel-info">
   <div class="panel-heading">    
     <h3>Comments</h3>
   </div>
@@ -209,7 +214,7 @@
 </div>
 
 
-<div class="tab-pane active" id="logs">
+<div class="tab-pane" id="logs">
 <!-- project logs --!>
  <h4>Access logs</h4>
  <table class="table table-striped">
@@ -224,7 +229,11 @@
   </thead>
   {% for l in project.access_log_set.all %}
    <tr><td>{{ l.record_creation }}</td>
+       {% if l.sn_ticket %}
        <td>{{ l.sn_ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
+       {% endif %}
        <td>{{ l.date_changed }}</td>
        <td>{{ l.dc_user }}</td>
        <td>{{ l.get_change_type_display }}</td>
@@ -244,7 +253,11 @@
   </thead>
   {% for l in project.external_access_log_set.all %}
    <tr><td>{{ l.record_creation }}</td>
+       {% if l.sn_ticket %}
        <td>{{ l.sn_ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
+       {% endif %}
        <td>{{ l.date_connected }}</td>
        <td>{{ l.date_disconnected }}</td>
        </tr>
@@ -261,10 +274,16 @@
         </tr>
   </thead>
   {% for l in project.software_log_set.all %}
-   <tr><td>{{ l.sn_ticket }}</td>
+    <tr>
+       {% if l.sn_ticket %}
+       <td>{{ l.sn_ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
+       {% endif %}
+
        <td>{{ l.change_date }}</td>
        <td>{{ l.software_changed }}</td>
-       </tr>
+    </tr>
   {% endfor %}
  </table>
 
@@ -281,7 +300,11 @@
   </thead>
   {% for l in project.storage_log_set.all %}
    <tr><td>{{ l.record_creation }}</td>
+       {% if l.sn_ticket %}
        <td>{{ l.sn_ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
+       {% endif %}
        <td>{{ l.date_changed }}</td>
        <td>{{ l.storage_amount }}</td>
        <td>{{ l.comments }}</td>
@@ -302,7 +325,11 @@
   </thead>
   {% for l in project.audit_log_set.all %}
    <tr><td>{{ l.record_creation }}</td>
+       {% if l.sn_ticket %}
        <td>{{ l.sn_ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
+       {% endif %}
        <td>{{ l.audit_date }}</td>
        <td>{{ l.dc_user }}</td>
        <td>{{ l.comments }}</td>

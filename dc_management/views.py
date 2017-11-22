@@ -17,7 +17,7 @@ from .forms import AddUserToProjectForm
 
 class IndexView(generic.ListView):
     template_name = 'dc_management/index.html'
-    context_object_name = 'running_projects_list'
+    context_object_name = 'project_list'
 
     def get_queryset(self):
         """Return  all active projects."""
@@ -36,7 +36,16 @@ class IndexView(generic.ListView):
                                         ).order_by('node'),
         })
         return context
-        
+
+
+class AllProjectsView(generic.ListView):
+    template_name = 'dc_management/all_projects.html'
+    context_object_name = 'project_list'
+    
+    def get_queryset(self):
+        """Return  all active projects."""
+        return Project.objects.all().order_by('dc_prj_id')
+            
 class AllDCUserView(generic.ListView):
     template_name = 'dc_management/all_users.html'
     context_object_name = 'user_list'

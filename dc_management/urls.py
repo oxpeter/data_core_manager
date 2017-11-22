@@ -8,8 +8,11 @@ app_name = 'dc_management'
 urlpatterns = [
     # index showing all running projects:
     url(r'^$', views.IndexView.as_view(), name='index'),
+    
     # index showing all users:
     url(r'^dcuser/all/$', views.AllDCUserView.as_view(), name='all_users'),
+    url(r'^project/all/$', views.AllProjectsView.as_view(), name='all_projects'),
+    
     # detail views of projects, nodes and users:
     url(r'^project/(?P<pk>[0-9]+)/$', views.ProjectView.as_view(), name='project'),
     url(r'^node/(?P<pk>[0-9]+)/$', views.ServerView.as_view(), name='node'),
