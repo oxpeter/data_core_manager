@@ -6,4 +6,4 @@ datacore/*
 .gitignore
 */*.pyc
 media/
-dc_management/migrations/*
+
