@@ -1,7 +1,10 @@
 from django.urls import reverse
 from django.db import models
-from datetime import date
 
+from django.contrib.auth.models import User
+
+from datetime import date
+import collections
 
 ## Models 
 class SN_Ticket(models.Model):
@@ -129,6 +132,14 @@ class Server(models.Model):
     def __str__(self):
             return self.node
 
+    def duplicate_users(self):
+        # pull all users from all projects. Return users/projects when a user
+        # is present in more than one project on the node
+        mounted_projects = self.projects_set.all()
+        users = [ p.dc_users_set.all() for p in mounted_projects ]
+        
+        return [ item for item, count in collections.Counter(users).items() if count > 1 ]
+        
     
 class EnvtSubtype(models.Model):
     name = models.CharField(max_length=32, unique=True)
@@ -352,7 +363,8 @@ def project_directory_path(instance, filename):
 class Governance_Doc(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
-
+    record_author = models.ForeignKey(User)
+    
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     doc_id = models.CharField(max_length=64)
     date_issued = models.DateField()
@@ -410,7 +422,8 @@ class Governance_Doc(models.Model):
 class DC_Administrator(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
-
+    record_author = models.ForeignKey(User)
+    
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     cwid = models.CharField(max_length=32)
     first_name = models.CharField(max_length=32)
@@ -429,7 +442,8 @@ class DC_Administrator(models.Model):
 class External_Access_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
-
+    record_author = models.ForeignKey(User)
+    
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     date_connected = models.DateField()
     date_disconnected = models.DateField()
@@ -448,6 +462,8 @@ class External_Access_Log(models.Model):
 class Software_Log(models.Model):
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     change_date = models.DateField()
+    record_author = models.ForeignKey(User)
+    
     applied_to_prj = models.ForeignKey(Project, on_delete=models.CASCADE)
     applied_to_node = models.ForeignKey(Server, on_delete=models.CASCADE)
     applied_to_user = models.ForeignKey(DC_User, on_delete=models.CASCADE)
@@ -476,7 +492,8 @@ class Software_Log(models.Model):
 class Software_Purchase(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
-
+    record_author = models.ForeignKey(User)
+    
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     date_purchased = models.DateField()
     software = models.ForeignKey(Software, on_delete=models.CASCADE)
@@ -517,6 +534,7 @@ class Software_Purchase(models.Model):
 class Access_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User)
 
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     date_changed = models.DateField()
@@ -545,6 +563,7 @@ class Access_Log(models.Model):
 class Audit_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User)
     
     performed_by = models.ForeignKey(DC_Administrator, on_delete=models.CASCADE)
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
@@ -586,7 +605,8 @@ class Audit_Log(models.Model):
 class Storage_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
-
+    record_author = models.ForeignKey(User)
+    
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     date_changed = models.DateField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -604,7 +624,8 @@ class Storage_Log(models.Model):
 class Data_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
-
+    record_author = models.ForeignKey(User)
+    
     change_date = models.DateField()
 
     IMPORT = 'IM'
@@ -663,7 +684,8 @@ class Data_Log(models.Model):
 class Server_Change_Log(models.Model):
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     change_date = models.DateField()
-
+    record_author = models.ForeignKey(User)
+    
     node_changed = models.ForeignKey(Server, on_delete=models.CASCADE, null=True)
     CONNECTED = 'CO'
     DISCONNECTED = 'DC'
@@ -708,7 +730,8 @@ class AlertTagType(models.Model):
 class AlertTag(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
-
+    record_author = models.ForeignKey(User)
+    
     name = models.CharField(max_length=64, null=True, blank=True)   
     type = models.ForeignKey(AlertTagType, 
                             on_delete=models.CASCADE, 

@@ -1,4 +1,4 @@
-{% extends 'dc_management/base.html' %}
+{% extends 'base.html' %}
 
 {# Load the tag library #}
 {% load bootstrap3 %}
@@ -11,8 +11,22 @@
 {% bootstrap_messages %}
 
 {% block content %}
-<h1>{{ dc_user.first_name }} {{ dc_user.last_name }}</h1>
 
+<style>
+/* styling of the tabs*/
+#exTab1 .tab-content {
+  color : black;
+  padding : 5px 15px;
+}
+
+#exTab1 .nav-tabs > li > a {
+  border-radius: 4px 4px 0 0;
+}
+</style>
+
+
+
+<h1>{{ dc_user.first_name }} {{ dc_user.last_name }}</h1>
 <table class="table table-striped table-hover">
     <thead class="thead-default">
     <tr>
@@ -28,6 +42,26 @@
         <td>{{ dc_user.get_affiliation_display }}</td>
     </tr>
 </table>
+<!-- Setup tabs for separating details and logs --!>
+<div id="exTab1" class="container">
+<ul  class="nav nav-tabs">
+			<li class="active">
+            <a  href="#details" data-toggle="tab">Details</a>
+			</li>
+			<li><a href="#logs" data-toggle="tab">Logs</a>
+			</li>
+		</ul>
+		
+		
+<div class="tab-content clearfix">
+  
+
+
+
+
+<!-- Attributes of project --!>
+<div class="tab-pane active" id="details">
+
 
 <h2>{{ dc_user.project_set.all.count }} projects</h2>
 
@@ -48,6 +82,130 @@
 <a type="button" class="btn btn-warning" href="{% url 'dc_management:dc_user-update' dc_user.pk %}">Update user</a>
 
 <a type="button" class="btn btn-danger" href="{% url 'dc_management:thisusertoproject-add' dc_user.pk %}">Add user to project</a>
+</div>
 
+<!--  LOGS  --!>
+<div class="tab-pane" id="logs">
+ <h4>Access logs</h4>
+ <table class="table table-striped">
+  <thead class="thead-default">
+        <tr>
+            <th>Logged</th>
+            <th>Ticket</th>
+            <th>Activated</th>
+            <th>User</th>
+            <th>Change</th>
+        </tr>
+  </thead>
+  {% for l in project.access_log_set.all %}
+   <tr><td>{{ l.record_creation }}</td>
+       {% if l.sn_ticket %}
+       <td>{{ l.sn_ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
+       {% endif %}
+       <td>{{ l.date_changed }}</td>
+       <td>{{ l.dc_user }}</td>
+       <td>{{ l.get_change_type_display }}</td>
+       </tr>
+  {% endfor %}
+ </table>
+
+ <h4>External access logs</h4>
+ <table class="table table-striped">
+  <thead class="thead-default">
+        <tr>
+            <th>Logged</th>
+            <th>Ticket</th>
+            <th>Connected</th>
+            <th>Disconnected</th>
+        </tr>
+  </thead>
+  {% for l in project.external_access_log_set.all %}
+   <tr><td>{{ l.record_creation }}</td>
+       {% if l.sn_ticket %}
+       <td>{{ l.sn_ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
+       {% endif %}
+       <td>{{ l.date_connected }}</td>
+       <td>{{ l.date_disconnected }}</td>
+       </tr>
+  {% endfor %}
+ </table>
+ 
+ <h4>Software logs</h4>
+ <table class="table table-striped">
+  <thead class="thead-default">
+        <tr>
+            <th>Ticket</th>
+            <th>Changed</th>
+            <th>Software</th>
+        </tr>
+  </thead>
+  {% for l in project.software_log_set.all %}
+    <tr>
+       {% if l.sn_ticket %}
+       <td>{{ l.sn_ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
+       {% endif %}
+
+       <td>{{ l.change_date }}</td>
+       <td>{{ l.software_changed }}</td>
+    </tr>
+  {% endfor %}
+ </table>
+
+ <h4>Storage logs</h4>
+ <table class="table table-striped">
+  <thead class="thead-default">
+        <tr>
+            <th>Logged</th>
+            <th>Ticket</th>
+            <th>Changed</th>
+            <th>Amount (GB)</th>
+            <th>Comments</th>
+        </tr>
+  </thead>
+  {% for l in project.storage_log_set.all %}
+   <tr><td>{{ l.record_creation }}</td>
+       {% if l.sn_ticket %}
+       <td>{{ l.sn_ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
+       {% endif %}
+       <td>{{ l.date_changed }}</td>
+       <td>{{ l.storage_amount }}</td>
+       <td>{{ l.comments }}</td>
+       </tr>
+  {% endfor %}
+ </table>
+
+ <h4>Audit logs</h4>
+ <table class="table table-striped">
+  <thead class="thead-inverse">
+        <tr>
+            <th>Logged</th>
+            <th>Ticket</th>
+            <th>Audit Date</th>
+            <th>User</th>
+            <th>Comments</th>
+        </tr>
+  </thead>
+  {% for l in project.audit_log_set.all %}
+   <tr><td>{{ l.record_creation }}</td>
+       {% if l.sn_ticket %}
+       <td>{{ l.sn_ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
+       {% endif %}
+       <td>{{ l.audit_date }}</td>
+       <td>{{ l.dc_user }}</td>
+       <td>{{ l.comments }}</td>
+       </tr>
+  {% endfor %}
+ </table>
+</div>
 {% endblock %}
 

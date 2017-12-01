@@ -1,4 +1,4 @@
-{% extends 'dc_management/base.html' %}
+{% extends 'base.html' %}
 
 {% load bootstrap3 %}
 
@@ -51,6 +51,9 @@
 
 <!-- Attributes of project --!>
 <div class="tab-pane active" id="details">
+
+<a type="button" class="btn btn-default" href="#">Decommission project</a>
+
 <div class="container">
  <div class="panel panel-info">
   <div class="panel-heading">
@@ -135,8 +138,9 @@
   <div class="panel-heading">
     <h4>{{ project.users.all.count }} Users
         <span class="pull-right">
-            <a type="button" class="btn btn-default" href="#">Remove user from project</a>
-            <a type="button" class="btn btn-danger" href="{% url 'dc_management:usertoproject-add'  %}">Add user to project</a>
+            <a type="button" class="btn btn-danger" href="{% url 'dc_management:usertothisproject-remove' project.pk %}">Remove user from project</a>
+            <a type="button" class="btn btn-danger" href="{% url 'dc_management:usertothisproject-add' project.pk %}">Add user to project</a>
+            
         </span>
     </h4>
   </div>
@@ -225,6 +229,7 @@
             <th>Activated</th>
             <th>User</th>
             <th>Change</th>
+            <th>Author</th>
         </tr>
   </thead>
   {% for l in project.access_log_set.all %}
@@ -237,6 +242,7 @@
        <td>{{ l.date_changed }}</td>
        <td>{{ l.dc_user }}</td>
        <td>{{ l.get_change_type_display }}</td>
+       <td>{{ l.record_author }}</td>
        </tr>
   {% endfor %}
  </table>

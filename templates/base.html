@@ -31,12 +31,43 @@
                 </div>
                 <div id="navbar-main" class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li><a href="{% url 'dc_management:index' %}">Data Core Home</a></li>
+                        <li>
+                          <a href="{% url 'dc_management:index' %}">Data Core Home</a>
+                        </li>
                     </ul>
                     
+                    
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="{% url 'admin:index' %}" target="_blank">DC Admin</a></li>
+                        {% if user.is_authenticated %}
+                            <li>
+                              <a href="/logout/">Logout</a>
+                            </li>
+                          
+                            <li class="dropdown">
+                <a class="dropdown-toggle" id="dropblast" data-toggle="dropdown"
+                    href="#">Options <b class="caret"></b></a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dropblast">
+                    <li><a href="{% url 'admin:index' %}" 
+                           target="_blank">DC Admin</a>
+                    </li>
+                    <li><a href="{% url 'password_reset' %}">Reset password</a></li>
+                    <li><a href="#">tblastn</a></li>
+                    <li><a href="#">blastx</a></li>
+                    <li><a href="#">OrtholoTree</a></li>
+                </ul>
+            </li>
+                           
+                            
+</div>
+                        {% else %}
+                            <li><a href="/login/">Login</a></li>
+                            
+                        {% endif %}
                     </ul>
+                
+                    
+                    
+                    
                 </div>
             </div>
         </div>

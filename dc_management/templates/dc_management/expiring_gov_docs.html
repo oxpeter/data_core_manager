@@ -1,0 +1,29 @@
+{% load bootstrap3 %}
+
+{% load project_tags %}
+
+{% for gd in project.governance_doc_set.all %}
+        
+        
+        {% if gd.expiry_date|days_until:90 %}
+        <tr>
+        <td><a href="{% url 'dc_management:govdoc' gd.pk %}" target="_blank">{{ gd }}</a></td>
+        <td>{{ gd.doc_id }}</td>
+        {% if gd.expiry_date|days_until:0 %}
+            <td class="bg-danger" style="color:red;">
+                {{ gd.expiry_date }}
+            </td>
+        {% elif gd.expiry_date|days_until:10 %}
+            <td class="bg-warning" style="color:orange;">
+                {{ gd.expiry_date }}
+            </td>
+        {% elif gd.expiry_date|days_until:90 %}
+            <td class="bg-info" style="color:blue;">
+                {{ gd.expiry_date }}
+            </td>
+        {% endif %}
+        {% endif %}
+        
+        
+
+{% endfor %}

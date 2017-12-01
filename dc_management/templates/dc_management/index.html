@@ -1,4 +1,4 @@
-{% extends 'dc_management/base.html' %}
+{% extends 'base.html' %}
 
 {% load bootstrap3 %}
 
@@ -45,7 +45,13 @@
         <h4>User mounted twice on node</h4>
       </div>
       <div class="panel-body">
-
+        <ul>
+        {% for s in server_list %}
+            {% if s.duplicate_users|length >= 1 %}
+              <li>{{ s }} : {{ s.duplicate_users }}</li>
+            {% endif %}
+        {% endfor %}
+        </ul>
       </div>
      </div>
     </div>
@@ -55,7 +61,7 @@
         <h4>Projects expiring in less than 90 days</h4>
       </div>
       <div class="panel-body">
-
+         {% include "dc_management/expiring_projects.html" %}
       </div>
      </div>
     </div>
@@ -65,7 +71,21 @@
         <h4>Governance docs missing / expiring</h4>
       </div>
       <div class="panel-body">
+        
+        <table class="table table-striped table-hover">
+            <thead class="thead-default">
+            <tr>
+                <th>Document</th>
+                <th>ID</th>
+                <th>Expiry Date</th>
+            </tr>
+            </thead>
 
+            {% for project in project_list %}
+               {% include "dc_management/expiring_gov_docs.html" %}
+            {% endfor %}
+        </table>
+        
       </div>
      </div>
     </div>
@@ -96,7 +116,7 @@
     <h2>Active Projects</h2>
     <a type="button" class="btn btn-info" href="{% url 'dc_management:all_projects' %}">View all projects</a>
     <a type="button" class="btn btn-default" href="#">Add new project</a>
-
+    <a type="button" class="btn btn-default" href="#">Decommission project</a>
     {% include "dc_management/project_list.html" %}
     
   </div>

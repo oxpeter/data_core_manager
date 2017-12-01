@@ -18,12 +18,14 @@ urlpatterns = [
     url(r'^node/(?P<pk>[0-9]+)/$', views.ServerView.as_view(), name='node'),
     url(r'^dcuser/(?P<pk>[0-9]+)/$', views.DCUserView.as_view(), name='dcuser'),
     url(r'^govdoc/(?P<pk>[0-9]+)/$', views.pdf_view, name='govdoc'),
-    # forms for updating users:
+    # add, modify, remove user
     url(r'^dcuser/add/$', views.DC_UserCreate.as_view(), name='dc_user-add'),
     url(r'^dcuser/update/(?P<pk>[0-9]+)/$', 
         views.DC_UserUpdate.as_view(), 
         name='dc_user-update',
     ),
+  
+    # forms for adding user - project relationship:
     url(r'^dcuser/(?P<pk>[0-9]+)/connect$', 
         views.AddThisUserToProject.as_view(), 
         name='thisusertoproject-add',
@@ -32,6 +34,16 @@ urlpatterns = [
         views.AddUserToProject.as_view(), 
         name='usertoproject-add',
     ),
+    # removing user - project relationship:
+    url(r'^project/(?P<pk>[0-9]+)/userconnect$', 
+        views.AddUserToThisProject.as_view(), 
+        name='usertothisproject-add',
+    ),
+    url(r'^project/(?P<pk>[0-9]+)/userremove$', 
+        views.RemoveUserFromThisProject.as_view(), 
+        name='usertothisproject-remove',
+    ),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
