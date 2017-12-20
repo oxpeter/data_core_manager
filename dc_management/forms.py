@@ -39,4 +39,27 @@ class RemoveUserFromProjectForm(forms.Form):
         qs = kwargs.pop('project_users')
         super(RemoveUserFromProjectForm, self).__init__(*args, **kwargs)
         self.fields['dcuser'].queryset = qs
+
+class ExportFileForm(forms.Form):
+    dcuser = forms.ModelChoiceField(
+                                queryset=DC_User.objects.all(), 
+                                label="Data Core User"
+                                    )
+    project = forms.ModelChoiceField(
+                                queryset=Project.objects.exclude(status="CO"), 
+                                label="Project"
+                                    )
+    internal_destination = forms.ModelChoiceField(
+                                queryset=Project.objects.exclude(status="CO"), 
+                                label="Internal transfer",
+                                required=False,
+                                    )
+    files_requested = forms.CharField(required=False, label="Location of requested files")
+    comment = forms.CharField(required=False, label="Comment")
+    
+    # the project_users list is now available, add it to the instance data
+    def __init__(self, *args, **kwargs):
+        qs = kwargs.pop('project_users')
+        super(ExportFileForm, self).__init__(*args, **kwargs)
+        self.fields['dcuser'].queryset = qs
     

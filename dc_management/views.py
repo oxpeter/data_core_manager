@@ -14,7 +14,9 @@ from django.shortcuts import render, get_object_or_404
 from datetime import date
 
 from .models import Server, Project, DC_User, Access_Log, Governance_Doc
+
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
+from .forms import ExportFileForm
 
 class IndexView(LoginRequiredMixin, generic.ListView):
     login_url='/login/'
@@ -249,6 +251,79 @@ class RemoveUserFromThisProject(RemoveUserFromProject):
         # update initial field defaults with custom set default values:
         initial.update({'project': chosen_project, })
         return initial
+
+###### Export requests #######
+class ExportRequest(LoginRequiredMixin, FormView):
+    template_name = 'dc_management/export_request_form.html'
+    form_class = ExportFileForm
+    success_url = reverse_lazy('dc_management:all_projects')
+    
+    print("Export Request invoked")
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        post_data = self.request.POST
+        
+        
+        
+        # Check if user in project, then connect user to project
+        
+        prj = form.cleaned_data['project']
+        requestor = form.cleaned_data['dcuser']
+        files_requested = form.cleaned_data['files_requested']
+        internal_destination = form.cleaned_data['internal_destination']
+        record_author = self.request.user
+        
+        # if internal_destination supplied, request internal transfer
+        # otherwise, use transfer.med to transfer to user directly.
+        if internal_destination:
+            pass
+        else:
+            pass
+            
+        # save access log instance
+        self.logger = Access_Log(
+                    record_author=record_author,
+                    date_changed=date.today(),
+                    dc_user=form.cleaned_data['dcuser'],
+                    prj_affected=form.cleaned_data['project'],
+                    change_type="AA",
+        )
+        self.logger.save()
+        
+        # send email
+        send_mail(
+            'Transfer files from {} to {}'.format(newuser, str(prj)),
+            'Please add {} to project {} ({}) (name: {} IP:{}).'.format(newuser, 
+                                                                 str(prj),
+                                                                 prj.host,
+                                                                 prj.host.node,
+                                                                 prj.host.ip_address,
+                                                                 ),
+            'from@example.com',
+            ['oxpeter@gmail.com'],
+            fail_silently=True,
+        )
+        return super(AddUserToProject, self).form_valid(form)
+
+class ExportFromThisProject(ExportRequest):
+    template_name = 'dc_management/addusertoproject.html'
+    form_class = ExportFileForm
+    success_url = reverse_lazy('dc_management:all_projects')
+    #chosen_user = DC_User.objects.get(pk=self.kwargs['pk'])
+    #success_url = reverse_lazy('dc_management:dcuser', self.kwargs['pk'])
+    
+    def get_initial(self):
+        initial = super(AddThisUserToProject, self).get_initial()
+        # get the user from the url
+        chosen_user = DC_User.objects.get(pk=self.kwargs['pk'])
+        print(chosen_user)
+        # update initial field defaults with custom set default values:
+        initial.update({'dcuser': chosen_user, })
+        return initial
+
+
+
         
 ########################################
 ######  GOVERNANCE RELATED VIEWS  ######

@@ -30,9 +30,11 @@ class Server(models.Model):
 
     ON = 'ON'
     OFF = 'OF'
+    DECOMMISSIONED = 'DE'
     STATUS_CHOICES = (
             (ON, "On"),
             (OFF, "Off"),
+            (DECOMMISSIONED, "Decommissioned"),
     )
     status = models.CharField(
                         max_length=2,
