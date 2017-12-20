@@ -6,4 +6,5 @@ datacore/*
 .gitignore
 */*.pyc
 media/
-
+static/
+dcfront/*
