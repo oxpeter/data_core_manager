@@ -33,7 +33,7 @@ class IndexView(LoginRequiredMixin, generic.ListView):
         context.update({
             'user_list': DC_User.objects.filter(
                                         project_pi__isnull=False,
-                                        ).order_by('first_name'),
+                                        ).distinct().order_by('first_name'),
             'server_list': Server.objects.filter(
                                         status="ON"
                                         ).filter(
