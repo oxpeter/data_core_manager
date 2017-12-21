@@ -289,6 +289,7 @@ class Project(models.Model):
 
     dc_prj_id = models.CharField(max_length=8, unique=True)
     title = models.CharField(max_length=256)
+    nickname = models.CharField(max_length=256, blank=True)
     users = models.ManyToManyField(DC_User, blank=True)
     pi = models.ForeignKey(
                     DC_User, 
