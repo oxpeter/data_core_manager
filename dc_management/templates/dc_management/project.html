@@ -123,11 +123,17 @@
             <th>Node</th><th>Address</th><th>IP address</th>
         </tr>
         </thead>
+        {% if project.host %}
         <tr>
             <td><a href="{% url 'dc_management:node' project.host.pk %}">{{ project.host.node }}</a></td>
             <td>{{ project.host.name_address }}</td>
             <td>{{ project.host.ip_address }}</td>
         </tr>
+        {% else %}
+            <td>Project not mounted</td>
+            <td>Project not mounted</td>
+            <td>Project not mounted</td>
+        {% endif %}
 
     </table>
   </div>
