@@ -7,6 +7,7 @@
         <th>Name</th>
         <th>CWID</th>
         <th>Affiliation</th>
+        <th>Role</th>
     </tr>
     </thead>
     
@@ -15,6 +16,7 @@
         <td><a href="{% url 'dc_management:dcuser' u.pk %}">{{ u.first_name }} {{ u.last_name }}</a></td>
         <td>{{ u.cwid }}</td>
         <td>{{ u.get_affiliation_display }}</td>
+        <td>{{ u.get_role_display }}</td>
      </tr>
     {% endfor %}
     </table>

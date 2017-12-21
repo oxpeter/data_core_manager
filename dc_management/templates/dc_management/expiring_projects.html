@@ -15,6 +15,7 @@
     </thead>
 
     {% for project in project_list %}
+    {% if project.expected_completion|days_until:90 and project.status == 'RU' %}
       <tr>
         <td><a href="{% url 'dc_management:project' project.pk %}">{{ project.dc_prj_id }}</a></td>
         <td><a href="{% url 'dc_management:dcuser' project.pi.pk %}">{{ project.pi }}</a> </td>
@@ -32,7 +33,7 @@
             <td class="bg-info" style="color:blue;">
             {{ project.expected_completion }}</td>
         {% endif %}
-            
+    {% endif %}     
          
       </tr>
     {% endfor %}
