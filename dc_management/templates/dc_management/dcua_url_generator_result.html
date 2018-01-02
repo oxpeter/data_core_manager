@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<h2>Data Core User Agreement Qualtrics URL</h2>
+<p>The URL below will embed the entered field values into the DCUA qualtrics form. 
+You can also copy the hyperlink and paste into a rich-text editor.</p>
+
+    <table class="table table-striped table-hover">
+    <thead class="thead-default">
+    <tr>
+        <th>Field</th>
+        <th>Value</th>
+    </tr>
+    </thead>
+    
+    <tr>
+    	<td>Start Date</td>
+    	<td>{{ request.session.startdate }}</td>
+    </tr>
+	<tr>
+    	<td>End Date</td>
+    	<td>{{ request.session.enddate }}</td>
+    </tr>
+	<tr>
+    	<td>Folders</td>
+    	<td>{% for f in request.session.folders %}{{ f }}</br>{% endfor %}</td>
+    </tr>
+    
+    <tr>
+    	<td>URL</td>
+    	<td>{{ request.session.qualtrics_link }}</td>
+    </tr>
+    <tr>
+    	<td>Hyperlink</td>
+    	<td><a href='{{ request.session.qualtrics_link }}'>Data Core User Agreement</a></td>
+    </tr>
+    </table>
+
+
+
+
+
+{% endblock %}

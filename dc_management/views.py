@@ -16,7 +16,7 @@ from datetime import date
 from .models import Server, Project, DC_User, Access_Log, Governance_Doc
 
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
-from .forms import ExportFileForm
+from .forms import ExportFileForm, CreateDCAgreementURLForm
 
 class IndexView(LoginRequiredMixin, generic.ListView):
     login_url='/login/'
@@ -252,13 +252,53 @@ class RemoveUserFromThisProject(RemoveUserFromProject):
         initial.update({'project': chosen_project, })
         return initial
 
+###### Onboarding views #######
+class CreateDCAgreementURL(LoginRequiredMixin, FormView):
+    template_name = 'dc_management/dcua_url_generator_form.html'
+    form_class = CreateDCAgreementURLForm
+    #success_url = reverse_lazy('dc_management/dcua_url_generator_result.html')
+    success_url = reverse_lazy('dc_management:url_result')
+
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        post_data = self.request.POST 
+        
+        # create the personalized URL:
+        startdate = form.cleaned_data['startdate']
+        enddate = form.cleaned_data['enddate']
+        
+        folders = ""
+        folderlist = []
+        for f in range(1,7,1):
+            folder = "".join(["folder",str(f)])
+            foldername = form.cleaned_data[ folder ]
+            if foldername != "":
+                folders += "&{}={}".format(folder, foldername)
+                folderlist.append(foldername)
+        
+        qualtrics_link = "https://weillcornell.az1.qualtrics.com/jfe/form/SV_eL1OCCGkNZWnX93"
+        
+        qualtrics_link += "?startdate={}&enddate={}".format(startdate,enddate)
+        qualtrics_link += "{}".format(folders)
+        
+        # add to session info for passing to results page:
+        self.request.session['qualtrics_link'] = qualtrics_link
+        self.request.session['startdate'] = startdate
+        self.request.session['enddate'] = enddate
+        self.request.session['folders'] = folderlist
+        return super(CreateDCAgreementURL, self).form_valid(form)
+
+class ViewDCAgreementURL(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'dc_management/dcua_url_generator_result.html'
+
 ###### Export requests #######
 class ExportRequest(LoginRequiredMixin, FormView):
     template_name = 'dc_management/export_request_form.html'
     form_class = ExportFileForm
     success_url = reverse_lazy('dc_management:all_projects')
     
-    print("Export Request invoked")
+    
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
@@ -335,12 +375,18 @@ def pdf_view(request, pk):
     gov_doc = Governance_Doc.objects.get(pk=pk)
     print(gov_doc.documentation)
     print(dir(gov_doc.documentation))
-    try:
-        # open(gov_doc.documentation.file, 'rb')
-        return FileResponse(gov_doc.documentation.file, content_type='application/pdf')
-    except FileNotFoundError:
-        raise Http404()
-    
-
+    print(gov_doc.documentation.name)
+    if gov_doc.documentation.name[:-3] == "pdf":
+        try:
+            # open(gov_doc.documentation.file, 'rb')
+            return FileResponse(gov_doc.documentation.file, content_type='application/pdf')
+        except FileNotFoundError:
+            raise Http404()
+    elif gov_doc.documentation.name[:-4] == "docx":
+        try:
+            # open(gov_doc.documentation.file, 'rb')
+            return FileResponse(gov_doc.documentation.file, content_type='application/pdf')
+        except FileNotFoundError:
+            raise Http404()
     
     

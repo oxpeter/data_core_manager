@@ -25,6 +25,13 @@ urlpatterns = [
         name='dc_user-update',
     ),
   
+    # views related to onboarding:
+    url(r'onboarding/dcua_generator/$', views.CreateDCAgreementURL.as_view(), 
+        name='url_generator',
+    ),
+    url(r'onboarding/dcua_url/$', views.ViewDCAgreementURL.as_view(), 
+        name='url_result',
+    ),
     # forms for adding user - project relationship:
     url(r'^dcuser/(?P<pk>[0-9]+)/connect$', 
         views.AddThisUserToProject.as_view(), 

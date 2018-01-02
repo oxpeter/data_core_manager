@@ -1,3 +1,5 @@
+import datetime
+
 from django import forms
 
 from .models import Server, Project, DC_User
@@ -62,4 +64,28 @@ class ExportFileForm(forms.Form):
         qs = kwargs.pop('project_users')
         super(ExportFileForm, self).__init__(*args, **kwargs)
         self.fields['dcuser'].queryset = qs
-    
+
+class CreateDCAgreementURLForm(forms.Form):
+    startdate = forms.CharField(required=True, 
+                                label="Start Date", 
+                                initial=datetime.datetime.now().strftime("%m/%d/%Y"),
+                                )
+    enddate = forms.CharField(required=True, 
+                            label="End Date",
+                            initial=(datetime.datetime.now() + 
+                                     datetime.timedelta(days=365)
+                                        ).strftime("%m/%d/%Y"),
+                                )
+    folder1 = forms.CharField(required=True, 
+                              label="Folder 1",
+                              initial="dcore-prj00XX-SOURCE",)
+    folder2 = forms.CharField(required=False, 
+                              label="Folder 2",
+                              initial="dcore-prj00XX-SHARE",)
+    folder3 = forms.CharField(required=False, 
+                              label="Folder 3",
+                              initial="WorkArea-<user CWID>",)
+    folder4 = forms.CharField(required=False, label="Folder 4")
+    folder5 = forms.CharField(required=False, label="Folder 5")
+    folder6 = forms.CharField(required=False, label="Folder 6")
+    folder7 = forms.CharField(required=False, label="Folder 7")
