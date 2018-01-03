@@ -1,3 +1,4 @@
+import os
 import re
 
 from django.views import generic
@@ -395,9 +396,15 @@ def pdf_view(request, pk):
             raise Http404()
     elif gov_doc.documentation.name[-4:] == "docx":
         try:
-            # open(gov_doc.documentation.file, 'rb')
-            return FileResponse(gov_doc.documentation.file,         
-                                content_type='application/pdf')
+            print(gov_doc.documentation.file)
+            print(gov_doc.documentation.name)
+            print(dir(gov_doc.documentation.file))
+            with open(str(gov_doc.documentation.file), 'rb') as fh:
+                response = HttpResponse(fh.read(),
+                                        content_type="application/vnd.ms-word")
+                response['Content-Disposition'] = 'inline; filename=' + os.path.basename(str(gov_doc.documentation.file))
+                return response
+            
         except FileNotFoundError:
             raise Http404()
     else:
