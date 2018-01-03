@@ -5,25 +5,37 @@
 {% for gd in project.governance_doc_set.all %}
         
         
-        {% if gd.expiry_date|days_until:90 %}
+        {% if gd.attention_required != "safe" %}
         <tr>
         <td><a href="{% url 'dc_management:govdoc' gd.pk %}" target="_blank">{{ gd }}</a></td>
         <td>{{ gd.doc_id }}</td>
-        {% if gd.expiry_date|days_until:0 %}
+
+        {% if gd.attention_required == "danger" %}
             <td class="bg-danger" style="color:red;">
                 {{ gd.expiry_date }}
             </td>
-        {% elif gd.expiry_date|days_until:10 %}
+        {% elif gd.attention_required == "warning" %}
             <td class="bg-warning" style="color:orange;">
                 {{ gd.expiry_date }}
             </td>
-        {% elif gd.expiry_date|days_until:90 %}
+        {% elif gd.attention_required == "primary" %}
             <td class="bg-info" style="color:blue;">
                 {{ gd.expiry_date }}
             </td>
         {% endif %}
         {% endif %}
         
+        
+        {% comment "potentially cleaner code, but without the text color" %}
+        {% if gd.attention_required != "safe" %}
+        <tr>
+        <td><a href="{% url 'dc_management:govdoc' gd.pk %}" target="_blank">{{ gd }}</a></td>
+        <td>{{ gd.doc_id }}</td>
+        <td class="bg-{{ gd.attention_required }}" >
+			{{ gd.expiry_date }}
+		</td>
+        {% endif %}
+        {% endcomment %}
         
 
 {% endfor %}

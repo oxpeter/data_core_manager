@@ -38,6 +38,7 @@
     <p>Notes for future developments:</p>
     <ul>
     <li>In user pages, list all governance docs user is on.</li>
+    <li>Create mount project feature, which checks for all compatible nodes (incl. against user lists)</li>
     </ul>
     <div class="container">
      <div class="panel panel-info">
@@ -68,7 +69,7 @@
     <div class="container">
      <div class="panel panel-info">
       <div class="panel-heading">
-        <h4>Governance docs missing / expiring</h4>
+        <h4>Governance docs requiring attention</h4>
       </div>
       <div class="panel-body">
         
@@ -86,6 +87,18 @@
             {% endfor %}
         </table>
         
+      </div>
+     </div>
+    </div>
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>Projects without any governance documentation</h4>
+      </div>
+      <div class="panel-body">
+            
+               {% include "dc_management/missing_gov_docs.html" %}
+            
       </div>
      </div>
     </div>

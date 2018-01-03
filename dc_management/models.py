@@ -3,7 +3,9 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
+import datetime
 from datetime import date
+
 import collections
 
 ## Models 
@@ -419,6 +421,30 @@ class Governance_Doc(models.Model):
     def allowed_user_string(self):
         return  ", ".join([u.cwid for u in self.users_permitted.all()])
 
+    def attention_required(self):
+        td = self.expiry_date - datetime.date.today() 
+        if td.days >  90:
+            status = "safe"
+        
+        # DCUA always defers to other agreements, and has a soft end date
+        elif self.governance_type == "DC":
+            status = "safe"
+        
+        # if doc defers to another doc, then we need not pay attention to this one:
+        elif self.defers_to_doc:
+            status = "safe"
+        
+        # if not deferring, not DCUA:
+        elif td.days <= 0:
+            status = "danger"
+        elif td.days <= 10:
+            status = "warning"
+        elif td.days <= 90:
+            status = "primary"
+        
+        return status
+        
+        
     class Meta:
         verbose_name = 'Governance Document'
         verbose_name_plural = 'Governance Documents'
