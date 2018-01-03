@@ -383,20 +383,23 @@ class ExportFromThisProject(ExportRequest):
 @login_required()
 def pdf_view(request, pk):
     gov_doc = Governance_Doc.objects.get(pk=pk)
-    print(gov_doc.documentation)
-    print(dir(gov_doc.documentation))
-    print(gov_doc.documentation.name)
-    if gov_doc.documentation.name[:-3] == "pdf":
+   
+    if gov_doc.documentation.name[-3:] == "pdf":
+        print("recognized PDF")
+        print(gov_doc.documentation.file)
         try:
             # open(gov_doc.documentation.file, 'rb')
-            return FileResponse(gov_doc.documentation.file, content_type='application/pdf')
+            return FileResponse(gov_doc.documentation.file, 
+                                content_type='application/pdf')
         except FileNotFoundError:
             raise Http404()
-    elif gov_doc.documentation.name[:-4] == "docx":
+    elif gov_doc.documentation.name[-4:] == "docx":
         try:
             # open(gov_doc.documentation.file, 'rb')
-            return FileResponse(gov_doc.documentation.file, content_type='application/pdf')
+            return FileResponse(gov_doc.documentation.file,         
+                                content_type='application/pdf')
         except FileNotFoundError:
             raise Http404()
-    
+    else:
+        raise Http404()
     
