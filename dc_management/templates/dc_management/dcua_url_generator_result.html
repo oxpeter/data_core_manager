@@ -31,6 +31,13 @@ You can also copy the hyperlink and paste into a rich-text editor.</p>
     	<td>{% for f in request.session.folders %}{{ f }}</br>{% endfor %}</td>
     </tr>
     
+    {% if request.session.ticket %}
+	<tr>
+    	<td>Ticket</td>
+    	<td>{{ request.session.ticket }}</td>
+    </tr>
+    {% endif %}
+    
     <tr>
     	<td>URL</td>
     	<td>{{ request.session.qualtrics_link }}</td>
@@ -40,9 +47,5 @@ You can also copy the hyperlink and paste into a rich-text editor.</p>
     	<td><a href='{{ request.session.qualtrics_link }}'>Data Core User Agreement</a></td>
     </tr>
     </table>
-
-
-
-
 
 {% endblock %}

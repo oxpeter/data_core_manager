@@ -66,6 +66,9 @@ class ExportFileForm(forms.Form):
         self.fields['dcuser'].queryset = qs
 
 class CreateDCAgreementURLForm(forms.Form):
+    ticket = forms.CharField(required=False, 
+                              label="SN Ticket",
+                            )
     startdate = forms.CharField(required=True, 
                                 label="Start Date", 
                                 initial=datetime.datetime.now().strftime("%m/%d/%Y"),

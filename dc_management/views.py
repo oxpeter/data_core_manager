@@ -1,3 +1,5 @@
+import re
+
 from django.views import generic
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.contrib.auth.decorators import login_required
@@ -265,6 +267,7 @@ class CreateDCAgreementURL(LoginRequiredMixin, FormView):
         post_data = self.request.POST 
         
         # create the personalized URL:
+        ticket = form.cleaned_data['ticket']
         startdate = form.cleaned_data['startdate']
         enddate = form.cleaned_data['enddate']
         
@@ -281,12 +284,19 @@ class CreateDCAgreementURL(LoginRequiredMixin, FormView):
         
         qualtrics_link += "?startdate={}&enddate={}".format(startdate,enddate)
         qualtrics_link += "{}".format(folders)
+        if re.search("INC\d{6,8}", ticket):
+            qualtrics_link += "&ticket={}".format(ticket)
+            self.request.session['ticket'] = ticket
+        else:
+            self.request.session['ticket'] = ""
         
-        # add to session info for passing to results page:
+        # add to session info for passing to results page
+        # NB - all session info fields must be updated, otherwise old info will be passed!
         self.request.session['qualtrics_link'] = qualtrics_link
         self.request.session['startdate'] = startdate
         self.request.session['enddate'] = enddate
         self.request.session['folders'] = folderlist
+
         return super(CreateDCAgreementURL, self).form_valid(form)
 
 class ViewDCAgreementURL(LoginRequiredMixin, generic.TemplateView):
