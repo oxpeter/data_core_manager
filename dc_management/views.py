@@ -386,8 +386,6 @@ def pdf_view(request, pk):
     gov_doc = Governance_Doc.objects.get(pk=pk)
    
     if gov_doc.documentation.name[-3:] == "pdf":
-        print("recognized PDF")
-        print(gov_doc.documentation.file)
         try:
             # open(gov_doc.documentation.file, 'rb')
             return FileResponse(gov_doc.documentation.file, 
@@ -396,9 +394,6 @@ def pdf_view(request, pk):
             raise Http404()
     elif gov_doc.documentation.name[-4:] == "docx":
         try:
-            print(gov_doc.documentation.file)
-            print(gov_doc.documentation.name)
-            print(dir(gov_doc.documentation.file))
             with open(str(gov_doc.documentation.file), 'rb') as fh:
                 response = HttpResponse(fh.read(),
                                         content_type="application/vnd.ms-word")

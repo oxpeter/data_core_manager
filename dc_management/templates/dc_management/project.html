@@ -169,6 +169,9 @@
         <h4>Project governance</h4>
       </div>
       <div class="panel-body">
+    {% include "dc_management/list_gov_docs.html" %}
+    
+    {% comment "old code being replaced" %}
     {% for gd in project.governance_doc_set.all %}
         <h5>
         <a href="{% url 'dc_management:govdoc' gd.pk %}" target="_blank">{{ gd }}</a> 
@@ -178,15 +181,15 @@
                 <td>ID </td><td> {{ gd.doc_id }}</td>
             </tr>
             
-                {% if gd.expiry_date|days_until:0 %}
+                {% if gd.attention_required == "danger" %}
                     <tr class="bg-danger" style="color:red;">
                         <td>Expiry</td><td> {{ gd.expiry_date }}</td>
                     </tr>
-                {% elif gd.expiry_date|days_until:10 %}
+                {% elif gd.attention_required == "warning" %}
                     <tr class="bg-warning" style="color:orange;">
                         <td>Expiry</td><td> {{ gd.expiry_date }}</td>
                     </tr>
-                {% elif gd.expiry_date|days_until:90 %}
+                {% elif gd.attention_required == "primary" %}
                     <tr class="bg-info" style="color:blue;">
                         <td>Expiry</td><td> {{ gd.expiry_date }}</td>
                     </tr>
@@ -207,6 +210,7 @@
             </tr>
         </table>
     {% endfor %}
+    {% endcomment %}
       </div>
      </div>
     </div>
