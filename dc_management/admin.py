@@ -19,6 +19,7 @@ class GovDocAdmin(admin.ModelAdmin):
                     'expiry_date',
                     'project', 
                     'defers_to_doc', 
+                    "supersedes_doc",
                     'allowed_user_string',
                     )
     list_filter = ('governance_type',)

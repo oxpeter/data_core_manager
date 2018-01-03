@@ -423,6 +423,7 @@ class Governance_Doc(models.Model):
 
     def attention_required(self):
         td = self.expiry_date - datetime.date.today() 
+        print(self, len(Governance_Doc.objects.filter(supersedes_doc=self)))
         if td.days >  90:
             status = "safe"
         
@@ -432,6 +433,8 @@ class Governance_Doc(models.Model):
         
         # if doc defers to another doc, then we need not pay attention to this one:
         elif self.defers_to_doc:
+            status = "safe"
+        elif len(Governance_Doc.objects.filter(supersedes_doc=self)) > 0:
             status = "safe"
         
         # if not deferring, not DCUA:
