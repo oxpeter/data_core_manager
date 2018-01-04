@@ -46,9 +46,11 @@ class Server(models.Model):
 
     PRODUCTION = 'PR'
     TEST = 'TE'
+    DEVELOPMENT = 'DE'
     FUNCTION_CHOICES = (
             (PRODUCTION, "Production"),
             (TEST, "Test"),
+            (DEVELOPMENT, "Development"),
     )
     function = models.CharField(
                             max_length=2,

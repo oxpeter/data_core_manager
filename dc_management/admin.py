@@ -24,6 +24,29 @@ class GovDocAdmin(admin.ModelAdmin):
                     )
     list_filter = ('governance_type',)
 
+@admin.register(Project)
+class ProjectAdmin(admin.ModelAdmin):
+	list_display = ('dc_prj_id',
+					'nickname',
+					'pi',
+					'title',
+					'fileshare_storage',
+					'status',
+					'expected_completion',
+	)
+	list_filter = ('pi','status')
+	
+@admin.register(Server)
+class ServerAdmin(admin.ModelAdmin):
+	list_display = ('node',
+					'ip_address',
+					'status',
+					'function',
+					'machine_type',
+					'operating_sys',
+					
+	)
+	list_filter = ('function','status', 'operating_sys', 'machine_type')
 
 admin.site.register(Access_Log)
 admin.site.register(AccessPermission)
@@ -33,8 +56,6 @@ admin.site.register(DC_Administrator)
 admin.site.register(DC_User)
 admin.site.register(EnvtSubtype)
 admin.site.register(External_Access_Log)
-admin.site.register(Project)
-admin.site.register(Server)
 admin.site.register(SN_Ticket)
 admin.site.register(Software)
 admin.site.register(Software_License_Type)
