@@ -9,7 +9,9 @@ from datetime import date
 import collections
 
 ## Models 
+
 class SN_Ticket(models.Model):
+    "deprecated class, not referenced by any other model"
     ticket_id = models.CharField(max_length=11, unique=True)
     date_created = models.DateField(default=date.today)
 
@@ -145,8 +147,7 @@ class Server(models.Model):
         users = [ p.dc_users_set.all() for p in mounted_projects ]
         
         return [ item for item, count in collections.Counter(users).items() if count > 1 ]
-        
-    
+           
 class EnvtSubtype(models.Model):
     name = models.CharField(max_length=32, unique=True)
 
@@ -221,6 +222,9 @@ class DC_User(models.Model):
     def get_absolute_url(self):
         return reverse('dcuser-detail', kwargs={'pk': self.pk})
 
+#########################
+#### Software Models ####
+#########################
 
 class Software_License_Type(models.Model):
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
@@ -268,24 +272,7 @@ class SoftwareUnit(models.Model):
             return self.unit
     
 
-class SoftwarePurchase(models.Model):
-    record_creation = models.DateField(auto_now_add=True)
-    record_update = models.DateField(auto_now=True)
-    
-    date_purchased = models.DateField(auto_now=True)
-    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
-    sw_purchased = models.ForeignKey(Software, on_delete=models.CASCADE)                        
-    units_purchased = models.IntegerField()
-    cost_per_unit = models.FloatField()
-    unit = models.ForeignKey(SoftwareUnit, on_delete=models.CASCADE)  
-    invoice_number = models.CharField(max_length=64)
-    
-    def __str__(self):
-            return "{} units on {} ({})".format( 
-                                self.date_purchased, 
-                                self.units_purchased,
-                                self.invoice_number,
-                                )
+
         
 class Project(models.Model):
     record_creation = models.DateField(auto_now_add=True)
@@ -473,7 +460,11 @@ class DC_Administrator(models.Model):
     class Meta:
         verbose_name = 'Data Core Administrator'
         verbose_name_plural = 'Data Core Administrators'
-    
+
+############################
+#### Log / Audit Models ####
+############################    
+
 class External_Access_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
@@ -532,8 +523,10 @@ class Software_Purchase(models.Model):
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     date_purchased = models.DateField()
     software = models.ForeignKey(Software, on_delete=models.CASCADE)
-    num_licenses_purchased = models.IntegerField()
+    num_units_purchased = models.IntegerField()
+    unit_type = models.ForeignKey(SoftwareUnit, on_delete=models.CASCADE)  
     expiration = models.DateField()
+    invoice_number = models.CharField(max_length=64)
     
     MAINTENANCE = 'MN'
     ADDITIONAL = 'AD'
@@ -556,16 +549,41 @@ class Software_Purchase(models.Model):
     comments = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return "{} licenses on {}".format(
-                        self.num_licenses_purchased, 
-                        self.date_purchased
+        return "{} units on {} ({})".format(
+                        self.num_units_purchased, 
+                        self.date_purchased,
+                        self.invoice_number,
                         )
 
     class Meta:
         verbose_name = 'Software Purchase'
         verbose_name_plural = 'Software Purchases'
 
+    def cost_per_unit(self):
+        return self.cost / self.num_units_purchased
+
+"""
+# Deprecated model
+class SoftwarePurchase(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
     
+    date_purchased = models.DateField(auto_now=True)
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
+    sw_purchased = models.ForeignKey(Software, on_delete=models.CASCADE)                        
+    units_purchased = models.IntegerField()
+    cost_per_unit = models.FloatField()
+    unit_type = models.ForeignKey(SoftwareUnit, on_delete=models.CASCADE)  
+    invoice_number = models.CharField(max_length=64)
+    
+    def __str__(self):
+            return "{} units on {} ({})".format( 
+                                self.date_purchased, 
+                                self.units_purchased,
+                                self.invoice_number,
+                                )
+"""
+
 class Access_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
@@ -594,7 +612,6 @@ class Access_Log(models.Model):
         verbose_name = 'Access Log'
         verbose_name_plural = 'Access Logs'
 
-    
 class Audit_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
@@ -636,7 +653,6 @@ class Audit_Log(models.Model):
         verbose_name = 'Audit Log'
         verbose_name_plural = 'Audit Logs'
 
-    
 class Storage_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
@@ -655,7 +671,6 @@ class Storage_Log(models.Model):
         verbose_name = 'Storage Log'
         verbose_name_plural = 'Storage Logs'
 
-    
 class Data_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
@@ -715,7 +730,6 @@ class Data_Log(models.Model):
         verbose_name = 'Data Log'
         verbose_name_plural = 'Data Logs'
 
-    
 class Server_Change_Log(models.Model):
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
     change_date = models.DateField()
@@ -816,3 +830,24 @@ class AlertTag(models.Model):
                             null=True,
                             blank=True,
                             )
+  
+########################
+#### Finance Models ####
+########################
+                          
+class SoftwareCost(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    software = models.ForeignKey(Software, on_delete=models.CASCADE)
+    
+class UserCost(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
+ 
+    user_quantity = models.IntegerField()
+    user_cost     = models.FloatField()
+    
+    
