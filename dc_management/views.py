@@ -99,7 +99,6 @@ class AddUserToProject(LoginRequiredMixin, FormView):
     form_class = AddUserToProjectForm
     success_url = reverse_lazy('dc_management:all_projects')
     
-    print("AddUserToProject invoked")
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
