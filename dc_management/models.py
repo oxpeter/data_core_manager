@@ -841,6 +841,7 @@ class SoftwareCost(models.Model):
     record_author = models.ForeignKey(User, on_delete=models.CASCADE)
     
     software = models.ForeignKey(Software, on_delete=models.CASCADE)
+    software_cost = models.FloatField()
     
 class UserCost(models.Model):
     record_creation = models.DateField(auto_now_add=True)
@@ -850,4 +851,12 @@ class UserCost(models.Model):
     user_quantity = models.IntegerField()
     user_cost     = models.FloatField()
     
+class StorageCost(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    storage_type = models.CharField(max_length=64)
+    st_cost_per_gb = models.FloatField()
+
     

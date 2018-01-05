@@ -4,7 +4,7 @@ from .models import Access_Log, AccessPermission, Audit_Log, Data_Log
 from .models import DC_Administrator, DC_User, EnvtSubtype, External_Access_Log
 from .models import Governance_Doc, Project, Server, Server_Change_Log, SN_Ticket
 from .models import Software, Software_License_Type, Software_Log, Software_Purchase
-from .models import Storage_Log, SubFunction
+from .models import Storage_Log, SubFunction, SoftwareCost, UserCost, StorageCost
 
 # customize the look of the admin site:
 admin.site.site_header = 'Data Core Management Site'
@@ -47,6 +47,25 @@ class ServerAdmin(admin.ModelAdmin):
 					
 	)
 	list_filter = ('function','status', 'operating_sys', 'machine_type')
+
+@admin.register(SoftwareCost)
+class SoftwareCostAdmin(admin.ModelAdmin):
+	list_display = ('software',
+					'software_cost',
+					)
+
+@admin.register(UserCost)
+class UserCostAdmin(admin.ModelAdmin):
+	list_display = ('user_quantity',
+					'user_cost',
+					)
+
+@admin.register(StorageCost)
+class StorageCostAdmin(admin.ModelAdmin):
+	list_display = ('storage_type',
+					'st_cost_per_gb',
+					)
+
 
 admin.site.register(Access_Log)
 admin.site.register(AccessPermission)
