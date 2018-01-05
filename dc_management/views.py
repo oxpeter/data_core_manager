@@ -1,6 +1,8 @@
 import os
 import re
 
+from dal import autocomplete
+
 from django.views import generic
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.contrib.auth.decorators import login_required
@@ -14,12 +16,18 @@ from django.http import HttpResponse, Http404, FileResponse
 from django.urls import reverse_lazy
 from django.shortcuts import render, get_object_or_404
 
+from django.db.models import Q
+
 from datetime import date
 
 from .models import Server, Project, DC_User, Access_Log, Governance_Doc
 
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
+
+#################################
+#### Basic information views ####
+#################################
 
 class IndexView(LoginRequiredMixin, generic.ListView):
     login_url='/login/'
@@ -87,12 +95,25 @@ class DC_UserCreate(LoginRequiredMixin, CreateView):
 class DC_UserUpdate(LoginRequiredMixin, UpdateView):
     model = DC_User
     fields = ['first_name', 'last_name', 'cwid', 'affiliation', 'role', 'comments']  
-    #success_url = reverse('dc_management:dcuser', pk=self.pk)
-
-
+    
 #################################################
 ######  UPDATE USER - PROJECT RELATIONSHIP ######
 #################################################
+
+class DCUserAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        #model = DC_User
+        qs = DC_User.objects.all()
+
+        if self.q:
+            qs = qs.filter(
+                            Q(cwid__istartswith=self.q) | 
+                            Q(first_name__istartswith=self.q) |
+                            Q(last_name__istartswith=self.q)
+                            )
+            #qs = qs.filter(cwid__istartswith=self.q)
+
+        return qs
 
 class AddUserToProject(LoginRequiredMixin, FormView):
     template_name = 'dc_management/addusertoproject.html'
@@ -255,6 +276,7 @@ class RemoveUserFromThisProject(RemoveUserFromProject):
         return initial
 
 ###### Onboarding views #######
+
 class CreateDCAgreementURL(LoginRequiredMixin, FormView):
     template_name = 'dc_management/dcua_url_generator_form.html'
     form_class = CreateDCAgreementURLForm
@@ -371,14 +393,10 @@ class ExportFromThisProject(ExportRequest):
         # update initial field defaults with custom set default values:
         initial.update({'dcuser': chosen_user, })
         return initial
-
-
-
-        
+    
 ########################################
 ######  GOVERNANCE RELATED VIEWS  ######
 ########################################
-
 
 @login_required()
 def pdf_view(request, pk):

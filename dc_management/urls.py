@@ -8,6 +8,12 @@ app_name = 'dc_management'
 urlpatterns = [
     # index showing all running projects:
     url(r'^$', views.IndexView.as_view(), name='index'),
+
+    # autocomplete functions:
+    url(r'autocomplete-user/$', 
+        views.DCUserAutocomplete.as_view(), 
+        name='autocomplete-user'
+        ),
     
     # index showing all users:
     url(r'^dcuser/all/$', views.AllDCUserView.as_view(), name='all_users'),

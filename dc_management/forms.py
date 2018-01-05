@@ -1,5 +1,7 @@
 import datetime
 
+from dal import autocomplete
+
 from django import forms
 
 from .models import Server, Project, DC_User
@@ -15,14 +17,21 @@ class CommentForm(forms.Form):
 class AddUserToProjectForm(forms.Form):
     dcuser = forms.ModelChoiceField(
                                 queryset=DC_User.objects.all(), 
-                                label="Data Core User"
-                                    )
+                                label="Data Core User",
+                                widget=autocomplete.ModelSelect2(
+                                                    url='dc_management:autocomplete-user'
+                                                                ),
+                                )
     project = forms.ModelChoiceField(
                                 queryset=Project.objects.exclude(status="CO"), 
                                 label="Project"
-                                    )
-    comment = forms.CharField(required=False, label="Comment")
-    
+                                )
+    comment = forms.CharField(required=False, label="Comment",)
+    class Meta:
+        widgets =  {'dcuser' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-user'
+                                        )
+                    }
     
 class RemoveUserFromProjectForm(forms.Form):
     dcuser = forms.ModelChoiceField(
