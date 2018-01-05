@@ -24,7 +24,10 @@ class AddUserToProjectForm(forms.Form):
                                 )
     project = forms.ModelChoiceField(
                                 queryset=Project.objects.exclude(status="CO"), 
-                                label="Project"
+                                label="Project",
+                                widget=autocomplete.ModelSelect2(
+                                                url='dc_management:autocomplete-project'
+                                                                ),
                                 )
     comment = forms.CharField(required=False, label="Comment",)
     class Meta:

@@ -115,6 +115,19 @@ class DCUserAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
 
         return qs
 
+class ProjectAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        #model = DC_User
+        qs = Project.objects.all()
+
+        if self.q:
+            qs =  qs.filter(
+                            Q(dc_prj_id__icontains=self.q) | 
+                            Q(nickname__icontains=self.q) 
+                            )
+        return qs
+
+
 class AddUserToProject(LoginRequiredMixin, FormView):
     template_name = 'dc_management/addusertoproject.html'
     form_class = AddUserToProjectForm

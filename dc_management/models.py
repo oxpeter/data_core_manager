@@ -342,7 +342,7 @@ class Project(models.Model):
     comments = models.TextField(null=True, blank=True)
     
     def __str__(self):
-            return self.dc_prj_id
+            return "{} ({})".format(self.dc_prj_id, self.nickname)
     
 class AccessPermission(models.Model):
     name = models.CharField(max_length=32)

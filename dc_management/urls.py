@@ -12,9 +12,12 @@ urlpatterns = [
     # autocomplete functions:
     url(r'autocomplete-user/$', 
         views.DCUserAutocomplete.as_view(), 
-        name='autocomplete-user'
+        name='autocomplete-user',
         ),
-    
+    url(r'autocomplete-project/$', 
+        views.ProjectAutocomplete.as_view(),
+        name='autocomplete-project',
+        ),
     # index showing all users:
     url(r'^dcuser/all/$', views.AllDCUserView.as_view(), name='all_users'),
     url(r'^project/all/$', views.AllProjectsView.as_view(), name='all_projects'),
