@@ -78,10 +78,10 @@ class Server(models.Model):
     LARGE = "LG"
     XLARGE = "XL"
     VM_SIZE_CHOICES = (
-                (SMALL, "Small ()"),
-                (MEDIUM, "Medium ()"),
-                (LARGE, "Large ()"),
-                (XLARGE, "Extra Large ()"),
+                (SMALL, "Small (2 CPU, 8GB RAM)"),
+                (MEDIUM, "Medium (4 CPU, 16GB RAM)"),
+                (LARGE, "Large (8 CPU, 32GB RAM)"),
+                (XLARGE, "Extra Large (16 CPU, 64GB RAM)"),
     )
     vm_size = models.CharField(
                             max_length=2,
@@ -278,6 +278,8 @@ class Project(models.Model):
     title = models.CharField(max_length=256)
     nickname = models.CharField(max_length=256, blank=True)
     fileshare_storage = models.IntegerField(null=True, blank=True)
+    direct_attach_storage = models.IntegerField(null=True, blank=True)
+    backup_storage = models.IntegerField(null=True, blank=True)
     users = models.ManyToManyField(DC_User, blank=True)
     pi = models.ForeignKey(
                     DC_User, 
@@ -335,6 +337,23 @@ class Project(models.Model):
     completion_ticket = models.CharField(max_length=32, null=True, blank=True)
     completion_date = models.DateField(null=True, blank=True)
     host = models.ForeignKey(Server, on_delete=models.CASCADE, null=True, blank=True)
+    db = models.ForeignKey(Server, 
+                            on_delete=models.CASCADE, 
+                            related_name='db_host',
+                            null=True, 
+                            blank=True,
+                            )
+    
+    # finance fields
+    user_cost = models.FloatField(null=True, blank=True)
+    host_cost = models.FloatField(null=True, blank=True)
+    db_cost = models.FloatField(null=True, blank=True)
+    fileshare_cost = models.FloatField(null=True, blank=True)
+    direct_attach_cost = models.FloatField(null=True, blank=True)
+    backup_cost = models.FloatField(null=True, blank=True)
+    software_cost = models.FloatField(null=True, blank=True)
+    project_total_cost = models.FloatField(null=True, blank=True)
+    
     comments = models.TextField(null=True, blank=True)
     
     def __str__(self):

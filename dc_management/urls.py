@@ -74,6 +74,10 @@ urlpatterns = [
     url(r'^software/email/$', 
         views.EmailResults.as_view(), 
         name='email_results'),
+        
+    # finance views:
+    url(r'finances/$', views.ActiveProjectFinances.as_view(), name='finances-active'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

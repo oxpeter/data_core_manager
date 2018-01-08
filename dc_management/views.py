@@ -8,7 +8,10 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormVi
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from django.core.mail import send_mail
+
 from django.urls import reverse_lazy, reverse
 
 from django.http import HttpResponse, Http404, FileResponse
@@ -16,12 +19,13 @@ from django.http import HttpResponse, Http404, FileResponse
 from django.urls import reverse_lazy
 from django.shortcuts import render, get_object_or_404
 
-from django.db.models import Q
+from django.db.models import Q, Max
 
 from datetime import date
 
 from .models import Server, Project, DC_User, Access_Log, Governance_Doc
 from .models import Software, Software_Log
+from .models import UserCost, SoftwareCost, StorageCost
 
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
@@ -39,7 +43,7 @@ class IndexView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         """Return  all active projects."""
-        return Project.objects.filter(status="RU").order_by('-dc_prj_id')
+        return Project.objects.filter(status="RU").order_by('dc_prj_id')
     
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
@@ -151,8 +155,6 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
         self.request.session['email_sbj'] = sbj_msg
         self.request.session['email_msg'] = body_msg
 
-
-    
     def form_valid(self, form):
         self.request.session['email_sbj'] = "No email sent"
         self.request.session['email_msg'] = ""
@@ -563,7 +565,6 @@ def pdf_view(request, pk):
 ######  AUTOCOMPLETE  VIEWS   ######
 ####################################
 
-
 class DCUserAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = DC_User.objects.all()
@@ -612,3 +613,169 @@ class NodeAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
                             Q(comments__icontains=self.q)
                             )
         return qs
+
+###############################
+######  FINANCE  VIEWS   ######
+###############################
+
+class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
+    template_name = 'dc_management/finances_global.html'
+    context_object_name = 'project_list'
+
+    def get_queryset(self):
+        """Return  all active projects."""
+        return Project.objects.filter(status="RU").order_by('dc_prj_id')
+    
+    def get_context_data(self, **kwargs):
+        act_prjs = Project.objects.filter(status="RU").order_by('dc_prj_id')
+        user_costs = UserCost.objects.all()
+        sw_costs = SoftwareCost.objects.all()
+        storage_costs = StorageCost.objects.all()
+        
+        sw_list = []
+        
+        for prj in act_prjs:
+            # get cost for users.
+            user_num = len(prj.users.all())
+            try:
+                ucost = user_costs.get(user_quantity=user_num).user_cost
+            except ObjectDoesNotExist:
+                #maxquant = user_costs.aggregate(Max('user_quantity'))
+                max_rego = user_costs.order_by('-user_quantity')[0]
+                set_cost = max_rego.user_cost
+                set_cnt = max_rego.user_quantity
+                try:
+                    xtr_cost = user_costs.get(user_quantity=0).user_cost    
+                except ObjectDoesNotExist:
+                    xtr_cost = 0
+                    
+                ucost = set_cost + xtr_cost * set_cnt
+                
+            prj.user_cost = ucost
+            
+                    
+            # get cost for storage
+            # direct attach
+            try:
+                direct_rate = storage_costs.get(
+                                storage_type__icontains="direct"
+                                            ).st_cost_per_gb
+            except ObjectDoesNotExist:
+                direct_rate = 0          
+            
+            if not prj.direct_attach_storage:
+                das = 0
+            else:
+                das = prj.direct_attach_storage
+            prj.direct_attach_cost = das * direct_rate
+            
+            # Fileshare and replication
+            try:
+                fs_rate = storage_costs.get(
+                                storage_type__icontains="share"
+                                            ).st_cost_per_gb
+            except ObjectDoesNotExist:
+                fs_rate = 0          
+            if prj.fileshare_storage:
+                fss = prj.fileshare_storage
+            else:
+                fss = 0
+            prj.fileshare_cost = fss * fs_rate
+
+            # backup
+            try:
+                bkp_rate = storage_costs.get(
+                                storage_type__icontains="backup"
+                                            ).st_cost_per_gb
+            except ObjectDoesNotExist:
+                bkp_rate = 0          
+            
+            if prj.backup_storage:
+                bs = prj.backup_storage
+            else:
+                bs = 0
+            prj.backup_cost = bs * direct_rate
+            
+            # get costs for software:
+            prj_sw_list = []
+            prj_sw_total = 0
+            for sw in prj.software_installed.all():
+                try:
+                    sw_cost = sw_costs.get(software=sw).software_cost
+                except ObjectDoesNotExist:
+                    sw_cost = 0
+                prj_sw_list.append((sw.name, sw_cost * user_num))
+                prj_sw_total += sw_cost * user_num
+            prj.software_cost = prj_sw_total
+            sw_list.append(prj_sw_list)
+            
+            
+            # db cost
+            try:
+                db_rate = storage_costs.get(
+                                storage_type__icontains="db"
+                                            ).st_cost_per_gb
+            except ObjectDoesNotExist:
+                db_rate = 0          
+            
+            if prj.db:
+                db_size = prj.db.processor_num / 2
+            else:
+                db_size = 0
+                            
+            prj.db_cost = db_size * db_rate
+
+            # server cost
+            try:
+                server_CPU_rate = storage_costs.get(
+                                storage_type__icontains="CPU"
+                                            ).st_cost_per_gb
+            except ObjectDoesNotExist:
+                server_CPU_rate = 0
+            try:
+                server_RAM_rate = storage_costs.get(
+                                storage_type__icontains="RAM"
+                                            ).st_cost_per_gb
+            except ObjectDoesNotExist:
+                server_RAM_rate = 0          
+            
+            xtra_cpu = prj.host.processor_num - 4
+            xtra_ram = prj.host.ram - 16
+            if xtra_cpu < 0:
+                xtra_cpu = 0
+            if xtra_ram < 0:
+                xtra_ram = 0
+            xtra_ram = xtra_ram - xtra_cpu * 4 
+            prj.host_cost = xtra_cpu / 2 * server_CPU_rate + xtra_ram * server_RAM_rate
+            
+            # update total cost:
+            prj.project_total_cost = (  prj.backup_cost + 
+                                         prj.fileshare_cost +
+                                         prj.direct_attach_cost +
+                                         prj.user_cost +
+                                         prj.software_cost 
+            #                            prj.db_cost +
+            #                            prj.host_cost
+            )
+            
+            #### SAVE ####
+            prj.save()
+            
+        prj_data = zip(act_prjs, sw_list)
+            
+        context = super(ActiveProjectFinances, self).get_context_data(**kwargs)
+        context.update({
+            'prj_data': prj_data,
+            'sw_list' : sw_list,
+            'user_list': DC_User.objects.filter(
+                                        project_pi__isnull=False,
+                                        ).distinct().order_by('first_name'),
+            'server_list': Server.objects.filter(
+                                        status="ON"
+                                        ).filter(
+                                            function="PR"
+                                        ).order_by('node'),
+        })
+        return context
+
+

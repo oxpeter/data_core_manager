@@ -2,6 +2,7 @@
 import datetime
 # Otherwise use timezone
 from django.utils import timezone 
+from django.contrib.humanize.templatetags.humanize import intcomma
 
 from django import template
 
@@ -18,3 +19,12 @@ def days_ago(date, days):
 @register.filter
 def days_until(date, days):
     return date - datetime.date.today() < datetime.timedelta(days=days)
+    
+ 
+ 
+@register.filter
+def account_format(dollar):
+    if dollar:
+        return "${:>10,.2f}".format(dollar)
+    else:
+        return "${:>10,.2f}".format(0.00)
