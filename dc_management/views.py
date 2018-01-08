@@ -82,7 +82,14 @@ class ProjectView(LoginRequiredMixin, generic.DetailView):
 class ServerView(LoginRequiredMixin, generic.DetailView):
     model = Server
     template_name = 'dc_management/server.html'
-
+    def get_context_data(self, **kwargs):
+        server_users = DC_User.objects.filter(project__host=self.pk)
+        
+        context = super(ServerView, self).get_context_data(**kwargs)
+        context.update({'server_users': server_users,
+        })
+        return context
+    
 class DCUserView(LoginRequiredMixin, generic.DetailView):
     model = DC_User
     template_name = 'dc_management/dcuser.html'
@@ -175,7 +182,8 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
             changestr = "install" # set language for emails:
             
             # if project specified, and not already installed:
-            if prj and not sw in prj.software_installed.all():
+            if prj and prj.host and not sw in prj.software_installed.all():
+                print("######ACCEPTED########")
                 # add sw to prj
                 prj.software_installed.add(sw)
                 prj.software_requested.add(sw)
@@ -213,7 +221,7 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
         elif change == "RA":
             changestr = "uninstall" # set language for emails:
             # if project specified, and not already uninstalled:
-            if prj and sw in prj.software_installed.all():
+            if prj and prj.host and sw in prj.software_installed.all():
                 # remove sw to prj
                 prj.software_installed.remove(sw)
                 prj.software_requested.remove(sw)
