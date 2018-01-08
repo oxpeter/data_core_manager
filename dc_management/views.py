@@ -19,7 +19,7 @@ from django.http import HttpResponse, Http404, FileResponse
 from django.urls import reverse_lazy
 from django.shortcuts import render, get_object_or_404
 
-from django.db.models import Q, Max
+from django.db.models import Q, Max, Sum
 
 from datetime import date
 
@@ -769,19 +769,17 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
             prj.save()
             
         prj_data = zip(act_prjs, sw_list)
-            
+        grand_total = list(Project.objects.filter(
+                                            status="RU"
+                       ).aggregate(
+                                    Sum('project_total_cost')
+                        ).values())[0]   
+        print("grand_total", grand_total) 
         context = super(ActiveProjectFinances, self).get_context_data(**kwargs)
         context.update({
             'prj_data': prj_data,
-            'sw_list' : sw_list,
-            'user_list': DC_User.objects.filter(
-                                        project_pi__isnull=False,
-                                        ).distinct().order_by('first_name'),
-            'server_list': Server.objects.filter(
-                                        status="ON"
-                                        ).filter(
-                                            function="PR"
-                                        ).order_by('node'),
+            'grand_total_cost': grand_total,
+            
         })
         return context
 
