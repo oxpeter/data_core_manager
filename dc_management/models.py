@@ -280,6 +280,9 @@ class Project(models.Model):
     fileshare_storage = models.IntegerField(null=True, blank=True)
     direct_attach_storage = models.IntegerField(null=True, blank=True)
     backup_storage = models.IntegerField(null=True, blank=True)
+    requested_ram = models.IntegerField(null=True, blank=True)
+    requested_cpu = models.IntegerField(null=True, blank=True)
+    
     users = models.ManyToManyField(DC_User, blank=True)
     pi = models.ForeignKey(
                     DC_User, 

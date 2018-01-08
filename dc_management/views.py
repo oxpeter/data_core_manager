@@ -740,8 +740,8 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
                 server_RAM_rate = 0          
             
             if prj.host:
-                xtra_cpu = prj.host.processor_num - 4
-                xtra_ram = prj.host.ram - 16
+                xtra_cpu = prj.requested_cpu - 4
+                xtra_ram = prj.requested_ram - 16
                 if xtra_cpu < 0:
                     xtra_cpu = 0
                 if xtra_ram < 0:
