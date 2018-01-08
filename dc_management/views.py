@@ -747,7 +747,7 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
                 if xtra_ram < 0:
                     xtra_ram = 0
                 xtra_ram = xtra_ram - xtra_cpu * 4 
-                prj.host_cost = xtra_cpu / 2 * server_CPU_rate + xtra_ram * server_RAM_rate
+                prj.host_cost = xtra_cpu / 2 * server_CPU_rate + xtra_ram / 8 * server_RAM_rate
             else:
                 prj.host_cost = 0
             
