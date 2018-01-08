@@ -21,9 +21,11 @@ from django.db.models import Q
 from datetime import date
 
 from .models import Server, Project, DC_User, Access_Log, Governance_Doc
+from .models import Software, Software_Log
 
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
+from .forms import AddSoftwareToProjectForm
 
 #################################
 #### Basic information views ####
@@ -95,38 +97,161 @@ class DC_UserCreate(LoginRequiredMixin, CreateView):
 class DC_UserUpdate(LoginRequiredMixin, UpdateView):
     model = DC_User
     fields = ['first_name', 'last_name', 'cwid', 'affiliation', 'role', 'comments']  
+
+###############################
+######  UPDATE SOFTWARE  ######
+###############################
+
+class UpdateSoftware(LoginRequiredMixin, FormView):
+    template_name = 'dc_management/updatesoftwareform.html'
+    form_class = AddSoftwareToProjectForm
+    success_url = reverse_lazy('dc_management:email_results')
+    
+    def email_change_project_software(self, changestr, prj, sw):
+        """
+        send request to add/remove software to node:
+        """
+        sbj_str = '{} software {} to {}'
+        body_str = 'Please {} {} for project {} (node {}, {}).'
+        sbj_msg  = sbj_str.format(changestr, sw, prj.dc_prj_id)
+        body_msg = body_str.format(changestr,
+                                     sw, 
+                                     prj.dc_prj_id,
+                                     prj.host.node,
+                                     prj.host.ip_address,
+                                    )
+        send_mail(
+            sbj_msg,
+            body_msg,
+            'from@example.com',     # set reply_to address?
+            ['oxpeter@gmail.com'],  # to field
+            fail_silently=True,
+        )
+        self.request.session['email_sbj'] = sbj_msg
+        self.request.session['email_msg'] = body_msg
+    
+    def email_change_node_software(self, changestr, node, sw):
+        """
+        send request to add/remove software to node:
+        """
+        sbj_str = '{} software {} to {}'
+        body_str = 'Please install {} on node {} ({}).'
+        sbj_msg  = sbj_str.format(changestr, sw, node.node)
+        body_msg = body_str.format(sw, 
+                             node.node,
+                             node.ip_address,
+                            )
+        send_mail(
+                sbj_msg,
+                body_msg,
+                'from@example.com',     # set reply_to address?
+                ['oxpeter@gmail.com'],  # to field
+                fail_silently=True,
+        )
+        self.request.session['email_sbj'] = sbj_msg
+        self.request.session['email_msg'] = body_msg
+
+
+    
+    def form_valid(self, form):
+        self.request.session['email_sbj'] = "No email sent"
+        self.request.session['email_msg'] = ""
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        post_data = self.request.POST
+        
+        # Check if user in project, then connect user to project
+        sw = form.cleaned_data['software_changed']
+        prj = form.cleaned_data['applied_to_prj']
+        user = form.cleaned_data['applied_to_user']
+        node = form.cleaned_data['applied_to_node']
+        change = form.cleaned_data['change_type']
+        
+        form.instance.record_author = self.request.user
+        
+        if change == "AA":
+            changestr = "install" # set language for emails:
+            
+            # if project specified, and not already installed:
+            if prj and not sw in prj.software_installed.all():
+                # add sw to prj
+                prj.software_installed.add(sw)
+                prj.software_requested.add(sw)
+
+                self.email_change_project_software(changestr, prj, sw)
+            
+            
+                # add to node if not already:
+                qs = Software_Log.objects.all()
+                qs_node = qs.filter(Q(applied_to_node=prj.host) &
+                             Q(software_changed=sw)
+                             ).order_by('-change_date')
+                
+                if len(qs_node) == 0:  
+                    node = prj.host
+                    form.instance.applied_to_node = node
+                elif qs_node[0].change_type == "RA":
+                    # this is same as above, but put as elif statement to prevent
+                    # breakage for null sets looking for [-1]
+                    node = prj.host
+                    form.instance.applied_to_node = node
+                    
+                    
+            # if node specified (and not a project), and not already on node:
+            if node and not prj:
+                qs = Software_Log.objects.all()
+                qs_node = qs.filter(Q(applied_to_node=node) &
+                                    Q(software_changed=sw)
+                                    ).order_by('-change_date')
+                if len(qs_node) == 0:                    
+                    self.email_change_node_software(changestr, node, sw)
+                elif qs_node[0].change_type == "RA":
+                    self.email_change_node_software(changestr, node, sw)
+        
+        elif change == "RA":
+            changestr = "uninstall" # set language for emails:
+            # if project specified, and not already uninstalled:
+            if prj and sw in prj.software_installed.all():
+                # remove sw to prj
+                prj.software_installed.remove(sw)
+                prj.software_requested.remove(sw)
+
+                self.email_change_project_software(changestr, prj, sw)
+            
+                # remove from node if not already:
+                qs = Software_Log.objects.all()
+                qs_node = qs.filter(Q(applied_to_node=prj.host) &
+                                        Q(software_changed=sw)
+                                        ).order_by('-change_date')
+                                        
+                if qs_node[0].change_type == "AA":  
+                    node = prj.host
+                    form.instance.applied_to_node = node
+        
+            # if node specified (and not a project), and sw still on node:
+            if node and not prj:
+                qs = Software_Log.objects.all()
+                qs_node = qs.filter(Q(applied_to_node=node) &
+                                    Q(software_changed=sw)
+                                     ).order_by('-change_date')
+                if qs_node[0].change_type == "AA":
+                    self.email_change_node_software(changestr, node, sw)
+
+
+        else:
+            changestr = "confirm presence of" # innocuous, not intended to be used.
+                
+            
+        form.save()                
+                
+        return super(UpdateSoftware, self).form_valid(form)    
+
+class EmailResults(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'dc_management/email_result.html'
     
 #################################################
 ######  UPDATE USER - PROJECT RELATIONSHIP ######
 #################################################
-
-class DCUserAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        #model = DC_User
-        qs = DC_User.objects.all()
-
-        if self.q:
-            qs = qs.filter(
-                            Q(cwid__istartswith=self.q) | 
-                            Q(first_name__istartswith=self.q) |
-                            Q(last_name__istartswith=self.q)
-                            )
-            #qs = qs.filter(cwid__istartswith=self.q)
-
-        return qs
-
-class ProjectAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        #model = DC_User
-        qs = Project.objects.all()
-
-        if self.q:
-            qs =  qs.filter(
-                            Q(dc_prj_id__icontains=self.q) | 
-                            Q(nickname__icontains=self.q) 
-                            )
-        return qs
-
 
 class AddUserToProject(LoginRequiredMixin, FormView):
     template_name = 'dc_management/addusertoproject.html'
@@ -167,9 +292,8 @@ class AddUserToProject(LoginRequiredMixin, FormView):
             # send email
             send_mail(
                 'Subject: add user {} to {}'.format(newuser, str(prj)),
-                'Please add {} to project {} ({}) (name: {} IP:{}).'.format(newuser, 
+                'Please add {} to project {} (node {}, {}).'.format(newuser, 
                                                                      str(prj),
-                                                                     prj.host,
                                                                      prj.host.node,
                                                                      prj.host.ip_address,
                                                                      ),
@@ -434,4 +558,57 @@ def pdf_view(request, pk):
             raise Http404()
     else:
         raise Http404()
-    
+
+####################################
+######  AUTOCOMPLETE  VIEWS   ######
+####################################
+
+
+class DCUserAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = DC_User.objects.all()
+
+        if self.q:
+            qs = qs.filter(
+                            Q(cwid__istartswith=self.q) | 
+                            Q(first_name__istartswith=self.q) |
+                            Q(last_name__istartswith=self.q)
+                            )
+            #qs = qs.filter(cwid__istartswith=self.q)
+
+        return qs
+
+class ProjectAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Project.objects.all()
+
+        if self.q:
+            qs =  qs.filter(
+                            Q(dc_prj_id__icontains=self.q) | 
+                            Q(nickname__icontains=self.q) 
+                            )
+        return qs
+
+class SoftwareAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Software.objects.all()
+
+        if self.q:
+            qs =  qs.filter(
+                            Q(name__icontains=self.q) | 
+                            Q(vendor__icontains=self.q) |
+                            Q(version__icontains=self.q)
+                            )
+        return qs
+
+class NodeAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Server.objects.all()
+
+        if self.q:
+            qs =  qs.filter(
+                            Q(node__icontains=self.q) | 
+                            Q(ip_address__icontains=self.q) |
+                            Q(comments__icontains=self.q)
+                            )
+        return qs

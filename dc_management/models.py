@@ -2,6 +2,7 @@ from django.urls import reverse
 from django.db import models
 
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 import datetime
 from datetime import date
@@ -240,14 +241,13 @@ class Software_License_Type(models.Model):
         verbose_name = 'Software License Type'
         verbose_name_plural = 'Software License Types'
 
-
 class Software(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
 
-    name = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=64, unique=False)
     vendor = models.CharField(max_length=64)
-    version = models.CharField(max_length=16)
+    version = models.CharField(max_length=32)
     license_type = models.ForeignKey(
                             Software_License_Type, 
                             on_delete=models.CASCADE
@@ -256,12 +256,11 @@ class Software(models.Model):
     comments = models.TextField(null=True, blank=True)
 
     def __str__(self):
-            return self.name
+            return "{} (version {})".format(self.name, self.version)
 
     class Meta:
         verbose_name = 'Software'
         verbose_name_plural = 'Software'
-
 
 class SoftwareUnit(models.Model):
     record_creation = models.DateField(auto_now_add=True)
@@ -270,10 +269,7 @@ class SoftwareUnit(models.Model):
     
     def __str__(self):
             return self.unit
-    
-
-
-        
+  
 class Project(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
@@ -368,11 +364,13 @@ class Governance_Doc(models.Model):
     access_allowed = models.ForeignKey(AccessPermission, on_delete=models.CASCADE)
     
     IRB = 'IR'
+    IRB_EXEMPTION = 'IX'
     DUA = 'DU'
     DCA = 'DC'
     ONBOARDING = 'ON'
     GOVERNANCE_TYPE_CHOICES = (
                     (IRB, "IRB"),
+                    (IRB_EXEMPTION, "IRB Exemption"),
                     (DUA, "DUA"),
                     (DCA, "Data Core User Agreement"),
                     (ONBOARDING, "Onboarding Form"),
@@ -440,7 +438,7 @@ class Governance_Doc(models.Model):
     class Meta:
         verbose_name = 'Governance Document'
         verbose_name_plural = 'Governance Documents'
-   
+
 class DC_Administrator(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
@@ -487,13 +485,27 @@ class External_Access_Log(models.Model):
         
 class Software_Log(models.Model):
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
-    change_date = models.DateField()
+    change_date = models.DateField(default=timezone.now)
     record_author = models.ForeignKey(User, on_delete=models.CASCADE)
     
-    applied_to_prj = models.ForeignKey(Project, on_delete=models.CASCADE)
-    applied_to_node = models.ForeignKey(Server, on_delete=models.CASCADE)
-    applied_to_user = models.ForeignKey(DC_User, on_delete=models.CASCADE)
+    applied_to_prj = models.ForeignKey(Project, 
+                                        on_delete=models.CASCADE,
+                                        null=True,
+                                        blank=True
+                                        )
+    applied_to_node = models.ForeignKey(Server, 
+                                        on_delete=models.CASCADE,
+                                        null=True,
+                                        blank=True,
+                                        )
+    applied_to_user = models.ForeignKey(DC_User, 
+                                        on_delete=models.CASCADE,
+                                        null=True,
+                                        blank=True,
+                                        )
     software_changed = models.ForeignKey(Software, on_delete=models.CASCADE, null=True)
+
+    comments = models.TextField(null=True, blank=True)
 
     ADD_ACCESS = 'AA'
     REMOVE_ACCESS = 'RA'
@@ -561,28 +573,6 @@ class Software_Purchase(models.Model):
 
     def cost_per_unit(self):
         return self.cost / self.num_units_purchased
-
-"""
-# Deprecated model
-class SoftwarePurchase(models.Model):
-    record_creation = models.DateField(auto_now_add=True)
-    record_update = models.DateField(auto_now=True)
-    
-    date_purchased = models.DateField(auto_now=True)
-    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
-    sw_purchased = models.ForeignKey(Software, on_delete=models.CASCADE)                        
-    units_purchased = models.IntegerField()
-    cost_per_unit = models.FloatField()
-    unit_type = models.ForeignKey(SoftwareUnit, on_delete=models.CASCADE)  
-    invoice_number = models.CharField(max_length=64)
-    
-    def __str__(self):
-            return "{} units on {} ({})".format( 
-                                self.date_purchased, 
-                                self.units_purchased,
-                                self.invoice_number,
-                                )
-"""
 
 class Access_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)

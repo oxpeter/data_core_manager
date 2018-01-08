@@ -18,6 +18,15 @@ urlpatterns = [
         views.ProjectAutocomplete.as_view(),
         name='autocomplete-project',
         ),
+    url(r'autocomplete-node/$', 
+        views.NodeAutocomplete.as_view(),
+        name='autocomplete-node',
+        ),
+
+    url(r'autocomplete-software/$', 
+        views.SoftwareAutocomplete.as_view(),
+        name='autocomplete-software',
+        ),
     # index showing all users:
     url(r'^dcuser/all/$', views.AllDCUserView.as_view(), name='all_users'),
     url(r'^project/all/$', views.AllProjectsView.as_view(), name='all_projects'),
@@ -60,6 +69,11 @@ urlpatterns = [
         name='usertothisproject-remove',
     ),
 
+    # software views:
+    url(r'^software/$', views.UpdateSoftware.as_view(), name='change_software'),
+    url(r'^software/email/$', 
+        views.EmailResults.as_view(), 
+        name='email_results'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

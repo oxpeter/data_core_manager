@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<h2>Software change requested</h2>
+<p>Email sent:</p>
+<p><b>{{ request.session.email_sbj }}</b></p>
+<p>{{ request.session.email_msg }}</p>
+
+{% endblock %}

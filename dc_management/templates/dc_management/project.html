@@ -56,12 +56,13 @@
 <div class="tab-pane active" id="details">
 
 <a type="button" class="btn btn-default" href="#">Decommission project</a>
-<a type="button" class="btn btn-default" href="#">Export file(s)</a>
+<a type="button" class="btn btn-default" href="#">Transfer file(s)</a>
+</br>
 
 <div class="container">
  <div class="panel panel-info">
   <div class="panel-heading">
-    <h4>Attributes:</h4>
+    <h4>Project attributes:</h4>
   </div>
   <div class="panel-body">
     <table class="table table-striped">
@@ -98,16 +99,11 @@
         </tr>
         {% if project.governance_doc_set.all.count == 0 %}
         <tr class="bg-danger" style="color:red;">
-            <td>Governance doc </td><td> None entered! </td>
-        </tr>
-        
-        {% else %}
-            {% for gd in project.governance_doc_set.all %}
-            <tr>
-                <td>Governance doc {{ forloop.counter }} </td><td> {{ gd }}</td>
-            </tr>
-            {% endfor %}
+        {% else %} 
+        <tr>
         {% endif %}
+            <td>Governance docs </td><td> {{ project.governance_doc_set.all.count }} </td>
+        </tr>
 
     </table>
   </div>
@@ -117,7 +113,7 @@
 <div class="container">
  <div class="panel panel-info">
   <div class="panel-heading">
-    <h4>Node Attributes:</h4>
+    <h4>Project node:</h4>
   </div>
   <div class="panel-body">
     <table class="table table-striped"><ul>
@@ -146,7 +142,7 @@
 <div class="container">
  <div class="panel panel-info">
   <div class="panel-heading">
-    <h4>{{ project.users.all.count }} Users
+    <h4>{{ project.users.all.count }} users
         <span class="pull-right">
             <a type="button" class="btn btn-danger" href="{% url 'dc_management:usertothisproject-remove' project.pk %}">Remove user from project</a>
             <a type="button" class="btn btn-danger" href="{% url 'dc_management:usertothisproject-add' project.pk %}">Add user to project</a>
@@ -177,6 +173,33 @@
     </div>
 
 {% endif %}
+
+<div class="container">
+ <div class="panel panel-info">
+  <div class="panel-heading">
+    <h4>Installed software:</h4>
+  </div>
+  <div class="panel-body">
+    <table class="table table-striped"><ul>
+        <thead class="thead-default">
+        <tr>
+            <th>Software</th><th>Version</th><th>License type</th>
+        </tr>
+        </thead>
+        {% for sw in project.software_installed.all %}
+        <tr>
+            <td>{{ sw.name }}</td>
+            <td>{{ sw.version }}</td>
+            <td>{{ sw.license_type }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+  </div>
+ </div>
+</div>
+
+
     
 {% if project.comments %}
 <div class="container">
@@ -250,7 +273,8 @@
   <thead class="thead-default">
         <tr>
             <th>Ticket</th>
-            <th>Changed</th>
+            <th>Change date</th>
+            <th>Change type</th>
             <th>Software</th>
         </tr>
   </thead>
@@ -263,6 +287,7 @@
        {% endif %}
 
        <td>{{ l.change_date }}</td>
+       <td>{{ l.get_change_type_display }}</td>
        <td>{{ l.software_changed }}</td>
     </tr>
   {% endfor %}
