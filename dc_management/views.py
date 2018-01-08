@@ -739,23 +739,26 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
             except ObjectDoesNotExist:
                 server_RAM_rate = 0          
             
-            xtra_cpu = prj.host.processor_num - 4
-            xtra_ram = prj.host.ram - 16
-            if xtra_cpu < 0:
-                xtra_cpu = 0
-            if xtra_ram < 0:
-                xtra_ram = 0
-            xtra_ram = xtra_ram - xtra_cpu * 4 
-            prj.host_cost = xtra_cpu / 2 * server_CPU_rate + xtra_ram * server_RAM_rate
+            if prj.host:
+                xtra_cpu = prj.host.processor_num - 4
+                xtra_ram = prj.host.ram - 16
+                if xtra_cpu < 0:
+                    xtra_cpu = 0
+                if xtra_ram < 0:
+                    xtra_ram = 0
+                xtra_ram = xtra_ram - xtra_cpu * 4 
+                prj.host_cost = xtra_cpu / 2 * server_CPU_rate + xtra_ram * server_RAM_rate
+            else:
+                prj.host_cost = 0
             
             # update total cost:
             prj.project_total_cost = (  prj.backup_cost + 
                                          prj.fileshare_cost +
                                          prj.direct_attach_cost +
                                          prj.user_cost +
-                                         prj.software_cost 
-            #                            prj.db_cost +
-            #                            prj.host_cost
+                                         prj.software_cost +
+                                         prj.db_cost +
+                                         prj.host_cost
             )
             
             #### SAVE ####
