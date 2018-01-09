@@ -177,7 +177,12 @@
 <div class="container">
  <div class="panel panel-info">
   <div class="panel-heading">
-    <h4>Installed software:</h4>
+    <h4>Installed software:
+      <span class="pull-right">
+            <a type="button" class="btn btn-danger" href="{% url 'dc_management:change_software' %}">Install/remove software</a>
+      </span>
+    </h4>
+    
   </div>
   <div class="panel-body">
     <table class="table table-striped"><ul>
