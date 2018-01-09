@@ -35,7 +35,16 @@ class ProjectAdmin(admin.ModelAdmin):
 					'expected_completion',
 	)
 	list_filter = ('pi','status')
-	
+	exlude = (  'user_cost',
+				'host_cost',
+				'db_cost',
+				'fileshare_cost',
+				'direct_attach_cost',
+				'backup_cost',
+				'software_cost',
+				'project_total_cost',
+    )
+
 @admin.register(Server)
 class ServerAdmin(admin.ModelAdmin):
 	list_display = ('node',

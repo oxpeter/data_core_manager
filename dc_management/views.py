@@ -632,51 +632,19 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         """Return  all active projects."""
-        return Project.objects.filter(status="RU").order_by('dc_prj_id')
+        return Project.objects.all().order_by('dc_prj_id')
     
     def get_context_data(self, **kwargs):
-        act_prjs = Project.objects.filter(status="RU").order_by('dc_prj_id')
+        all_prjs = Project.objects.all().order_by('dc_prj_id')
         user_costs = UserCost.objects.all()
         sw_costs = SoftwareCost.objects.all()
         storage_costs = StorageCost.objects.all()
         
+        # lists for passing to template:
         sw_list = []
+        compute_list = []
         
-        for prj in act_prjs:
-            # get cost for users.
-            user_num = len(prj.users.all())
-            try:
-                ucost = user_costs.get(user_quantity=user_num).user_cost
-            except ObjectDoesNotExist:
-                #maxquant = user_costs.aggregate(Max('user_quantity'))
-                max_rego = user_costs.order_by('-user_quantity')[0]
-                set_cost = max_rego.user_cost
-                set_cnt = max_rego.user_quantity
-                try:
-                    xtr_cost = user_costs.get(user_quantity=0).user_cost    
-                except ObjectDoesNotExist:
-                    xtr_cost = 0
-                    
-                ucost = set_cost + xtr_cost * set_cnt
-                
-            prj.user_cost = ucost
-            
-                    
-            # get cost for storage
-            # direct attach
-            try:
-                direct_rate = storage_costs.get(
-                                storage_type__icontains="direct"
-                                            ).st_cost_per_gb
-            except ObjectDoesNotExist:
-                direct_rate = 0          
-            
-            if not prj.direct_attach_storage:
-                das = 0
-            else:
-                das = prj.direct_attach_storage
-            prj.direct_attach_cost = das * direct_rate
-            
+        for prj in all_prjs:
             # Fileshare and replication
             try:
                 fs_rate = storage_costs.get(
@@ -697,72 +665,132 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
                                             ).st_cost_per_gb
             except ObjectDoesNotExist:
                 bkp_rate = 0          
-            
+        
             if prj.backup_storage:
                 bs = prj.backup_storage
             else:
                 bs = 0
-            prj.backup_cost = bs * direct_rate
+            prj.backup_cost = bs * bkp_rate
             
-            # get costs for software:
-            prj_sw_list = []
-            prj_sw_total = 0
-            for sw in prj.software_installed.all():
+            # completed projects only have storage costs:
+            if prj.status == 'CO':
+                prj.direct_attach_cost = 0
+                prj.user_cost = 0
+                prj.software_cost = 0
+                prj.db_cost = 0
+                prj.host_cost = 0
+                sw_list.append([]) # to keep the sw list in sync
+                compute_list.append(((0, 'CPUs', 0.0), (0, 'GB RAM', 0.0)))
+            else:
+                # get cost for users.
+                user_num = len(prj.users.all())
                 try:
-                    sw_cost = sw_costs.get(software=sw).software_cost
+                    ucost = user_costs.get(user_quantity=user_num).user_cost
                 except ObjectDoesNotExist:
-                    sw_cost = 0
-                prj_sw_list.append((sw.name, sw_cost * user_num))
-                prj_sw_total += sw_cost * user_num
-            prj.software_cost = prj_sw_total
-            sw_list.append(prj_sw_list)
+                    #maxquant = user_costs.aggregate(Max('user_quantity'))
+                    max_rego = user_costs.order_by('-user_quantity')[0]
+                    set_cost = max_rego.user_cost
+                    set_cnt = max_rego.user_quantity
+                    try:
+                        xtr_cost = user_costs.get(user_quantity=0).user_cost    
+                    except ObjectDoesNotExist:
+                        xtr_cost = 0
+                    
+                    ucost = set_cost + xtr_cost * set_cnt
+                
+                prj.user_cost = ucost
+            
+                    
+                # get cost for storage
+                # direct attach
+                try:
+                    direct_rate = storage_costs.get(
+                                    storage_type__icontains="direct"
+                                                ).st_cost_per_gb
+                except ObjectDoesNotExist:
+                    direct_rate = 0          
+            
+                if not prj.direct_attach_storage:
+                    das = 0
+                else:
+                    das = prj.direct_attach_storage
+                prj.direct_attach_cost = das * direct_rate
+            
+                
+            
+                # get costs for software:
+                prj_sw_list = []
+                prj_sw_total = 0
+                for sw in prj.software_installed.all():
+                    try:
+                        sw_cost = sw_costs.get(software=sw).software_cost
+                    except ObjectDoesNotExist:
+                        sw_cost = 0
+                    prj_sw_list.append((sw.name, sw_cost * user_num))
+                    prj_sw_total += sw_cost * user_num
+                prj.software_cost = prj_sw_total
+                sw_list.append(prj_sw_list)
             
             
-            # db cost
-            try:
-                db_rate = storage_costs.get(
-                                storage_type__icontains="db"
-                                            ).st_cost_per_gb
-            except ObjectDoesNotExist:
-                db_rate = 0          
+                # db cost
+                try:
+                    db_rate = storage_costs.get(
+                                    storage_type__icontains="db"
+                                                ).st_cost_per_gb
+                except ObjectDoesNotExist:
+                    db_rate = 0          
             
-            if prj.db:
-                db_size = prj.db.processor_num / 2
-            else:
-                db_size = 0
+                if prj.db:
+                    db_size = prj.db.processor_num / 2
+                else:
+                    db_size = 0
                             
-            prj.db_cost = db_size * db_rate
+                prj.db_cost = db_size * db_rate
 
-            # server cost
-            try:
-                server_CPU_rate = storage_costs.get(
-                                storage_type__icontains="CPU"
-                                            ).st_cost_per_gb
-            except ObjectDoesNotExist:
-                server_CPU_rate = 0
-            try:
-                server_RAM_rate = storage_costs.get(
-                                storage_type__icontains="RAM"
-                                            ).st_cost_per_gb
-            except ObjectDoesNotExist:
-                server_RAM_rate = 0          
+                # server cost
+                try:
+                    server_CPU_rate = storage_costs.get(
+                                    storage_type__icontains="CPU"
+                                                ).st_cost_per_gb
+                except ObjectDoesNotExist:
+                    server_CPU_rate = 0
+                try:
+                    server_RAM_rate = storage_costs.get(
+                                    storage_type__icontains="RAM"
+                                                ).st_cost_per_gb
+                except ObjectDoesNotExist:
+                    server_RAM_rate = 0          
             
-            if prj.host and prj.requested_cpu:
-                xtra_cpu = prj.requested_cpu - 4
-                if xtra_cpu < 0:
+                if prj.host and prj.requested_cpu:
+                    xtra_cpu = prj.requested_cpu - 4
+                    if xtra_cpu < 0:
+                        xtra_cpu = 0
+                else:
                     xtra_cpu = 0
-            else:
-                xtra_cpu = 0
-            if prj.host and prj.requested_ram:
-                xtra_ram = prj.requested_ram - 16
-                if xtra_ram < 0:
+                if prj.host and prj.requested_ram:
+                    xtra_ram = prj.requested_ram - 16
+                    if xtra_ram < 0:
+                        xtra_ram = 0
+                    total_xtra_ram = xtra_ram
+                    xtra_ram = xtra_ram - xtra_cpu * 4 
+                else: 
                     xtra_ram = 0
-                xtra_ram = xtra_ram - xtra_cpu * 4 
-            else: 
-                xtra_ram = 0
-            prj.host_cost = xtra_cpu / 2 * server_CPU_rate + xtra_ram / 8 * server_RAM_rate
-            
-            
+                    total_xtra_ram = 0
+                prj.host_cost = (   xtra_cpu / 2 * 
+                                    server_CPU_rate + 
+                                    xtra_ram / 8 * 
+                                    server_RAM_rate
+                                )
+                compute_list.append(((  xtra_cpu, 
+                                        "CPUs", 
+                                        xtra_cpu / 2 * server_CPU_rate
+                                        ),
+                                    (total_xtra_ram, 
+                                    "GB RAM", 
+                                    xtra_ram / 8 * server_RAM_rate),
+                                    )
+                )
+                
             # update total cost:
             prj.project_total_cost = (  prj.backup_cost + 
                                          prj.fileshare_cost +
@@ -774,20 +802,24 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
             )
             
             #### SAVE ####
+            print("#"*10)
+            print(prj.dc_prj_id)
             prj.save()
-            
-        prj_data = zip(act_prjs, sw_list)
-        grand_total = list(Project.objects.filter(
-                                            status="RU"
-                       ).aggregate(
-                                    Sum('project_total_cost')
+        print(all_prjs)
+        print(sw_list)
+        print(compute_list) 
+        print(len(all_prjs))
+        print(len(sw_list))
+        print(len(compute_list)) 
+           
+        prj_data = list(zip(all_prjs, sw_list, compute_list))
+        grand_total = list(Project.objects.all().aggregate(
+                                            Sum('project_total_cost')
                         ).values())[0]   
-        print("grand_total", grand_total) 
         context = super(ActiveProjectFinances, self).get_context_data(**kwargs)
         context.update({
             'prj_data': prj_data,
             'grand_total_cost': grand_total,
-            
         })
         return context
 
