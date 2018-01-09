@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.conf import settings
+from django.urls import path
 
 from . import views
 
@@ -50,6 +51,10 @@ urlpatterns = [
     url(r'onboarding/dcua_url/$', views.ViewDCAgreementURL.as_view(), 
         name='url_result',
     ),
+    path('project/add/', views.ProjectCreate.as_view(), name='project-add'),
+    path('project/update/<int:pk>/', 
+            views.ProjectUpdate.as_view(), 
+            name='project-update'),
     # forms for adding user - project relationship:
     url(r'^dcuser/(?P<pk>[0-9]+)/connect$', 
         views.AddThisUserToProject.as_view(), 

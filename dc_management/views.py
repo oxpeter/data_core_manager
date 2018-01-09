@@ -109,6 +109,77 @@ class DC_UserUpdate(LoginRequiredMixin, UpdateView):
     model = DC_User
     fields = ['first_name', 'last_name', 'cwid', 'affiliation', 'role', 'comments']  
 
+##########################
+######  ONBOARDING  ######
+##########################
+class ProjectCreate(LoginRequiredMixin, CreateView):
+    model = Project
+    fields = [  'dc_prj_id',
+                'title', 
+                'nickname', 
+                'fileshare_storage', 
+                'direct_attach_storage', 
+                'backup_storage',
+                'requested_ram', 
+                'requested_cpu', 
+                'users',
+                'pi',
+                'software_requested',
+                'env_type',
+                'env_subtype',
+                'expected_completion',
+                'status',
+                'sn_tickets',
+                'predata_ticket',
+                'predata_date',
+                'postdata_ticket',
+                'postdata_date',
+                'completion_ticket',
+                'completion_date',
+                'host',
+                'db',
+                'comments'
+            ]
+    #success_url = reverse_lazy("dc_management:index" )
+    # default success_url should be to the object page defined in model.
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        return super(ProjectCreate, self).form_valid(form)
+
+class ProjectUpdate(LoginRequiredMixin, UpdateView):
+    model = Project
+    fields = [  'dc_prj_id',
+                'title', 
+                'nickname', 
+                'fileshare_storage', 
+                'direct_attach_storage', 
+                'backup_storage',
+                'requested_ram', 
+                'requested_cpu', 
+                'users',
+                'pi',
+                'software_requested',
+                'env_type',
+                'env_subtype',
+                'expected_completion',
+                'status',
+                'sn_tickets',
+                'predata_ticket',
+                'predata_date',
+                'postdata_ticket',
+                'postdata_date',
+                'completion_ticket',
+                'completion_date',
+                'host',
+                'db',
+                'comments'
+            ]
+    #success_url = reverse_lazy("dc_management:index" )
+    #default success_url should be to the object page defined in model.
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        return super(ProjectUpdate, self).form_valid(form)
+
 ###############################
 ######  UPDATE SOFTWARE  ######
 ###############################
@@ -802,8 +873,7 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
             )
             
             #### SAVE ####
-            print("#"*10)
-            print(prj.dc_prj_id)
+            
             prj.save()
         print(all_prjs)
         print(sw_list)

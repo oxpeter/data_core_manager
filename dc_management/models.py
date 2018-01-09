@@ -362,6 +362,9 @@ class Project(models.Model):
     def __str__(self):
             return "{} ({})".format(self.dc_prj_id, self.nickname)
     
+    def get_absolute_url(self):
+        return reverse('dc_management:project', kwargs={'pk': self.pk})
+        
 class AccessPermission(models.Model):
     name = models.CharField(max_length=32)
     description = models.TextField()    
