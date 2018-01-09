@@ -92,6 +92,14 @@
             <td>Status </td><td> {{ project.get_status_display }}</td>
         </tr>
         <tr>
+            <td>Fileshare storage </td><td> {{ project.fileshare_storage }} GB</td>
+        </tr>
+        <tr>
+            <td>Direct attach storage </td><td> {{ project.direct_attach }} GB</td>
+        </tr>
+        
+        
+        <tr>
             <td>Environment </td><td> {{ project.get_env_type_display }}</tdd>
         </tr>
         <tr>
@@ -156,30 +164,30 @@
  </div>
 </div>
 
-{% if project.governance_doc_set.all.count == 0 %}
-    </br>
-{% else %}
-    <div class="container">
-     <div class="panel panel-info">
-      <div class="panel-heading">
-        <h4>Project governance</h4>
-      </div>
-      <div class="panel-body">
+
+<div class="container">
+ <div class="panel panel-info">
+  <div class="panel-heading">
+    <h4>Project governance
+      <span class="pull-right">
+            <a type="button" class="btn btn-default"  href="#">Add document</a>
+      </span>
+    </h4>
+  </div>
+  <div class="panel-body">
     {% include "dc_management/list_gov_docs.html" %}
-    
+  </div>
+ </div>
+</div>
 
-      </div>
-     </div>
-    </div>
 
-{% endif %}
 
 <div class="container">
  <div class="panel panel-info">
   <div class="panel-heading">
     <h4>Installed software:
       <span class="pull-right">
-            <a type="button" class="btn btn-danger" href="{% url 'dc_management:change_software' %}">Install/remove software</a>
+            <a type="button" class="btn btn-danger"  href="{% url 'dc_management:change_software' %}">Install/remove software</a>
       </span>
     </h4>
     
@@ -200,6 +208,20 @@
         {% endfor %}
 
     </table>
+  </div>
+ </div>
+</div>
+
+
+<div class="container">
+ <div class="panel panel-info">
+  <div class="panel-heading">
+    <h4>Project billing</h4>
+  </div>
+  <div class="panel-body">
+    {% comment %}
+    {% include "dc_management/list_gov_docs.html" %}
+    {% endcomment %}
   </div>
  </div>
 </div>
