@@ -29,7 +29,7 @@ from .models import UserCost, SoftwareCost, StorageCost
 
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
-from .forms import AddSoftwareToProjectForm
+from .forms import AddSoftwareToProjectForm, ProjectForm
 
 #################################
 #### Basic information views ####
@@ -114,32 +114,8 @@ class DC_UserUpdate(LoginRequiredMixin, UpdateView):
 ##########################
 class ProjectCreate(LoginRequiredMixin, CreateView):
     model = Project
-    fields = [  'dc_prj_id',
-                'title', 
-                'nickname', 
-                'fileshare_storage', 
-                'direct_attach_storage', 
-                'backup_storage',
-                'requested_ram', 
-                'requested_cpu', 
-                'users',
-                'pi',
-                'software_requested',
-                'env_type',
-                'env_subtype',
-                'expected_completion',
-                'status',
-                'sn_tickets',
-                'predata_ticket',
-                'predata_date',
-                'postdata_ticket',
-                'postdata_date',
-                'completion_ticket',
-                'completion_date',
-                'host',
-                'db',
-                'comments'
-            ]
+    form_class = ProjectForm
+    
     #success_url = reverse_lazy("dc_management:index" )
     # default success_url should be to the object page defined in model.
     def form_valid(self, form):
@@ -148,32 +124,7 @@ class ProjectCreate(LoginRequiredMixin, CreateView):
 
 class ProjectUpdate(LoginRequiredMixin, UpdateView):
     model = Project
-    fields = [  'dc_prj_id',
-                'title', 
-                'nickname', 
-                'fileshare_storage', 
-                'direct_attach_storage', 
-                'backup_storage',
-                'requested_ram', 
-                'requested_cpu', 
-                'users',
-                'pi',
-                'software_requested',
-                'env_type',
-                'env_subtype',
-                'expected_completion',
-                'status',
-                'sn_tickets',
-                'predata_ticket',
-                'predata_date',
-                'postdata_ticket',
-                'postdata_date',
-                'completion_ticket',
-                'completion_date',
-                'host',
-                'db',
-                'comments'
-            ]
+    form_class = ProjectForm
     #success_url = reverse_lazy("dc_management:index" )
     #default success_url should be to the object page defined in model.
     def form_valid(self, form):

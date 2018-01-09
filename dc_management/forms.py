@@ -5,7 +5,7 @@ from dal import autocomplete
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from .models import Server, Project, DC_User, Software, Software_Log
+from .models import Server, Project, DC_User, Software, Software_Log, Project
 
 class CommentForm(forms.Form):
     name = forms.CharField()
@@ -105,6 +105,55 @@ class CreateDCAgreementURLForm(forms.Form):
     folder5 = forms.CharField(required=False, label="Folder 5")
     folder6 = forms.CharField(required=False, label="Folder 6")
     folder7 = forms.CharField(required=False, label="Folder 7")
+
+class ProjectForm(forms.ModelForm):
+    
+    class Meta:
+        model = Project
+        fields = [  'dc_prj_id',
+                    'title', 
+                    'nickname', 
+                    'fileshare_storage', 
+                    'direct_attach_storage', 
+                    'backup_storage',
+                    'requested_ram', 
+                    'requested_cpu', 
+                    'users',
+                    'pi',
+                    'software_requested',
+                    'env_type',
+                    'env_subtype',
+                    'expected_completion',
+                    'status',
+                    'sn_tickets',
+                    'predata_ticket',
+                    'predata_date',
+                    'postdata_ticket',
+                    'postdata_date',
+                    'completion_ticket',
+                    'completion_date',
+                    'host',
+                    'db',
+                    'comments',
+                ]
+
+        widgets =  {'users' : autocomplete.ModelSelect2Multiple(
+                                        url='dc_management:autocomplete-user'
+                                        ),
+                    'pi' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-user'
+                                        ),
+                    'host' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-node'
+                                        ),
+                    'db' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-node'
+                                        ),
+                    'software_requested' : autocomplete.ModelSelect2Multiple(
+                                        url='dc_management:autocomplete-software'
+                                        ),
+                                    
+                    }
     
 class AddSoftwareToProjectForm(forms.ModelForm):
     
@@ -142,34 +191,3 @@ class AddSoftwareToProjectForm(forms.ModelForm):
                     }
     
     
-    # the fields from the model:
-    """
-    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
-    change_date = models.DateField()
-    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
-    
-    applied_to_prj = models.ForeignKey(Project, on_delete=models.CASCADE)
-    applied_to_node = models.ForeignKey(Server, on_delete=models.CASCADE)
-    applied_to_user = models.ForeignKey(DC_User, on_delete=models.CASCADE)
-    software_changed = models.ForeignKey(Software, on_delete=models.CASCADE, null=True)
-
-    ADD_ACCESS = 'AA'
-    REMOVE_ACCESS = 'RA'
-    CHANGE_TYPE_CHOICES = (
-                    (ADD_ACCESS, "Add access"),
-                    (REMOVE_ACCESS, "Remove access"),
-    )  
-    change_type  = models.CharField(
-                            max_length=2,
-                            choices = CHANGE_TYPE_CHOICES,
-                            default = ADD_ACCESS,
-    )
-
-    
-    def __str__(self):
-        return "{} on {} ".format( self.change_type, self.change_date)
-
-    class Meta:
-        verbose_name = 'Software Log'
-        verbose_name_plural = 'Software Logs'
-    """
