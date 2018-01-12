@@ -83,7 +83,8 @@ class ServerView(LoginRequiredMixin, generic.DetailView):
     model = Server
     template_name = 'dc_management/server.html'
     def get_context_data(self, **kwargs):
-        server_users = DC_User.objects.filter(project__host=self.kwargs['pk'])
+        server_users =  DC_User.objects.filter(project__host=self.kwargs['pk']
+                        ).order_by('first_name')
         
         context = super(ServerView, self).get_context_data(**kwargs)
         context.update({'server_users': server_users,

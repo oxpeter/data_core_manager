@@ -45,12 +45,19 @@
     </tr>
 </table>
 
-<h2>{{ server.project_set.all.count }} Projects</h2>
+<h2>{{ server.project_set.all.count }} projects mounted</h2>
+
 
 {% with server.project_set.all as project_list %}
     {% include 'dc_management/project_list.html' %}
 {% endwith %}
 
+<h2>{{ server_users|length }} users associated with {{ server.node }}</h2>
+{% if server_users %}
+    {% with server_users as user_list %}
+        {% include 'dc_management/user_list_multiproject.html' %}
+    {% endwith %}
+{% endif %}
 
 {% if server.comments %}
 <h3>Comments</h3>
