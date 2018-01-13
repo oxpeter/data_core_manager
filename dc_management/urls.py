@@ -28,6 +28,9 @@ urlpatterns = [
         views.SoftwareAutocomplete.as_view(),
         name='autocomplete-software',
         ),
+    # outlook email:
+    url(r'outlook', views.OutlookConnection.as_view(), name='outlook'),
+    
     # index showing all users:
     url(r'^dcuser/all/$', views.AllDCUserView.as_view(), name='all_users'),
     url(r'^project/all/$', views.AllProjectsView.as_view(), name='all_projects'),

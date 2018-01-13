@@ -645,6 +645,20 @@ class NodeAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
                             )
         return qs
 
+#######################
+#### Outlook views ####
+#######################
+
+class OutlookConnection(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'dc_management/email_outlook.html'
+    def get_context_data(self, **kwargs):
+        sign_in_url = '#'
+        
+        context = super(OutlookConnection, self).get_context_data(**kwargs)
+        context.update({'sign_in_url': sign_in_url,
+        })
+        return context
+
 ###############################
 ######  FINANCE  VIEWS   ######
 ###############################
