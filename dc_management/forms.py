@@ -6,6 +6,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from .models import Server, Project, DC_User, Software, Software_Log, Project
+from .models import DCUAGenerator
 
 class CommentForm(forms.Form):
     name = forms.CharField()
@@ -78,7 +79,7 @@ class ExportFileForm(forms.Form):
         super(ExportFileForm, self).__init__(*args, **kwargs)
         self.fields['dcuser'].queryset = qs
 
-class CreateDCAgreementURLForm(forms.Form):
+class CreateDCAgreementURLFormOld(forms.Form):
     ticket = forms.CharField(required=False, 
                               label="SN Ticket",
                             )
@@ -105,6 +106,27 @@ class CreateDCAgreementURLForm(forms.Form):
     folder5 = forms.CharField(required=False, label="Folder 5")
     folder6 = forms.CharField(required=False, label="Folder 6")
     folder7 = forms.CharField(required=False, label="Folder 7")
+
+class CreateDCAgreementURLForm(forms.ModelForm):
+    class Meta:
+        model = DCUAGenerator
+        fields = [  'project',
+                    'ticket',
+                    'startdate',
+                    'enddate',
+                    'folder1',
+                    'folder2',
+                    'folder3',
+                    'folder4',
+                    'folder5',
+                    'folder6', 
+                    'folder7',
+        ]
+        help_texts = {'ticket' : _('This will send the DCUA results to ServiceNow') }
+        widgets =   {'project' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-project'
+                                        ),
+                    }
 
 class ProjectForm(forms.ModelForm):
     

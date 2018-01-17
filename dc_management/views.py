@@ -28,7 +28,7 @@ from dc_management.outlookservice import get_me, send_message
 
 from .models import Server, Project, DC_User, Access_Log, Governance_Doc
 from .models import Software, Software_Log
-from .models import UserCost, SoftwareCost, StorageCost
+from .models import UserCost, SoftwareCost, StorageCost, DCUAGenerator
 
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
@@ -450,13 +450,51 @@ class RemoveUserFromThisProject(RemoveUserFromProject):
 
 ###### Onboarding views #######
 
-class CreateDCAgreementURL(LoginRequiredMixin, FormView):
+class CreateDCAgreementURL(LoginRequiredMixin, CreateView):
+    model = DCUAGenerator
     template_name = 'dc_management/dcua_url_generator_form.html'
     form_class = CreateDCAgreementURLForm
     #success_url = reverse_lazy('dc_management/dcua_url_generator_result.html')
-    success_url = reverse_lazy('dc_management:url_result')
+    #success_url = reverse_lazy('dc_management:url_result')
 
     def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        post_data = self.request.POST 
+        link_object = form.save(commit=False)
+        
+        
+        # create the personalized URL:
+        ticket = form.cleaned_data['ticket']
+        startdate = form.cleaned_data['startdate']
+        enddate = form.cleaned_data['enddate']
+        
+        # create a string of folders:
+        folders = ""
+        folderlist = []
+        for f in range(1,7,1):
+            folder = "".join(["folder",str(f)])
+            foldername = form.cleaned_data[ folder ]
+            if foldername and foldername != "":
+                folders += "&{}={}".format(folder, foldername)
+                folderlist.append(foldername)
+        
+        # create the qualtrics link with embedded data:
+        qualtrics_link = "https://weillcornell.az1.qualtrics.com/jfe/form/SV_eL1OCCGkNZWnX93"
+        
+        qualtrics_link += "?startdate={}&enddate={}".format(startdate,enddate)
+        qualtrics_link += "{}".format(folders)
+        if re.search("INC\d{6,8}", ticket):
+            qualtrics_link += "&ticket={}".format(ticket)
+        
+        # add qualtrics link to model instance and save:
+        link_object.url = qualtrics_link
+        link_object.save()
+        
+        return super(CreateDCAgreementURL, self).form_valid(form)
+
+
+    def form_valid_old(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
         post_data = self.request.POST 
@@ -494,10 +532,12 @@ class CreateDCAgreementURL(LoginRequiredMixin, FormView):
 
         return super(CreateDCAgreementURL, self).form_valid(form)
 
-class ViewDCAgreementURL(LoginRequiredMixin, generic.TemplateView):
+class ViewDCAgreementURL(LoginRequiredMixin, generic.DetailView):
     template_name = 'dc_management/dcua_url_generator_result.html'
+    model = DCUAGenerator
 
 ###### Export requests #######
+
 class ExportRequest(LoginRequiredMixin, FormView):
     template_name = 'dc_management/export_request_form.html'
     form_class = ExportFileForm
@@ -924,12 +964,6 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
             #### SAVE ####
             
             prj.save()
-        print(all_prjs)
-        print(sw_list)
-        print(compute_list) 
-        print(len(all_prjs))
-        print(len(sw_list))
-        print(len(compute_list)) 
            
         prj_data = list(zip(all_prjs, sw_list, compute_list))
         grand_total = list(Project.objects.all().aggregate(

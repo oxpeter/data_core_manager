@@ -499,6 +499,49 @@ class DC_Administrator(models.Model):
         verbose_name = 'Data Core Administrator'
         verbose_name_plural = 'Data Core Administrators'
 
+class DCUAGenerator(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
+
+    ticket = models.CharField("SN Ticket", blank=True,null=True,max_length=12,)
+    startdate = models.CharField("Start Date", 
+                                blank=False, 
+                                max_length=32,
+                                default=datetime.datetime.now().strftime("%m/%d/%Y"),
+                                )
+    enddate = models.CharField(  "End Date",
+                                blank=False, 
+                                max_length=32,
+                                default=(datetime.datetime.now() + 
+                                         datetime.timedelta(days=365)
+                                        ).strftime("%m/%d/%Y"),
+                             )
+    folder1 = models.CharField("Folder 1", blank=False, 
+                              max_length=128,
+                              default="dcore-prj00XX-SOURCE",
+                              )
+    folder2 = models.CharField("Folder 2", blank=True,null=True, 
+                              default="dcore-prj00XX-SHARE",
+                              max_length=128,
+                              )
+    folder3 = models.CharField("Folder 3", blank=True,null=True, 
+                              default="WorkArea-<user CWID>",
+                              max_length=128,
+                              )
+    folder4 = models.CharField("Folder 4", blank=True,null=True, max_length=128,)
+    folder5 = models.CharField("Folder 5", blank=True,null=True, max_length=128,)
+    folder6 = models.CharField("Folder 6", blank=True,null=True, max_length=128,)
+    folder7 = models.CharField("Folder 7", blank=True,null=True, max_length=128,)
+    url = models.CharField("Qualtrics URL", blank=True,null=True, max_length=512,)
+
+    def __str__(self):
+        return "{} - {} {}".format(self.startdate, self.enddate, self.folder1)
+    
+    def get_absolute_url(self):
+        return reverse('dc_management:url_result', kwargs={'pk': self.pk})
+
 ############################
 #### Log / Audit Models ####
 ############################    
@@ -871,9 +914,18 @@ class SoftwareCost(models.Model):
     record_author = models.ForeignKey(User, on_delete=models.CASCADE)
     
     software = models.ForeignKey(Software, on_delete=models.CASCADE)
-    software_cost = models.FloatField("Regular cost (per person)")
-    cost_classroom = models.FloatField("Cost for classrooms (per student)")
-    cost_student = models.FloatField("Cost for classrooms (per class)")
+    software_cost = models.FloatField("Regular cost (per person)", 
+                                        null=True, 
+                                        blank=True,
+                                        )
+    cost_classroom = models.FloatField("Cost for classrooms (per student)", 
+                                        null=True, 
+                                        blank=True,
+                                        )
+    cost_student = models.FloatField("Cost for classrooms (per class)", 
+                                        null=True, 
+                                        blank=True,
+                                        )
     
 class UserCost(models.Model):
     record_creation = models.DateField(auto_now_add=True)

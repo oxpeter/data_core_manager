@@ -20,31 +20,47 @@ You can also copy the hyperlink and paste into a rich-text editor.</p>
     
     <tr>
     	<td>Start Date</td>
-    	<td>{{ request.session.startdate }}</td>
+    	<td>{{ dcuagenerator.startdate }}</td>
     </tr>
 	<tr>
     	<td>End Date</td>
-    	<td>{{ request.session.enddate }}</td>
+    	<td>{{ dcuagenerator.enddate }}</td>
     </tr>
 	<tr>
     	<td>Folders</td>
-    	<td>{% for f in request.session.folders %}{{ f }}</br>{% endfor %}</td>
+    	<td>
+            {{ dcuagenerator.folder1 }}</br>
+            {% if dcuagenerator.folder2 %}{{ dcuagenerator.folder2 }}</br>{% endif %}
+            {% if dcuagenerator.folder3 %}{{ dcuagenerator.folder3 }}</br>{% endif %}
+            {% if dcuagenerator.folder4 %}{{ dcuagenerator.folder4 }}</br>{% endif %}
+            {% if dcuagenerator.folder5 %}{{ dcuagenerator.folder5 }}</br>{% endif %}
+            {% if dcuagenerator.folder6 %}{{ dcuagenerator.folder6 }}</br>{% endif %}
+            {% if dcuagenerator.folder7 %}{{ dcuagenerator.folder7 }}</br>{% endif %}
+    	</td>
     </tr>
+
+    {% if dcuagenerator.project %}
+	<tr>
+    	<td>Project</td>
+    	<td>{{ dcuagenerator.project }}</td>
+    </tr>
+    {% endif %}
+
     
-    {% if request.session.ticket %}
+    {% if dcuagenerator.ticket %}
 	<tr>
     	<td>Ticket</td>
-    	<td>{{ request.session.ticket }}</td>
+    	<td>{{ dcuagenerator.ticket }}</td>
     </tr>
     {% endif %}
     
     <tr>
     	<td>URL</td>
-    	<td>{{ request.session.qualtrics_link }}</td>
+    	<td>{{ dcuagenerator.url }}</td>
     </tr>
     <tr>
     	<td>Hyperlink</td>
-    	<td><a href='{{ request.session.qualtrics_link }}'>Data Core User Agreement</a></td>
+    	<td><a href='{{ dcuagenerator.url }}'>Data Core User Agreement</a></td>
     </tr>
     </table>
 

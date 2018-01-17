@@ -52,13 +52,15 @@ urlpatterns = [
     url(r'onboarding/dcua_generator/$', views.CreateDCAgreementURL.as_view(), 
         name='url_generator',
     ),
-    url(r'onboarding/dcua_url/$', views.ViewDCAgreementURL.as_view(), 
+    path('onboarding/dcua_url/<int:pk>', views.ViewDCAgreementURL.as_view(), 
         name='url_result',
     ),
     path('project/add/', views.ProjectCreate.as_view(), name='project-add'),
     path('project/update/<int:pk>/', 
             views.ProjectUpdate.as_view(), 
-            name='project-update'),
+            name='project-update'
+    ),
+    
     # forms for adding user - project relationship:
     url(r'^dcuser/(?P<pk>[0-9]+)/connect$', 
         views.AddThisUserToProject.as_view(), 
@@ -68,6 +70,7 @@ urlpatterns = [
         views.AddUserToProject.as_view(), 
         name='usertoproject-add',
     ),
+    
     # removing user - project relationship:
     url(r'^project/(?P<pk>[0-9]+)/userconnect$', 
         views.AddUserToThisProject.as_view(), 

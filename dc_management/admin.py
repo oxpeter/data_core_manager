@@ -5,6 +5,7 @@ from .models import DC_Administrator, DC_User, EnvtSubtype, External_Access_Log
 from .models import Governance_Doc, Project, Server, Server_Change_Log, SN_Ticket
 from .models import Software, Software_License_Type, Software_Log, Software_Purchase
 from .models import Storage_Log, SubFunction, SoftwareCost, UserCost, StorageCost
+from .models import DCUAGenerator
 
 # customize the look of the admin site:
 admin.site.site_header = 'Data Core Management Site'
@@ -73,6 +74,15 @@ class UserCostAdmin(admin.ModelAdmin):
 class StorageCostAdmin(admin.ModelAdmin):
 	list_display = ('storage_type',
 					'st_cost_per_gb',
+					)
+
+@admin.register(DCUAGenerator)
+class DCUAGeneratorAdmin(admin.ModelAdmin):
+	list_display = ('project',
+					'ticket',
+					'startdate',
+					'enddate',
+					'url',
 					)
 
 
