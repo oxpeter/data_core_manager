@@ -269,6 +269,10 @@ class SoftwareUnit(models.Model):
     
     def __str__(self):
             return self.unit
+
+########################
+#### Project Models ####
+########################
   
 class Project(models.Model):
     record_creation = models.DateField(auto_now_add=True)
@@ -382,6 +386,10 @@ class AccessPermission(models.Model):
 def project_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/prj<id>/<filename>
     return '{0}/{1}'.format(instance.project.dc_prj_id, filename)
+
+###########################
+#### Governance Models ####
+###########################
 
 class Governance_Doc(models.Model):
     record_creation = models.DateField(auto_now_add=True)
@@ -863,7 +871,9 @@ class SoftwareCost(models.Model):
     record_author = models.ForeignKey(User, on_delete=models.CASCADE)
     
     software = models.ForeignKey(Software, on_delete=models.CASCADE)
-    software_cost = models.FloatField()
+    software_cost = models.FloatField("Regular cost (per person)")
+    cost_classroom = models.FloatField("Cost for classrooms (per student)")
+    cost_student = models.FloatField("Cost for classrooms (per class)")
     
 class UserCost(models.Model):
     record_creation = models.DateField(auto_now_add=True)
