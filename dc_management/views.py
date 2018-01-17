@@ -1,5 +1,7 @@
 import os
 import re
+from datetime import date
+import time
 
 from dal import autocomplete
 
@@ -21,7 +23,8 @@ from django.shortcuts import render, get_object_or_404
 
 from django.db.models import Q, Max, Sum
 
-from datetime import date
+from dc_management.authhelper import get_signin_url, get_token_from_code, get_access_token
+from dc_management.outlookservice import get_me, send_message
 
 from .models import Server, Project, DC_User, Access_Log, Governance_Doc
 from .models import Software, Software_Log
@@ -651,14 +654,94 @@ class NodeAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
 
 class OutlookConnection(LoginRequiredMixin, generic.TemplateView):
     template_name = 'dc_management/email_outlook.html'
+    
+    
     def get_context_data(self, **kwargs):
-        sign_in_url = '#'
-        
+        redirect_uri = self.request.build_absolute_uri(reverse('dc_management:gettoken'))
+        sign_in_url = get_signin_url(redirect_uri)
+                
         context = super(OutlookConnection, self).get_context_data(**kwargs)
         context.update({'sign_in_url': sign_in_url,
+                        'redirect_uri': redirect_uri,
         })
         return context
 
+class GetToken(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'dc_management/email_token.html'
+    def get_context_data(self, **kwargs):
+        auth_code = self.request.GET['code']
+        redirect_uri = self.request.build_absolute_uri(reverse('dc_management:gettoken'))
+        token = get_token_from_code(auth_code, redirect_uri)
+        access_token = token['access_token']
+        user = get_me(access_token)
+        
+        # get token refresh details
+        refresh_token = token['refresh_token']
+        expires_in = token['expires_in']
+
+        # expires_in is in seconds
+        # Get current timestamp (seconds since Unix Epoch) and
+        # add expires_in to get expiration time
+        # Subtract 5 minutes to allow for clock differences
+        expiration = int(time.time()) + expires_in - 300
+
+
+        # Save the token in the session
+        self.request.session['outlook_access_token'] = access_token
+        self.request.session['outlook_user_email'] = user['mail']
+        self.request.session['outlook_token_expires'] = expiration
+        self.request.session['outlook_refresh_token'] = refresh_token
+
+        context = super(GetToken, self).get_context_data(**kwargs)
+        context.update({'gettoken': "Get Token",
+                        'auth_code': auth_code,
+                        'user': user,
+                        'email': user['mail'],
+        })
+        return context
+
+class SendMail(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'dc_management/email_result.html'
+    def get_context_data(self, **kwargs):
+        access_token = get_access_token(
+                            self.request,
+                            self.request.build_absolute_uri(
+                                        reverse('dc_management:gettoken'))
+                                        )
+        user_email = self.request.session['outlook_user_email']
+        payload = {
+                  "Message": {
+                    "Subject": self.request.session['email_sbj'],
+                    "Body": {
+                      "ContentType": "Text",
+                      "Content": self.request.session['email_msg']
+                    },
+                    "ToRecipients": [
+                      {
+                        "EmailAddress": {
+                          "Address": "oxpeter@gmail.com"
+                        }
+                      }
+                    ],
+                    #"Attachments": [
+                    #  {
+                    #    "@odata.type": "#Microsoft.OutlookServices.FileAttachment",
+                    #    "Name": "menu.txt",
+                    #    "ContentBytes": "bWFjIGFuZCBjaGVlc2UgdG9kYXk="
+                    #  }
+                    #]
+                  },
+                  "SaveToSentItems": "true"
+                  }
+
+        context = super(SendMail, self).get_context_data(**kwargs)
+        context.update({'gettoken': access_token,
+                        'sendtest': send_message(access_token,user_email,payload),
+        })
+        return context
+
+
+    
 ###############################
 ######  FINANCE  VIEWS   ######
 ###############################

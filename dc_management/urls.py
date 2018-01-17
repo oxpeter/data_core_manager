@@ -29,8 +29,9 @@ urlpatterns = [
         name='autocomplete-software',
         ),
     # outlook email:
-    url(r'outlook', views.OutlookConnection.as_view(), name='outlook'),
-    
+    url(r'outlook/$', views.OutlookConnection.as_view(), name='outlook'),
+    url(r'outlook/gettoken/$', views.GetToken.as_view(), name='gettoken'),
+    url(r'outlook/sendtest/$', views.SendMail.as_view(), name='sendtest'),
     # index showing all users:
     url(r'^dcuser/all/$', views.AllDCUserView.as_view(), name='all_users'),
     url(r'^project/all/$', views.AllProjectsView.as_view(), name='all_projects'),
