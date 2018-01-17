@@ -4,11 +4,16 @@ import json
 import time
 import os
 
+from django.conf import settings
+
 import requests
 
 # Client ID and secret
-client_id = os.environ["OUTLOOK_APP_ID"]     #'YOUR APP ID HERE'
-client_secret = os.environ["OUTLOOK_APP_PW"] #'YOUR APP PASSWORD HERE'
+#client_id = os.environ["OUTLOOK_APP_ID"]     #'YOUR APP ID HERE'
+#client_secret = os.environ["OUTLOOK_APP_PW"] #'YOUR APP PASSWORD HERE'
+client_id = settings.OUTLOOK_APP_ID
+client_secret = settings.OUTLOOK_APP_PW
+
 
 # Constant strings for OAuth2 flow
 # The OAuth authority
