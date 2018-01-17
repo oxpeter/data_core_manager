@@ -277,10 +277,16 @@ class Project(models.Model):
     dc_prj_id = models.CharField(max_length=8, unique=True)
     title = models.CharField(max_length=256)
     nickname = models.CharField(max_length=256, blank=True)
-    fileshare_storage = models.IntegerField(null=True, blank=True)
-    direct_attach_storage = models.IntegerField(null=True, blank=True)
-    backup_storage = models.IntegerField(null=True, blank=True)
-    requested_ram = models.IntegerField(null=True, blank=True)
+    fileshare_storage = models.IntegerField("Fileshare size (GB)",
+                                            null=True, 
+                                            blank=True)
+    direct_attach_storage = models.IntegerField("Direct attach size (GB)", 
+                                                null=True, 
+                                                blank=True)
+    backup_storage = models.IntegerField("Backup storage size (GB)", 
+                                         null=True, 
+                                         blank=True)
+    requested_ram = models.IntegerField("Requested RAM (GB)", null=True, blank=True)
     requested_cpu = models.IntegerField(null=True, blank=True)
     
     users = models.ManyToManyField(DC_User, blank=True)
@@ -310,6 +316,7 @@ class Project(models.Model):
                 (CLASS, "Classroom Project")
     )
     env_type = models.CharField(
+                            "Environment type",
                             max_length=2,
                             choices = ENV_TYPE_CHOICES,
                             default = RESEARCH,
