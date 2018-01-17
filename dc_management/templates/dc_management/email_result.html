@@ -6,7 +6,7 @@
 
 {% block content %}
 
-{% if sendtest == '202:' %}
+{% if sendtest == '202: ' %}
 <h2>Email sent successfully</h2>
 
 <p>Email sent:</p>
@@ -16,6 +16,6 @@
 {% else %}
 <h2>Email not sent </h2>
 <p>Log:</p>
-<p>{{ sendtest }}</p>
+<p>"{{ sendtest }}"</p>
 {% endif %}
 {% endblock %}
