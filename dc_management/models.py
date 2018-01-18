@@ -542,6 +542,48 @@ class DCUAGenerator(models.Model):
     def get_absolute_url(self):
         return reverse('dc_management:url_result', kwargs={'pk': self.pk})
 
+########################
+#### Finance Models ####
+########################
+                          
+class SoftwareCost(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    software = models.ForeignKey(Software, on_delete=models.CASCADE)
+    software_cost = models.FloatField("Regular cost (per person)", 
+                                        null=True, 
+                                        blank=True,
+                                        )
+    cost_classroom = models.FloatField("Cost for classrooms (per student)", 
+                                        null=True, 
+                                        blank=True,
+                                        )
+    cost_student = models.FloatField("Cost for classrooms (per class)", 
+                                        null=True, 
+                                        blank=True,
+                                        )
+    
+class UserCost(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
+ 
+    user_quantity = models.IntegerField()
+    user_cost     = models.FloatField()
+    
+class StorageCost(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    storage_type = models.CharField(max_length=64)
+    st_cost_per_gb = models.FloatField()
+
+    def __str__(self):
+        return "{} (${}/GB)".format( self.storage_type, self.st_cost_per_gb)
+
 ############################
 #### Log / Audit Models ####
 ############################    
@@ -735,6 +777,7 @@ class Storage_Log(models.Model):
     date_changed = models.DateField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     storage_amount = models.IntegerField(null=True, blank=True)
+    storage_type = models.ForeignKey(StorageCost, on_delete=models.CASCADE)
     comments = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -904,43 +947,6 @@ class AlertTag(models.Model):
                             blank=True,
                             )
   
-########################
-#### Finance Models ####
-########################
-                          
-class SoftwareCost(models.Model):
-    record_creation = models.DateField(auto_now_add=True)
-    record_update = models.DateField(auto_now=True)
-    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
-    
-    software = models.ForeignKey(Software, on_delete=models.CASCADE)
-    software_cost = models.FloatField("Regular cost (per person)", 
-                                        null=True, 
-                                        blank=True,
-                                        )
-    cost_classroom = models.FloatField("Cost for classrooms (per student)", 
-                                        null=True, 
-                                        blank=True,
-                                        )
-    cost_student = models.FloatField("Cost for classrooms (per class)", 
-                                        null=True, 
-                                        blank=True,
-                                        )
-    
-class UserCost(models.Model):
-    record_creation = models.DateField(auto_now_add=True)
-    record_update = models.DateField(auto_now=True)
-    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
- 
-    user_quantity = models.IntegerField()
-    user_cost     = models.FloatField()
-    
-class StorageCost(models.Model):
-    record_creation = models.DateField(auto_now_add=True)
-    record_update = models.DateField(auto_now=True)
-    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
-    
-    storage_type = models.CharField(max_length=64)
-    st_cost_per_gb = models.FloatField()
+
 
     
