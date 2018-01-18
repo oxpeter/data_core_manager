@@ -27,12 +27,13 @@ from dc_management.authhelper import get_signin_url, get_token_from_code, get_ac
 from dc_management.outlookservice import get_me, send_message
 
 from .models import Server, Project, DC_User, Access_Log, Governance_Doc
-from .models import Software, Software_Log
+from .models import Software, Software_Log, Storage_Log
 from .models import UserCost, SoftwareCost, StorageCost, DCUAGenerator
 
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
 from .forms import AddSoftwareToProjectForm, ProjectForm
+from .forms import StorageChangeForm
 
 #################################
 #### Basic information views ####
@@ -113,9 +114,9 @@ class DC_UserUpdate(LoginRequiredMixin, UpdateView):
     model = DC_User
     fields = ['first_name', 'last_name', 'cwid', 'affiliation', 'role', 'comments']  
 
-##########################
-######  ONBOARDING  ######
-##########################
+#############################
+######  PROJECT VIEWS  ######
+#############################
 class ProjectCreate(LoginRequiredMixin, CreateView):
     model = Project
     form_class = ProjectForm
@@ -134,6 +135,58 @@ class ProjectUpdate(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         self.object = form.save(commit=False)
         return super(ProjectUpdate, self).form_valid(form)
+
+class StorageChange(LoginRequiredMixin, CreateView):
+    model = Storage_Log
+    template_name = 'dc_management/storage_change_form.html'
+    form_class = StorageChangeForm
+        
+    """
+    # keeping this in case I need it somewhere else later
+    # pass the project pk from the url to the form's kwargs for queryset populating
+    def get_form_kwargs(self):
+        kwargs = super(StorageChange, self).get_form_kwargs()
+        kwargs.update({'ppk': self.kwargs['ppk']})  
+    return kwargs
+    """
+    
+    def get_initial(self):
+        initial = super(StorageChange, self).get_initial()
+        # get the project from the url
+        chosen_project = Project.objects.get(pk=self.kwargs['ppk'])
+        # update initial field defaults with custom set default values:
+        initial.update({'project': chosen_project, })
+        return initial
+
+    
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        post_data = self.request.POST 
+        log = form.save(commit=False)
+        
+        log.record_author = self.request.user
+        
+        # update the project storage:
+        project = log.project
+        
+        # match storage type to project (this needs to be more robust)
+        s_type = log.storage_type.storage_type
+        if re.search('direct', s_type.lower()):
+            project.direct_attach_storage = log.storage_amount
+        elif re.search('backup', s_type.lower()):
+            project.backup_storage = log.storage_amount
+        elif re.search('share', s_type.lower()):
+            project.fileshare_storage = log.storage_amount
+        else:
+            pass # may want to add an error message here.
+        
+        project.save()
+        log.save()
+        ## TODO: 
+        # send email requesting change:
+        
+        return super(StorageChange, self).form_valid(form)
 
 ###############################
 ######  UPDATE SOFTWARE  ######
@@ -209,7 +262,6 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
             
             # if project specified, and not already installed:
             if prj and prj.host and not sw in prj.software_installed.all():
-                print("######ACCEPTED########")
                 # add sw to prj
                 prj.software_installed.add(sw)
                 prj.software_requested.add(sw)
@@ -350,7 +402,6 @@ class AddThisUserToProject(AddUserToProject):
         initial = super(AddThisUserToProject, self).get_initial()
         # get the user from the url
         chosen_user = DC_User.objects.get(pk=self.kwargs['pk'])
-        print(chosen_user)
         # update initial field defaults with custom set default values:
         initial.update({'dcuser': chosen_user, })
         return initial
@@ -366,7 +417,6 @@ class AddUserToThisProject(AddUserToProject):
         initial = super(AddUserToThisProject, self).get_initial()
         # get the user from the url
         chosen_project = Project.objects.get(pk=self.kwargs['pk'])
-        print(chosen_project)
         # update initial field defaults with custom set default values:
         initial.update({'project': chosen_project, })
         return initial
@@ -493,7 +543,7 @@ class CreateDCAgreementURL(LoginRequiredMixin, CreateView):
         
         return super(CreateDCAgreementURL, self).form_valid(form)
 
-
+    # the following has been deprecated. Being maintained during bug testing.
     def form_valid_old(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
@@ -602,7 +652,6 @@ class ExportFromThisProject(ExportRequest):
         initial = super(AddThisUserToProject, self).get_initial()
         # get the user from the url
         chosen_user = DC_User.objects.get(pk=self.kwargs['pk'])
-        print(chosen_user)
         # update initial field defaults with custom set default values:
         initial.update({'dcuser': chosen_user, })
         return initial

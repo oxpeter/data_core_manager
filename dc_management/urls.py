@@ -60,6 +60,9 @@ urlpatterns = [
             views.ProjectUpdate.as_view(), 
             name='project-update'
     ),
+    path('project/<int:ppk>/storage/change/',
+            views.StorageChange.as_view(),
+            name='storage-change'),
     
     # forms for adding user - project relationship:
     url(r'^dcuser/(?P<pk>[0-9]+)/connect$', 

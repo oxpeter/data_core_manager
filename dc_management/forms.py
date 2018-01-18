@@ -3,10 +3,12 @@ import datetime
 from dal import autocomplete
 
 from django import forms
+from django.db.models import Q
+
 from django.utils.translation import gettext_lazy as _
 
 from .models import Server, Project, DC_User, Software, Software_Log, Project
-from .models import DCUAGenerator
+from .models import DCUAGenerator, Storage_Log, StorageCost
 
 class CommentForm(forms.Form):
     name = forms.CharField()
@@ -127,6 +129,31 @@ class CreateDCAgreementURLForm(forms.ModelForm):
                                         url='dc_management:autocomplete-project'
                                         ),
                     }
+
+class StorageChangeForm(forms.ModelForm):
+    
+    
+    class Meta:
+        model = Storage_Log
+        fields = [ 'sn_ticket',
+                    'date_changed',
+                    'project',
+                    'storage_amount',
+                    'storage_type',
+                    'comments',
+        ]
+    # limit the choices in storage_type:
+    def __init__(self, *args, **kwargs):
+        qs = StorageCost.objects.filter(
+                                Q(storage_type__icontains='direct') |
+                                Q(storage_type__icontains='backup') |
+                                Q(storage_type__icontains='share') 
+                        )
+        # ppk = kwargs.pop('ppk', None)
+        # prj = Project.objects.get(pk=ppk)
+        super(StorageChangeForm, self).__init__(*args, **kwargs)
+        self.fields['storage_type'].queryset = qs
+        #self.fields['project'].queryset = prj
 
 class ProjectForm(forms.ModelForm):
     

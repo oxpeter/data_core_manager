@@ -450,7 +450,7 @@ class Governance_Doc(models.Model):
 
     def attention_required(self):
         td = self.expiry_date - datetime.date.today() 
-        print(self, len(Governance_Doc.objects.filter(supersedes_doc=self)))
+        #print(self, len(Governance_Doc.objects.filter(supersedes_doc=self)))
         if td.days >  90:
             status = "safe"
         
@@ -774,7 +774,7 @@ class Storage_Log(models.Model):
     record_author = models.ForeignKey(User, on_delete=models.CASCADE)
     
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
-    date_changed = models.DateField()
+    date_changed = models.DateField(default=date.today)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     storage_amount = models.IntegerField(null=True, blank=True)
     storage_type = models.ForeignKey(StorageCost, on_delete=models.CASCADE)
@@ -786,6 +786,9 @@ class Storage_Log(models.Model):
     class Meta:
         verbose_name = 'Storage Log'
         verbose_name_plural = 'Storage Logs'
+    
+    def get_absolute_url(self):
+        return reverse('dc_management:project', kwargs={'pk': self.project.pk})
 
 class Data_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)

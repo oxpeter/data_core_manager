@@ -57,6 +57,7 @@
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:project-update' project.pk %}">Update project</a>
 <a type="button" class="btn btn-default" href="#">Decommission project</a>
 <a type="button" class="btn btn-default" href="#">Transfer file(s)</a>
+<a type="button" class="btn btn-primary" href="{% url 'dc_management:storage-change' project.pk %}">Change Storage</a>
 </br>
 
 <div class="container">
@@ -95,7 +96,7 @@
             <td>Fileshare storage </td><td> {{ project.fileshare_storage }} GB</td>
         </tr>
         <tr>
-            <td>Direct attach storage </td><td> {{ project.direct_attach }} GB</td>
+            <td>Direct attach storage </td><td> {{ project.direct_attach_storage }} GB</td>
         </tr>
         
         
@@ -327,6 +328,7 @@
             <th>Logged</th>
             <th>Ticket</th>
             <th>Changed</th>
+            <th>Type</th>
             <th>Amount (GB)</th>
             <th>Comments</th>
         </tr>
@@ -339,6 +341,7 @@
        <td class="bg-warning" style="color:orange;">{{ l.sn_ticket }}</td>
        {% endif %}
        <td>{{ l.date_changed }}</td>
+       <td>{{ l.storage_type }}</td>
        <td>{{ l.storage_amount }}</td>
        <td>{{ l.comments }}</td>
        </tr>
