@@ -32,7 +32,7 @@ from .models import UserCost, SoftwareCost, StorageCost, DCUAGenerator
 
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
-from .forms import AddSoftwareToProjectForm, ProjectForm
+from .forms import AddSoftwareToProjectForm, ProjectForm, ProjectUpdateForm
 from .forms import StorageChangeForm
 
 #################################
@@ -106,6 +106,7 @@ class ResetOutlookTokens(LoginRequiredMixin, generic.TemplateView):
         self.request.session['outlook_token_expires'] = ""
         self.request.session['outlook_refresh_token'] = ""
         context = super(ResetOutlookTokens, self).get_context_data(**kwargs)
+        context.update({'reset':"TRUE"})
         return context
         
 class OutlookConnection(LoginRequiredMixin, generic.TemplateView):
@@ -278,6 +279,7 @@ class DC_UserUpdate(LoginRequiredMixin, UpdateView):
 #############################
 ######  PROJECT VIEWS  ######
 #############################
+
 class ProjectCreate(LoginRequiredMixin, CreateView):
     model = Project
     form_class = ProjectForm
@@ -290,7 +292,7 @@ class ProjectCreate(LoginRequiredMixin, CreateView):
 
 class ProjectUpdate(LoginRequiredMixin, UpdateView):
     model = Project
-    form_class = ProjectForm
+    form_class = ProjectUpdateForm
     #success_url = reverse_lazy("dc_management:index" )
     #default success_url should be to the object page defined in model.
     def form_valid(self, form):

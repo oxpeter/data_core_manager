@@ -212,7 +212,52 @@ class ProjectForm(forms.ModelForm):
                                         ),
                                     
                     }
+
+
+class ProjectUpdateForm(forms.ModelForm):
     
+    class Meta:
+        model = Project
+        fields = [  'title', 
+                    'nickname', 
+                    'requested_ram', 
+                    'requested_cpu', 
+                    'pi',
+                    'software_requested',
+                    'env_type',
+                    'env_subtype',
+                    'expected_completion',
+                    'status',
+                    'sn_tickets',
+                    'predata_ticket',
+                    'predata_date',
+                    'postdata_ticket',
+                    'postdata_date',
+                    'completion_ticket',
+                    'completion_date',
+                    'host',
+                    'db',
+                    'comments',
+                ]
+
+        widgets =  {'users' : autocomplete.ModelSelect2Multiple(
+                                        url='dc_management:autocomplete-user'
+                                        ),
+                    'pi' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-user'
+                                        ),
+                    'host' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-node'
+                                        ),
+                    'db' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-node'
+                                        ),
+                    'software_requested' : autocomplete.ModelSelect2Multiple(
+                                        url='dc_management:autocomplete-software'
+                                        ),
+                                    
+                    }
+   
 class AddSoftwareToProjectForm(forms.ModelForm):
     
     class Meta:
