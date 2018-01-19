@@ -9,13 +9,13 @@
 {% if sendtest == '202: ' %}
 <h2>Email sent successfully</h2>
 
-<p>Email sent:</p>
+<p>Database updated and email sent:</p>
 <p><b>{{ request.session.email_sbj|linebreaks }}</b></p>
 <p>{{ request.session.email_msg|linebreaks }}</p>
 
 {% else %}
-<h2>Email not sent </h2>
-<p>Log:</p>
+<h2>Database updated, but email not sent </h2>
+<p>Email error log:</p>
 <p>"{{ sendtest }}"</p>
 {% endif %}
 {% endblock %}

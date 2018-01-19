@@ -346,8 +346,9 @@ class StorageChange(LoginRequiredMixin, CreateView):
 class UpdateSoftware(LoginRequiredMixin, FormView):
     template_name = 'dc_management/updatesoftwareform.html'
     form_class = AddSoftwareToProjectForm
-    success_url = reverse_lazy('dc_management:email_results')
-    
+    #success_url = reverse_lazy('dc_management:email_results')
+    success_url = reverse_lazy('dc_management:sendtest')
+
     def email_change_project_software(self, changestr, prj, sw):
         """
         send request to add/remove software to node:
@@ -361,6 +362,7 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                                      prj.host.node,
                                      prj.host.ip_address,
                                     )
+        """
         send_mail(
             sbj_msg,
             body_msg,
@@ -368,6 +370,7 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
             ['oxpeter@gmail.com'],  # to field
             fail_silently=True,
         )
+        """
         self.request.session['email_sbj'] = sbj_msg
         self.request.session['email_msg'] = body_msg
     
@@ -382,6 +385,7 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                              node.node,
                              node.ip_address,
                             )
+        """
         send_mail(
                 sbj_msg,
                 body_msg,
@@ -389,12 +393,13 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                 ['oxpeter@gmail.com'],  # to field
                 fail_silently=True,
         )
+        """
         self.request.session['email_sbj'] = sbj_msg
         self.request.session['email_msg'] = body_msg
 
     def form_valid(self, form):
-        self.request.session['email_sbj'] = "No email sent"
-        self.request.session['email_msg'] = ""
+        self.request.session['email_sbj'] = "n/a"
+        self.request.session['email_msg'] = "n/a"
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
         post_data = self.request.POST
@@ -495,7 +500,6 @@ class EmailResults(LoginRequiredMixin, generic.TemplateView):
 class AddUserToProject(LoginRequiredMixin, FormView):
     template_name = 'dc_management/addusertoproject.html'
     form_class = AddUserToProjectForm
-    #success_url = reverse_lazy('dc_management:all_projects')
     success_url = reverse_lazy('dc_management:sendtest')
     
     def form_valid(self, form):
@@ -533,6 +537,12 @@ class AddUserToProject(LoginRequiredMixin, FormView):
                 self.logger.save()
         
         # send email
+        if prj.host:
+            node = prj.host.node
+            ip = prj.host.ip_address
+        else:
+            node = "not mounted"
+            ip = ""
         subject_str = 'Add users to {}'
         body_str = '''Dear OPs, 
         
@@ -549,8 +559,8 @@ Kind regards,
 {5}'''
         subj_msg = subject_str.format(str(prj))
         body_msg = body_str.format(prj.dc_prj_id,
-                            prj.host.node,
-                            prj.host.ip_address,
+                            node,
+                            ip,
                             '\n'.join([str(u) for u in userlist]),
                             len(userlist),
                             self.request.user,
@@ -580,10 +590,6 @@ class AddThisUserToProject(AddUserToProject):
 class AddUserToThisProject(AddUserToProject):
     template_name = 'dc_management/addusertoproject.html'
     form_class = AddUserToProjectForm
-    #success_url = reverse_lazy('dc_management:all_projects')
-    #chosen_project = Project.objects.get(pk=self.kwargs['pk'])
-    #success_url = reverse_lazy('dc_management:project', self.kwargs['pk'])
-    #success_url = reverse_lazy('dc_management:email_results')
     success_url = reverse_lazy('dc_management:sendtest')
     
     def get_initial(self):
@@ -599,8 +605,6 @@ class AddUserToThisProject(AddUserToProject):
 class RemoveUserFromProject(LoginRequiredMixin, FormView ):
     template_name = 'dc_management/removeuserfromproject.html'
     form_class = RemoveUserFromProjectForm
-    #success_url = 'dc_management:all_projects'
-    #success_url = reverse_lazy('dc_management:email_results')
     success_url = reverse_lazy('dc_management:sendtest')
     
     def form_valid(self, form):
@@ -637,6 +641,13 @@ class RemoveUserFromProject(LoginRequiredMixin, FormView ):
                 self.logger.save()
 
         # send email
+        if prj.host:
+            node = prj.host.node
+            ip = prj.host.ip_address
+        else:
+            node = "not mounted"
+            ip = ""
+
         subject_str = 'Remove users from {}'
         body_str = '''Dear OPs, 
         
@@ -653,8 +664,8 @@ Kind regards,
 {4}'''
         subj_msg = subject_str.format(str(prj))
         body_msg = body_str.format(prj.dc_prj_id,
-                            prj.host.node,
-                            prj.host.ip_address,
+                            node,
+                            ip,
                             '\n'.join([str(u) for u in userlist]),
                             self.request.user,
                             email_comment,
@@ -669,7 +680,6 @@ Kind regards,
 class RemoveUserFromThisProject(RemoveUserFromProject):
     template_name = 'dc_management/removeuserfromproject.html'
     form_class = RemoveUserFromProjectForm
-    #success_url = reverse_lazy('dc_management:email_results')
     success_url = reverse_lazy('dc_management:sendtest')
     
     # add the request to the kwargs
