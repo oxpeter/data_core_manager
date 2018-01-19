@@ -98,6 +98,16 @@ class NodeAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
 #### Outlook views ####
 #######################
 
+class ResetOutlookTokens(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'dc_management/email_reset.html'
+    def get_context_url(self, **kwargs):
+        self.request.session['outlook_access_token'] = ""
+        self.request.session['outlook_user_email'] = ""
+        self.request.session['outlook_token_expires'] = ""
+        self.request.session['outlook_refresh_token'] = ""
+        context = super(ResetOutlookTokens, self).get_context_data(**kwargs)
+        return context
+        
 class OutlookConnection(LoginRequiredMixin, generic.TemplateView):
     template_name = 'dc_management/email_outlook.html'
     
