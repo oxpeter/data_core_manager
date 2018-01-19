@@ -158,6 +158,10 @@
                 <th>Node</th>
                 <th>IP address</th>
                 <th># projects</th>
+                <th>CPUs</th>
+                <th>RAM</th>
+                <th>Direct Attach</th>
+                <th>Internet</th>
             </tr>
         </thead>
     
@@ -166,6 +170,9 @@
             <td><a href="{% url 'dc_management:node' s.pk %}">{{ s }}</a></td>
             <td>{{ s.ip_address }}</td>
             <td> {{ s.project_set.count }}</td>
+            <td> {{ s.processor_num }}</td>
+            <td> {{ s.ram }}</td>
+            <td> {{ s.other_storage }}</td>
             </tr>
         {% endfor %}
         </table>
