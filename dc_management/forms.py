@@ -19,45 +19,55 @@ class CommentForm(forms.Form):
         pass
         
 class AddUserToProjectForm(forms.Form):
-    dcuser = forms.ModelChoiceField(
+    dcusers = forms.ModelMultipleChoiceField(
                                 queryset=DC_User.objects.all(), 
                                 label="Data Core User",
-                                widget=autocomplete.ModelSelect2(
-                                                    url='dc_management:autocomplete-user'
-                                                                ),
+                                widget = autocomplete.ModelSelect2Multiple(
+                                        url='dc_management:autocomplete-user'
+                                        ),
                                 )
     project = forms.ModelChoiceField(
                                 queryset=Project.objects.exclude(status="CO"), 
                                 label="Project",
-                                widget=autocomplete.ModelSelect2(
-                                                url='dc_management:autocomplete-project'
-                                                                ),
+                                widget = autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-project'
+                                        ),
                                 )
-    comment = forms.CharField(required=False, label="Comment",)
+    email_comment = forms.CharField(required=False, label="Comment for SN ticket",)                            
+    comment = forms.CharField(required=False, label="Comment for db log",)
     class Meta:
-        widgets =  {'dcuser' : autocomplete.ModelSelect2(
+        widgets =  {'dcusers' : autocomplete.ModelSelect2Multiple(
                                         url='dc_management:autocomplete-user'
-                                        )
+                                        ),
+                    'project' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-project'
+                                        ),
                     }
     
 class RemoveUserFromProjectForm(forms.Form):
-    dcuser = forms.ModelChoiceField(
+    dcusers = forms.ModelMultipleChoiceField(
                                 queryset=DC_User.objects.none(), 
-                                label="Data Core User"
+                                label="Data Core User",
                                     )
     project = forms.ModelChoiceField(
                                 queryset=Project.objects.all(), 
                                 label="Project"
                                     )
-    comment = forms.CharField(required=False, label="Comment")
+    email_comment = forms.CharField(required=False, label="Comment for SN ticket",)                            
+    comment = forms.CharField(required=False, label="Comment for db log",)
     
     
     # the project_users list is now available, add it to the instance data
     def __init__(self, *args, **kwargs):
         qs = kwargs.pop('project_users')
         super(RemoveUserFromProjectForm, self).__init__(*args, **kwargs)
-        self.fields['dcuser'].queryset = qs
-
+        self.fields['dcusers'].queryset = qs
+    class Meta:
+        widgets = {'project' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-project'
+                                        ),
+                    }
+    
 class ExportFileForm(forms.Form):
     dcuser = forms.ModelChoiceField(
                                 queryset=DC_User.objects.all(), 
@@ -131,7 +141,6 @@ class CreateDCAgreementURLForm(forms.ModelForm):
                     }
 
 class StorageChangeForm(forms.ModelForm):
-    
     
     class Meta:
         model = Storage_Log

@@ -83,11 +83,11 @@ tbody tr td {
 			<td {% if prj.status == "CO" %}style="color:#896E4E;"{% endif %}>
 			{{ prj.fileshare_cost|account_format }}</td>
 			<td {% if prj.status == "CO" %}style="color:#896E4E;"{% endif %}>
-			{{ prj.direct_attach_storage }}</td>
+			{{ prj.direct_attach_storage }} GB</td>
 			<td {% if prj.status == "CO" %}style="color:#896E4E;"{% endif %}>
 			{{ prj.direct_attach_cost|account_format }}</td>
 			<td {% if prj.status == "CO" %}style="color:#896E4E;"{% endif %}>
-			{{ prj.backup_storage }}</td>
+			{{ prj.backup_storage }} GB</td>
 			<td {% if prj.status == "CO" %}style="color:#896E4E;"{% endif %}>
 			{{ prj.backup_cost|account_format }}</td>
 			

@@ -39,6 +39,157 @@ from .forms import StorageChangeForm
 #### Basic information views ####
 #################################
 
+
+
+####################################
+######  AUTOCOMPLETE  VIEWS   ######
+####################################
+
+class DCUserAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = DC_User.objects.all()
+
+        if self.q:
+            qs = qs.filter(
+                            Q(cwid__istartswith=self.q) | 
+                            Q(first_name__istartswith=self.q) |
+                            Q(last_name__istartswith=self.q)
+                            )
+            #qs = qs.filter(cwid__istartswith=self.q)
+
+        return qs
+
+class ProjectAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Project.objects.all()
+
+        if self.q:
+            qs =  qs.filter(
+                            Q(dc_prj_id__icontains=self.q) | 
+                            Q(nickname__icontains=self.q) 
+                            )
+        return qs
+
+class SoftwareAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Software.objects.all()
+
+        if self.q:
+            qs =  qs.filter(
+                            Q(name__icontains=self.q) | 
+                            Q(vendor__icontains=self.q) |
+                            Q(version__icontains=self.q)
+                            )
+        return qs
+
+class NodeAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Server.objects.all()
+
+        if self.q:
+            qs =  qs.filter(
+                            Q(node__icontains=self.q) | 
+                            Q(ip_address__icontains=self.q) |
+                            Q(comments__icontains=self.q)
+                            )
+        return qs
+
+#######################
+#### Outlook views ####
+#######################
+
+class OutlookConnection(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'dc_management/email_outlook.html'
+    
+    
+    def get_context_data(self, **kwargs):
+        redirect_uri = self.request.build_absolute_uri(reverse('dc_management:gettoken'))
+        sign_in_url = get_signin_url(redirect_uri)
+                
+        context = super(OutlookConnection, self).get_context_data(**kwargs)
+        context.update({'sign_in_url': sign_in_url,
+                        'redirect_uri': redirect_uri,
+        })
+        return context
+
+class GetToken(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'dc_management/email_token.html'
+    def get_context_data(self, **kwargs):
+        auth_code = self.request.GET['code']
+        redirect_uri = self.request.build_absolute_uri(reverse('dc_management:gettoken'))
+        token = get_token_from_code(auth_code, redirect_uri)
+        access_token = token['access_token']
+        user = get_me(access_token)
+        
+        # get token refresh details
+        refresh_token = token['refresh_token']
+        expires_in = token['expires_in']
+
+        # expires_in is in seconds
+        # Get current timestamp (seconds since Unix Epoch) and
+        # add expires_in to get expiration time
+        # Subtract 5 minutes to allow for clock differences
+        expiration = int(time.time()) + expires_in - 300
+
+
+        # Save the token in the session
+        self.request.session['outlook_access_token'] = access_token
+        self.request.session['outlook_user_email'] = user['mail']
+        self.request.session['outlook_token_expires'] = expiration
+        self.request.session['outlook_refresh_token'] = refresh_token
+
+        context = super(GetToken, self).get_context_data(**kwargs)
+        context.update({'gettoken': "Get Token",
+                        'auth_code': auth_code,
+                        'user': user,
+                        'email': user['mail'],
+        })
+        return context
+
+class SendMail(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'dc_management/email_result.html'
+    def get_context_data(self, **kwargs):
+        access_token = get_access_token(
+                            self.request,
+                            self.request.build_absolute_uri(
+                                        reverse('dc_management:gettoken'))
+                                        )
+        user_email = self.request.session['outlook_user_email']
+        payload = {
+                  "Message": {
+                    "Subject": self.request.session['email_sbj'],
+                    "Body": {
+                      "ContentType": "Text",
+                      "Content": self.request.session['email_msg']
+                    },
+                    "ToRecipients": [
+                      {
+                        "EmailAddress": {
+                          "Address": "oxpeter@gmail.com"
+                        }
+                      }
+                    ],
+                    #"Attachments": [
+                    #  {
+                    #    "@odata.type": "#Microsoft.OutlookServices.FileAttachment",
+                    #    "Name": "menu.txt",
+                    #    "ContentBytes": "bWFjIGFuZCBjaGVlc2UgdG9kYXk="
+                    #  }
+                    #]
+                  },
+                  "SaveToSentItems": "true"
+                  }
+
+        context = super(SendMail, self).get_context_data(**kwargs)
+        context.update({'gettoken': access_token,
+                        'sendtest': send_message(access_token,user_email,payload),
+        })
+        return context
+
+#######################
+#### Basic views ####
+#######################
+ 
 class IndexView(LoginRequiredMixin, generic.ListView):
     login_url='/login/'
     
@@ -312,7 +463,7 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                                         Q(software_changed=sw)
                                         ).order_by('-change_date')
                                         
-                if qs_node[0].change_type == "AA":  
+                if qs_node and qs_node[0].change_type == "AA":  
                     node = prj.host
                     form.instance.applied_to_node = node
         
@@ -344,51 +495,71 @@ class EmailResults(LoginRequiredMixin, generic.TemplateView):
 class AddUserToProject(LoginRequiredMixin, FormView):
     template_name = 'dc_management/addusertoproject.html'
     form_class = AddUserToProjectForm
-    success_url = reverse_lazy('dc_management:all_projects')
+    #success_url = reverse_lazy('dc_management:all_projects')
+    success_url = reverse_lazy('dc_management:sendtest')
     
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
         post_data = self.request.POST
-        
-        
-        
+        self.request.session['email_sbj'] = "n/a"
+        self.request.session['email_msg'] = "n/a"
+             
         # Check if user in project, then connect user to project
         
         prj = form.cleaned_data['project']
-        newuser = form.cleaned_data['dcuser']
+        newusers = form.cleaned_data['dcusers']
+        email_comment = form.cleaned_data['email_comment']
         oldusers = prj.users.all()
         record_author = self.request.user
         
-        if newuser in oldusers:
-            # report user is already added to project
-            pass
-        else:
-            prj.users.add(newuser)
-            prj.save()
-            
-            # save access log instance
-            self.logger = Access_Log(
-                        record_author=record_author,
-                        date_changed=date.today(),
-                        dc_user=form.cleaned_data['dcuser'],
-                        prj_affected=form.cleaned_data['project'],
-                        change_type="AA",
-            )
-            self.logger.save()
+        userlist = []
+        for newuser in newusers:
+            if newuser in oldusers:
+                # report user is already added to project
+                pass
+            else:
+                prj.users.add(newuser)
+                userlist.append(newuser)
+                
+                # save access log instance
+                self.logger = Access_Log(
+                            record_author=record_author,
+                            date_changed=date.today(),
+                            dc_user=newuser,
+                            prj_affected=prj,
+                            change_type="AA",
+                )
+                self.logger.save()
         
-            # send email
-            send_mail(
-                'Subject: add user {} to {}'.format(newuser, str(prj)),
-                'Please add {} to project {} (node {}, {}).'.format(newuser, 
-                                                                     str(prj),
-                                                                     prj.host.node,
-                                                                     prj.host.ip_address,
-                                                                     ),
-                'from@example.com',
-                ['oxpeter@gmail.com'],
-                fail_silently=True,
-            )
+        # send email
+        subject_str = 'Add users to {}'
+        body_str = '''Dear OPs, 
+        
+This ticket refers to SOP "HowTo: Add or remove a user to a Data Core project"
+https://nexus.weill.cornell.edu/display/ops/HowTo%3A+Add+or+remove+a+user+to+a+Data+Core+project+group
+
+For the following {4} users, please add them to the AD group for project {0} ({1}, {2}) and create their corresponding fileshare directory "WorkArea-<CWID>":
+
+{3}
+
+{6}
+
+Kind regards,
+{5}'''
+        subj_msg = subject_str.format(str(prj))
+        body_msg = body_str.format(prj.dc_prj_id,
+                            prj.host.node,
+                            prj.host.ip_address,
+                            '\n'.join([str(u) for u in userlist]),
+                            len(userlist),
+                            self.request.user,
+                            email_comment,
+                            )
+        
+        self.request.session['email_sbj'] = subj_msg
+        self.request.session['email_msg'] = body_msg
+        
         return super(AddUserToProject, self).form_valid(form)
 
 class AddThisUserToProject(AddUserToProject):
@@ -409,9 +580,11 @@ class AddThisUserToProject(AddUserToProject):
 class AddUserToThisProject(AddUserToProject):
     template_name = 'dc_management/addusertoproject.html'
     form_class = AddUserToProjectForm
-    success_url = reverse_lazy('dc_management:all_projects')
+    #success_url = reverse_lazy('dc_management:all_projects')
     #chosen_project = Project.objects.get(pk=self.kwargs['pk'])
     #success_url = reverse_lazy('dc_management:project', self.kwargs['pk'])
+    #success_url = reverse_lazy('dc_management:email_results')
+    success_url = reverse_lazy('dc_management:sendtest')
     
     def get_initial(self):
         initial = super(AddUserToThisProject, self).get_initial()
@@ -423,65 +596,82 @@ class AddUserToThisProject(AddUserToProject):
 
 ######### Removing users from projects ###########
 
-class RemoveUserFromProject(LoginRequiredMixin, FormView):
+class RemoveUserFromProject(LoginRequiredMixin, FormView ):
     template_name = 'dc_management/removeuserfromproject.html'
     form_class = RemoveUserFromProjectForm
-    success_url = 'dc_management:all_projects'
+    #success_url = 'dc_management:all_projects'
+    #success_url = reverse_lazy('dc_management:email_results')
+    success_url = reverse_lazy('dc_management:sendtest')
     
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
-        
         post_data = self.request.POST
-        
-        
-        
-        
+        self.request.session['email_sbj'] = "n/a"
+        self.request.session['email_msg'] = "n/a"
+                
         # Check if user in project, then connect user to project
         prj = form.cleaned_data['project']
-        newuser = form.cleaned_data['dcuser']
+        newusers = form.cleaned_data['dcusers']
         oldusers = prj.users.all()
         record_author = self.request.user
+        email_comment = form.cleaned_data['email_comment']
         
-        if newuser not in oldusers:
-            # report user is not in project
-            pass
-        else:
-            prj.users.remove(newuser)
-            prj.save()
+        userlist = []
+        for newuser in newusers:
+            if newuser not in oldusers:
+                # report user is not in project
+                pass
+            else:
+                prj.users.remove(newuser)
+                userlist.append(newuser)
+                
+                # save access log instance
+                self.logger = Access_Log(
+                            record_author=record_author,
+                            date_changed=date.today(),
+                            dc_user=newuser,
+                            prj_affected=prj,
+                            change_type="RA",
+                )
+                self.logger.save()
 
-            # save access log instance
-            self.logger = Access_Log(
-                        record_author=record_author,
-                        date_changed=date.today(),
-                        dc_user=form.cleaned_data['dcuser'],
-                        prj_affected=form.cleaned_data['project'],
-                        change_type="RA",
-            )
-            self.logger.save()
-
+        # send email
+        subject_str = 'Remove users from {}'
+        body_str = '''Dear OPs, 
         
-            # send email
-            print("Sending email")
-            send_mail(
-                'Subject: remove user {} from {}'.format(newuser, str(prj)),
-                'Please remove {} from project {} ({}) (name: {} IP:{}).'.format(newuser, 
-                                                         str(prj),
-                                                         prj.host,
-                                                         prj.host.node,
-                                                         prj.host.ip_address,
-                                                         ),
-                'from@example.com',
-                ['oxpeter@gmail.com'],
-                fail_silently=True,
-            )
+This ticket refers to SOP "HowTo: Add or remove a user to a Data Core project"
+https://nexus.weill.cornell.edu/display/ops/HowTo%3A+Add+or+remove+a+user+to+a+Data+Core+project+group
+
+Please remove the following users from project {0} ({1}, {2}):
+
+{3}
+
+{5}
+
+Kind regards,
+{4}'''
+        subj_msg = subject_str.format(str(prj))
+        body_msg = body_str.format(prj.dc_prj_id,
+                            prj.host.node,
+                            prj.host.ip_address,
+                            '\n'.join([str(u) for u in userlist]),
+                            self.request.user,
+                            email_comment,
+                            )
+        
+
+        self.request.session['email_sbj'] = subj_msg
+        self.request.session['email_msg'] = body_msg
+
         return super(RemoveUserFromProject, self).form_valid(form)
 
 class RemoveUserFromThisProject(RemoveUserFromProject):
     template_name = 'dc_management/removeuserfromproject.html'
     form_class = RemoveUserFromProjectForm
-    success_url = '/info/'
-
+    #success_url = reverse_lazy('dc_management:email_results')
+    success_url = reverse_lazy('dc_management:sendtest')
+    
     # add the request to the kwargs
     def get_form_kwargs(self):
         kwargs = super(RemoveUserFromThisProject, self).get_form_kwargs()
@@ -684,153 +874,7 @@ def pdf_view(request, pk):
     else:
         raise Http404()
 
-####################################
-######  AUTOCOMPLETE  VIEWS   ######
-####################################
 
-class DCUserAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = DC_User.objects.all()
-
-        if self.q:
-            qs = qs.filter(
-                            Q(cwid__istartswith=self.q) | 
-                            Q(first_name__istartswith=self.q) |
-                            Q(last_name__istartswith=self.q)
-                            )
-            #qs = qs.filter(cwid__istartswith=self.q)
-
-        return qs
-
-class ProjectAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = Project.objects.all()
-
-        if self.q:
-            qs =  qs.filter(
-                            Q(dc_prj_id__icontains=self.q) | 
-                            Q(nickname__icontains=self.q) 
-                            )
-        return qs
-
-class SoftwareAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = Software.objects.all()
-
-        if self.q:
-            qs =  qs.filter(
-                            Q(name__icontains=self.q) | 
-                            Q(vendor__icontains=self.q) |
-                            Q(version__icontains=self.q)
-                            )
-        return qs
-
-class NodeAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = Server.objects.all()
-
-        if self.q:
-            qs =  qs.filter(
-                            Q(node__icontains=self.q) | 
-                            Q(ip_address__icontains=self.q) |
-                            Q(comments__icontains=self.q)
-                            )
-        return qs
-
-#######################
-#### Outlook views ####
-#######################
-
-class OutlookConnection(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'dc_management/email_outlook.html'
-    
-    
-    def get_context_data(self, **kwargs):
-        redirect_uri = self.request.build_absolute_uri(reverse('dc_management:gettoken'))
-        sign_in_url = get_signin_url(redirect_uri)
-                
-        context = super(OutlookConnection, self).get_context_data(**kwargs)
-        context.update({'sign_in_url': sign_in_url,
-                        'redirect_uri': redirect_uri,
-        })
-        return context
-
-class GetToken(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'dc_management/email_token.html'
-    def get_context_data(self, **kwargs):
-        auth_code = self.request.GET['code']
-        redirect_uri = self.request.build_absolute_uri(reverse('dc_management:gettoken'))
-        token = get_token_from_code(auth_code, redirect_uri)
-        access_token = token['access_token']
-        user = get_me(access_token)
-        
-        # get token refresh details
-        refresh_token = token['refresh_token']
-        expires_in = token['expires_in']
-
-        # expires_in is in seconds
-        # Get current timestamp (seconds since Unix Epoch) and
-        # add expires_in to get expiration time
-        # Subtract 5 minutes to allow for clock differences
-        expiration = int(time.time()) + expires_in - 300
-
-
-        # Save the token in the session
-        self.request.session['outlook_access_token'] = access_token
-        self.request.session['outlook_user_email'] = user['mail']
-        self.request.session['outlook_token_expires'] = expiration
-        self.request.session['outlook_refresh_token'] = refresh_token
-
-        context = super(GetToken, self).get_context_data(**kwargs)
-        context.update({'gettoken': "Get Token",
-                        'auth_code': auth_code,
-                        'user': user,
-                        'email': user['mail'],
-        })
-        return context
-
-class SendMail(LoginRequiredMixin, generic.TemplateView):
-    template_name = 'dc_management/email_result.html'
-    def get_context_data(self, **kwargs):
-        access_token = get_access_token(
-                            self.request,
-                            self.request.build_absolute_uri(
-                                        reverse('dc_management:gettoken'))
-                                        )
-        user_email = self.request.session['outlook_user_email']
-        payload = {
-                  "Message": {
-                    "Subject": self.request.session['email_sbj'],
-                    "Body": {
-                      "ContentType": "Text",
-                      "Content": self.request.session['email_msg']
-                    },
-                    "ToRecipients": [
-                      {
-                        "EmailAddress": {
-                          "Address": "oxpeter@gmail.com"
-                        }
-                      }
-                    ],
-                    #"Attachments": [
-                    #  {
-                    #    "@odata.type": "#Microsoft.OutlookServices.FileAttachment",
-                    #    "Name": "menu.txt",
-                    #    "ContentBytes": "bWFjIGFuZCBjaGVlc2UgdG9kYXk="
-                    #  }
-                    #]
-                  },
-                  "SaveToSentItems": "true"
-                  }
-
-        context = super(SendMail, self).get_context_data(**kwargs)
-        context.update({'gettoken': access_token,
-                        'sendtest': send_message(access_token,user_email,payload),
-        })
-        return context
-
-
-    
 ###############################
 ######  FINANCE  VIEWS   ######
 ###############################

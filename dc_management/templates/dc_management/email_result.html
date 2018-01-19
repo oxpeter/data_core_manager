@@ -10,8 +10,8 @@
 <h2>Email sent successfully</h2>
 
 <p>Email sent:</p>
-<p><b>{{ request.session.email_sbj }}</b></p>
-<p>{{ request.session.email_msg }}</p>
+<p><b>{{ request.session.email_sbj|linebreaks }}</b></p>
+<p>{{ request.session.email_msg|linebreaks }}</p>
 
 {% else %}
 <h2>Email not sent </h2>
