@@ -57,7 +57,11 @@
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:project-update' project.pk %}">Update project</a>
 <a type="button" class="btn btn-default" href="#">Decommission project</a>
 <a type="button" class="btn btn-default" href="#">Transfer file(s)</a>
+<a type="button" class="btn btn-default" href="#">Unmount project</a>
+<a type="button" class="btn btn-default" href="#">Mount project</a>
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:storage-change' project.pk %}">Change Storage</a>
+</br>
+</br>
 </br>
 
 <div class="container">
@@ -67,51 +71,74 @@
   </div>
   <div class="panel-body">
     <table class="table table-striped">
+        <thead class="thead-default">
         <tr>
-            <td>PI </td><td> {{ project.pi }}</td>
+            <th></th><th>Value/Requested</th><th>Provisioned</th>
+        </tr>
+        </thead>
+        
+        <tr>
+            <td>PI </td><td> {{ project.pi }}</td><td></td>
         </tr>
 
         {% if project.expected_completion|days_until:0 and project.status == 'RU' %}
             <tr class="bg-danger" style="color:red;background:lightpink">
-                <td>Expiry</td><td> {{ project.expected_completion }}</td>
+                <td>Expiry</td><td> {{ project.expected_completion }}</td><td></td>
             </tr>
         {% elif project.expected_completion|days_until:10 and project.status == 'RU' %}
             <tr class="bg-warning" style="color:orange;">
-                <td>Expiry</td><td> {{ project.expected_completion }}</td>
+                <td>Expiry</td><td> {{ project.expected_completion }}</td><td></td>
             </tr>
         {% elif project.expected_completion|days_until:90 and project.status == 'RU' %}
             <tr class="bg-info" style="color:blue;">
-                <td>Expiry</td><td> {{ project.expected_completion}}</td>
+                <td>Expiry</td><td> {{ project.expected_completion}}</td><td></td>
             </tr>
         {% else %}
             <tr>
-                <td>Expiry</td><td> {{ project.expected_completion}}</td>
+                <td>Expiry</td><td> {{ project.expected_completion}}</td><td></td>
             </tr>
         {% endif %}
 
         <tr>
-            <td>Status </td><td> {{ project.get_status_display }}</td>
+            <td>Status </td><td> {{ project.get_status_display }}</td><td></td>
         </tr>
         <tr>
-            <td>Fileshare storage </td><td> {{ project.fileshare_storage }} GB</td>
+            <td>Fileshare storage </td>
+            <td> {{ project.fileshare_storage }} GB</td>
+            <td></td>
         </tr>
         <tr>
-            <td>Direct attach storage </td><td> {{ project.direct_attach_storage }} GB</td>
+            <td>Direct attach storage </td>
+            <td> {{ project.direct_attach_storage }} GB</td>
+            <td>{{ project.host.other_storage }} GB</td>
+        </tr>
+
+        <tr>
+            <td>CPUs</td>
+            <td> {{ project.requested_cpu }}</td>
+            <td>{{ project.host.processor_num }}</td>
+        </tr>
+        <tr>
+            <td>RAM</td>
+            <td> {{ project.requested_ram }} GB</td>
+            <td>{{ project.host.ram }} GB</td>
         </tr>
         
         
         <tr>
-            <td>Environment </td><td> {{ project.get_env_type_display }}</tdd>
+            <td>Environment </td><td> {{ project.get_env_type_display }}</td><td></td>
         </tr>
         <tr>
-            <td>Subtype </td><td> {{ project.env_subtype }}</td>
+            <td>Subtype </td><td> {{ project.env_subtype }}</td><td></td>
         </tr>
         {% if project.governance_doc_set.all.count == 0 %}
         <tr class="bg-danger" style="color:red;">
         {% else %} 
         <tr>
         {% endif %}
-            <td>Governance docs </td><td> {{ project.governance_doc_set.all.count }} </td>
+            <td>Governance docs </td>
+            <td> {{ project.governance_doc_set.all.count }} </td>
+            <td></td>
         </tr>
 
     </table>

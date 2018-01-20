@@ -123,8 +123,8 @@ class Server(models.Model):
     ip_address = models.GenericIPAddressField() # eg 10.36.217.229
     processor_num = models.IntegerField()
     ram = models.IntegerField() # to be entered in GB
-    disk_storage = models.IntegerField() # to be entered in GB
-    other_storage = models.IntegerField() # to be entered in GB    
+    disk_storage = models.IntegerField("System storage") # to be entered in GB
+    other_storage = models.IntegerField("Direct attach storage") # to be entered in GB    
     connection_date = models.DateField(default=date.today)
     dns_name = models.CharField(
                         max_length=32, 
@@ -541,6 +541,20 @@ class DCUAGenerator(models.Model):
     
     def get_absolute_url(self):
         return reverse('dc_management:url_result', kwargs={'pk': self.pk})
+
+class Protocols(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    created_by = models.ForeignKey(User, 
+                                    on_delete=models.CASCADE,
+                                    related_name='created_by',
+                                    )
+    edited_by = models.ForeignKey(User, 
+                                    on_delete=models.CASCADE, 
+                                    related_name="edited_by",
+                                    )
+    ticket_description = models.TextField("Description for tickets")
+    dc_description = models.TextField("Description for Data Core")
 
 ########################
 #### Finance Models ####
