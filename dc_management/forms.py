@@ -294,3 +294,11 @@ class AddSoftwareToProjectForm(forms.ModelForm):
                     }
     
     
+class BulkUserUploadForm(forms.Form):
+    # To be updated for bulk upload of users:
+    users_csv = forms.FileField(
+                                label="CSV file of users for upload"
+                                    )
+    comment = forms.CharField(required=False, 
+                    label="Comment (will be appended to all users' comment fields)")
+ 

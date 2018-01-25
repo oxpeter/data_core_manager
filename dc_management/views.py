@@ -22,6 +22,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import render, get_object_or_404
 
 from django.db.models import Q, Max, Sum
+from django.db.utils import IntegrityError
 
 from dc_management.authhelper import get_signin_url, get_token_from_code, get_access_token
 from dc_management.outlookservice import get_me, send_message
@@ -33,7 +34,7 @@ from .models import UserCost, SoftwareCost, StorageCost, DCUAGenerator
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
 from .forms import AddSoftwareToProjectForm, ProjectForm, ProjectUpdateForm
-from .forms import StorageChangeForm
+from .forms import StorageChangeForm, BulkUserUploadForm
 
 #################################
 #### Basic information views ####
@@ -249,11 +250,29 @@ class ServerView(LoginRequiredMixin, generic.DetailView):
     model = Server
     template_name = 'dc_management/server.html'
     def get_context_data(self, **kwargs):
+        # get a non-redundant list of all users on the server
         server_users =  DC_User.objects.filter(project__host=self.kwargs['pk']
                         ).order_by('first_name')
         
+        # get a list of all software installed for various projects:
+
+        qs = Software_Log.objects.all()
+        qs_node = qs.filter(applied_to_node=self.kwargs['pk'] 
+                            ).order_by('software_changed','-change_date')
+        current_swl = ''
+        installed_sw = []
+        for swl in qs_node:
+            if swl == current_swl:
+                continue
+            else:
+                current_swl = swl
+                if swl.change_type == "AA":   # last change was to add software to node
+                    installed_sw.append(swl.software_changed) 
+ 
         context = super(ServerView, self).get_context_data(**kwargs)
-        context.update({'server_users': server_users,
+        context.update({
+                        'server_users': server_users,
+                        'installed_software':installed_sw,
         })
         return context
     
@@ -280,6 +299,46 @@ class DC_UserUpdate(LoginRequiredMixin, UpdateView):
 ######  PROJECT VIEWS  ######
 #############################
 
+class BulkUserUpload(LoginRequiredMixin, FormView):
+    template_name = 'dc_management/bulkuseruploadform.html'
+    form_class = BulkUserUploadForm
+    success_url = success_url = reverse_lazy('dc_management:home')
+    
+    def form_valid(self, form):
+        self.request.session['email_sbj'] = "n/a"
+        self.request.session['email_msg'] = "n/a"
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        post_data = self.request.POST
+        
+        # Check if user in project, then connect user to project
+        users_csv = form.cleaned_data['users_csv']
+        extra_comment = form.cleaned_data['comment']
+        form.instance.record_author = self.request.user
+
+        # read file and create users.
+        handle = open(users_csv, "r")
+        for line in handle:
+            if len(line.strip().split(',')) == 6:
+                fn,ln,cw,af,ro,co = line.strip().split(',')
+                try:
+                    u = DC_User(first_name=fn, 
+                                last_name=ln, 
+                                cwid=cw, 
+                                affiliation=af, 
+                                role=ro,
+                                comments="\n".join([co,extra_comment]),
+                                )
+                    u.save()
+    
+                except IntegrityError:
+                    print("USER INTEGRITY ERROR ENCOUNTERED FOR {}. SKIPPING".format(cw))
+        
+        form.save()                
+                
+        return super(BulkUserUpload, self).form_valid(form)    
+    
+    
 class ProjectCreate(LoginRequiredMixin, CreateView):
     model = Project
     form_class = ProjectForm
@@ -443,9 +502,11 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                              Q(software_changed=sw)
                              ).order_by('-change_date')
                 
+                # check to see if any changes have been applied to the node:
                 if len(qs_node) == 0:  
                     node = prj.host
                     form.instance.applied_to_node = node
+                # check if the last change to the node was to remove the software:
                 elif qs_node[0].change_type == "RA":
                     # this is same as above, but put as elif statement to prevent
                     # breakage for null sets looking for [-1]
@@ -459,8 +520,10 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                 qs_node = qs.filter(Q(applied_to_node=node) &
                                     Q(software_changed=sw)
                                     ).order_by('-change_date')
+                # check to see if any changes have been applied to the node:
                 if len(qs_node) == 0:                    
                     self.email_change_node_software(changestr, node, sw)
+                # check if the last change to the node was to remove the software:
                 elif qs_node[0].change_type == "RA":
                     self.email_change_node_software(changestr, node, sw)
         

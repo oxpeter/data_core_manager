@@ -49,7 +49,7 @@ urlpatterns = [
         views.DC_UserUpdate.as_view(), 
         name='dc_user-update',
     ),
-  
+    path('dcuser/add/bulk', views.BulkUserUpload.as_view(), name='bulkuserupload'),
     # views related to onboarding:
     url(r'onboarding/dcua_generator/$', views.CreateDCAgreementURL.as_view(), 
         name='url_generator',
