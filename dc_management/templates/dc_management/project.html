@@ -221,21 +221,9 @@
     
   </div>
   <div class="panel-body">
-    <table class="table table-striped"><ul>
-        <thead class="thead-default">
-        <tr>
-            <th>Software</th><th>Version</th><th>License type</th>
-        </tr>
-        </thead>
-        {% for sw in project.software_installed.all %}
-        <tr>
-            <td>{{ sw.name }}</td>
-            <td>{{ sw.version }}</td>
-            <td>{{ sw.license_type }}</td>
-        </tr>
-        {% endfor %}
-
-    </table>
+    {% with project.software_installed.all as software_list %}
+        {% include "dc_management/software_list.html" %}
+    {% endwith %}
   </div>
  </div>
 </div>

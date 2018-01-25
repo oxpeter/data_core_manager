@@ -59,6 +59,16 @@
     {% endwith %}
 {% endif %}
 
+<h2>{{ installed_software|length }} software installed on {{ server.node }}</h2>
+{% if installed_software %}
+    {% with installed_software as software_list %}
+        {% include 'dc_management/software_list.html' %}
+    {% endwith %}
+{% endif %}
+
+
+
+
 {% if server.comments %}
 <h3>Comments</h3>
 <p>{{ server.comments }}</p>
