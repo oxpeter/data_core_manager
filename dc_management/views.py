@@ -980,6 +980,18 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
         # lists for passing to template:
         sw_list = []
         compute_list = []
+
+        # get user costs before cycling through all projects, so we only touch this 
+        # table once:
+        #maxquant = user_costs.aggregate(Max('user_quantity'))
+        max_rego = user_costs.order_by('-user_quantity')[0]
+        set_cost = max_rego.user_cost
+        set_cnt = max_rego.user_quantity
+        
+        try:
+            xtr_cost = user_costs.get(user_quantity=0).user_cost    
+        except ObjectDoesNotExist:
+            xtr_cost = 0
         
         for prj in all_prjs:
             # Fileshare and replication
@@ -1021,19 +1033,24 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
             else:
                 # get cost for users.
                 user_num = len(prj.users.all())
-                try:
-                    ucost = user_costs.get(user_quantity=user_num).user_cost
-                except ObjectDoesNotExist:
-                    #maxquant = user_costs.aggregate(Max('user_quantity'))
-                    max_rego = user_costs.order_by('-user_quantity')[0]
-                    set_cost = max_rego.user_cost
-                    set_cnt = max_rego.user_quantity
+                
+                # if a classroom, rate is set at the zero user rate for all users after PI
+                if prj.env_type == 'CL':
+                    # get the PI cost
                     try:
-                        xtr_cost = user_costs.get(user_quantity=0).user_cost    
+                        pi_cost = user_costs.get(user_quantity=1).user_cost    
                     except ObjectDoesNotExist:
-                        xtr_cost = 0
+                        pi_cost = 0
                     
-                    ucost = set_cost + xtr_cost * set_cnt
+                    # calculate total user cost for classroom:
+                    ucost = (user_num - 1) * xtr_cost + pi_cost
+                
+                else:  # not a classroom
+                    try:
+                        ucost = user_costs.get(user_quantity=user_num).user_cost
+                    except ObjectDoesNotExist:
+                    
+                        ucost = set_cost + xtr_cost * set_cnt
                 
                 prj.user_cost = ucost
             
