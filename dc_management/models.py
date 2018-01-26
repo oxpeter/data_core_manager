@@ -328,6 +328,7 @@ class Project(models.Model):
     
     env_subtype = models.ForeignKey(EnvtSubtype, on_delete=models.CASCADE)
     expected_completion = models.DateField()
+    requested_launch = models.DateField()
     
     RUNNING = "RU"
     COMPLETED = "CO"
