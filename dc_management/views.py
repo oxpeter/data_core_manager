@@ -337,8 +337,7 @@ class BulkUserUpload(LoginRequiredMixin, FormView):
         form.save()                
                 
         return super(BulkUserUpload, self).form_valid(form)    
-    
-    
+  
 class ProjectCreate(LoginRequiredMixin, CreateView):
     model = Project
     form_class = ProjectForm
@@ -1116,7 +1115,7 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
                     total_xtra_ram = 0
                 prj.host_cost = (   xtra_cpu / 2 * 
                                     server_CPU_rate + 
-                                    xtra_ram / 8 * 
+                                    total_xtra_ram / 8 * 
                                     server_RAM_rate
                                 )
                 compute_list.append(((  xtra_cpu, 
@@ -1125,7 +1124,7 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
                                         ),
                                     (total_xtra_ram, 
                                     "GB RAM", 
-                                    xtra_ram / 8 * server_RAM_rate),
+                                    total_xtra_ram / 8 * server_RAM_rate),
                                     )
                 )
                 
