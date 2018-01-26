@@ -252,7 +252,7 @@ class ServerView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         # get a non-redundant list of all users on the server
         server_users =  DC_User.objects.filter(project__host=self.kwargs['pk']
-                        ).order_by('first_name')
+                        ).order_by('first_name').distinct()
         
         # get a list of all software installed for various projects:
 
