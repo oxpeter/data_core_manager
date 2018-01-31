@@ -40,6 +40,20 @@
     <li>In user pages, list all governance docs user is on.</li>
     <li>Create mount project feature, which checks for all compatible nodes (incl. against user lists)</li>
     </ul>
+    
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>Onboarding projects</h4>
+      </div>
+      <div class="panel-body">
+        <ul>
+        {% include "dc_management/onboarding_projects_list.html" %}
+        </ul>
+      </div>
+     </div>
+    </div>
+    
     <div class="container">
      <div class="panel panel-info">
       <div class="panel-heading">
@@ -56,6 +70,7 @@
       </div>
      </div>
     </div>
+    
     <div class="container">
      <div class="panel panel-info">
       <div class="panel-heading">
@@ -139,7 +154,9 @@
     <a type="button" class="btn btn-primary" href="{% url 'dc_management:dc_user-add' %}">Create user</a>
     <a type="button" class="btn btn-info" href="{% url 'dc_management:all_users' %}">View all users</a>
     <a type="button" class="btn btn-info" href="{% url 'dc_management:bulkuserupload' %}">Create users (bulk upload)</a>
+
     {% include "dc_management/user_list_multiproject.html" %}
+
     </br>
   </div>
 

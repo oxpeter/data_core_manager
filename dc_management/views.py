@@ -213,17 +213,30 @@ class IndexView(LoginRequiredMixin, generic.ListView):
         return Project.objects.filter(status="RU").order_by('dc_prj_id')
     
     def get_context_data(self, **kwargs):
+        # get list of all projects still onboarding
+        #onboarding_list = Project.objects.filter(
+        #                            postdata_date__isnull=True,
+        #                            )
+        #onboarding_list = []
+        # get list of all PIs
+        user_list = DC_User.objects.filter(
+                                    project_pi__isnull=False,
+                                    ).distinct().order_by('first_name'),
+        
+        # get list of all active production servers
+        server_list = Server.objects.filter(
+                                    status="ON"
+                                    ).filter(
+                                        function="PR"
+                                    ).order_by('node'),
+        
+        
         context = super(IndexView, self).get_context_data(**kwargs)
         context.update({
-            'user_list': DC_User.objects.filter(
-                                        project_pi__isnull=False,
-                                        ).distinct().order_by('first_name'),
-            'server_list': Server.objects.filter(
-                                        status="ON"
-                                        ).filter(
-                                            function="PR"
-                                        ).order_by('node'),
-        })
+                        #'onboarding_listx' : onboarding_list,
+                        'user_list' : user_list, 
+                        'server_list' : server_list,
+                        })
         return context
 
 class AllProjectsView(LoginRequiredMixin, generic.ListView):
