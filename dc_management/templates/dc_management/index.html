@@ -56,6 +56,25 @@
       </div>
      </div>
     </div>
+
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>Projects being onboarded</h4>
+      </div>
+      <div class="panel-body">
+        <ul>
+        {% for p in onboarding_list %}
+            
+              <li>{{ p }} : {{ p.requested_launch }}</li>
+            
+        {% endfor %}
+        </ul>
+      </div>
+     </div>
+    </div>
+
+
     <div class="container">
      <div class="panel panel-info">
       <div class="panel-heading">
