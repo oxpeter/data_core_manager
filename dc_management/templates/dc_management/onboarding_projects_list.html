@@ -16,7 +16,11 @@
 
     {% for project in onboarding_list %}
       <tr>
-        <td>{{ project.dc_prj_id }}</td>
+        <td>
+            <a href="{% url 'dc_management:project' project.pk %}">
+                {{ project.dc_prj_id }}
+            </a>
+        </td>
         <td>{{ project.pi }}</td>
         <td {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}>
         {{ project.users.all.count }}</td> 

@@ -63,13 +63,7 @@
         <h4>Projects being onboarded</h4>
       </div>
       <div class="panel-body">
-        <ul>
-        {% for p in onboarding_list %}
-            
-              <li>{{ p }} : {{ p.requested_launch }}</li>
-            
-        {% endfor %}
-        </ul>
+        {% include "dc_management/onboarding_projects_list.html" %}
       </div>
      </div>
     </div>
