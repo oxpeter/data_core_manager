@@ -953,7 +953,8 @@ class ExportFromThisProject(ExportRequest):
 @login_required()
 def pdf_view(request, pk):
     gov_doc = Governance_Doc.objects.get(pk=pk)
-   
+    print("### GOV DOC:", gov_doc)
+    print("### GOV DOC FILE:", gov_doc.documentation.file)
     if gov_doc.documentation.name[-3:] == "pdf":
         try:
             # open(gov_doc.documentation.file, 'rb')
@@ -973,6 +974,8 @@ def pdf_view(request, pk):
             raise Http404()
     else:
         raise Http404()
+
+
 
 class GovernanceView(LoginRequiredMixin, generic.DetailView):
     model = Governance_Doc
