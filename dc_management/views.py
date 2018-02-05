@@ -34,7 +34,7 @@ from .models import UserCost, SoftwareCost, StorageCost, DCUAGenerator
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
 from .forms import AddSoftwareToProjectForm, ProjectForm, ProjectUpdateForm
-from .forms import StorageChangeForm, BulkUserUploadForm
+from .forms import StorageChangeForm, BulkUserUploadForm, GovernanceDocForm
 
 #################################
 #### Basic information views ####
@@ -91,6 +91,19 @@ class NodeAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
             qs =  qs.filter(
                             Q(node__icontains=self.q) | 
                             Q(ip_address__icontains=self.q) |
+                            Q(comments__icontains=self.q)
+                            )
+        return qs
+
+class GovdocAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Governance_Doc.objects.all()
+
+        if self.q:
+            qs =  qs.filter(
+                            Q(doc_id__icontains=self.q) | 
+                            Q(project__dc_prj_id__icontains=self.q) |
+                            Q(project__nickname__icontains=self.q) |
                             Q(comments__icontains=self.q)
                             )
         return qs
@@ -961,6 +974,36 @@ def pdf_view(request, pk):
     else:
         raise Http404()
 
+class GovernanceView(LoginRequiredMixin, generic.DetailView):
+    model = Governance_Doc
+    template_name = 'dc_management/governance_meta.html'
+
+class GovernanceCreate(LoginRequiredMixin, CreateView):
+    model = Governance_Doc
+    form_class = GovernanceDocForm
+    template_name = 'dc_management/governance_form.html'
+    #success_url = reverse_lazy("dc_management:index" )
+    # default success_url should be to the object page defined in model.
+    def form_valid(self, form):
+        # add the logged in user as the record author
+        form.instance.record_author = self.request.user
+        
+        self.object = form.save(commit=False)
+        return super(GovernanceCreate, self).form_valid(form)
+
+class GovernanceUpdate(LoginRequiredMixin, UpdateView):
+    model = Governance_Doc
+    form_class = GovernanceDocForm
+    template_name = 'dc_management/governance_form.html'
+    
+    #success_url = reverse_lazy("dc_management:index" )
+    #default success_url should be to the object page defined in model.
+    def form_valid(self, form):
+        # add the logged in user as the record author
+        form.instance.record_author = self.request.user
+        
+        self.object = form.save(commit=False)
+        return super(GovernanceUpdate, self).form_valid(form)
 
 ###############################
 ######  FINANCE  VIEWS   ######

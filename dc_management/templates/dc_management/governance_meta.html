@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block content %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# load the custom filters for time #}
+{% load project_tags %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+<style>
+/* styling of the tabs*/
+#exTab1 .tab-content {
+  color : black;
+  padding : 5px 15px;
+}
+
+#exTab1 .nav-tabs > li > a {
+  border-radius: 4px 4px 0 0;
+}
+</style>
+
+
+<h1>
+    {{ governance_doc.get_governance_type_display }} {{ governance_doc.doc_id }}
+    <small class="text-muted">{{ governance_doc.project  }}</small>
+</h1>
+<h2>
+    <small class="text-muted">Expires {{ governance_doc.expiry_date }}</small>
+</h2>
+
+
+
+<a type="button" class="btn btn-info" href="{% url 'dc_management:govdoc' governance_doc.pk %}">View governance doc</a>
+<a type="button" class="btn btn-default" href="#">Update governance doc</a>
+
+</br>
+</br>
+</br>
+
+<div class="container">
+ <div class="panel panel-info">
+  <div class="panel-heading">
+    <h4>Governance document metadata</h4>
+  </div>
+  <div class="panel-body">
+    <table class="table table-striped">
+        
+        
+        
+<tr><td>Ticket</td><td>{{ governance_doc.sn_ticket }}</td></tr>
+<tr><td>ID:</td><td>{{ governance_doc.doc_id }}</td></tr>
+<tr><td>Date Issued</td><td>{{ governance_doc.date_issued }}</td></tr>
+    {% if governance_doc.expiry_date|days_until:0  %}
+        <tr class="bg-danger" style="color:red;background:lightpink">
+            <td>Expiry Date</td><td>{{ governance_doc.expiry_date }}</td>
+        </tr>
+    {% elif governance_doc.expiry_date|days_until:10 %}
+        <tr class="bg-warning" style="color:orange;">
+            <td>Expiry Date</td><td>{{ governance_doc.expiry_date }}</td>
+        </tr>
+    {% elif governance_doc.expiry_date|days_until:90  %}
+        <tr class="bg-info" style="color:blue;">
+           <td>Expiry Date</td><td>{{ governance_doc.expiry_date }}</td>
+        </tr>
+    {% else %}
+        <tr>
+            <td>Expiry Date</td><td>{{ governance_doc.expiry_date }}</td>
+        </tr>
+    {% endif %}
+
+<tr><td>Users Permitted</td><td>{% for u in governance_doc.users_permitted.all %}{{ u }}<br/>{% endfor %}</td></tr>
+<tr><td>Access permitted</td><td>{{ governance_doc.access_allowed }}</td></tr>
+<tr><td>Type</td><td>{{ governance_doc.get_governance_type_display }}</td></tr>
+<tr><td>Defers to gov. docs:</td><td>{{ governance_doc.defers_to_doc }}</td></tr>
+<tr><td>Supersedes to gov. docs:</td><td>{{ governance_doc.supersedes_doc }}</td></tr>
+<tr><td>Project</td><td>{{ governance_doc.project }}</td></tr>
+<tr><td>File</td><td>{{ governance_doc.documentation }}</td></tr>
+
+    </table>
+  </div>
+ </div>
+</div>
+
+
+
+    
+{% if governance_doc.comments %}
+<div class="container">
+ <div class="panel panel-info">
+  <div class="panel-heading">    
+    <h3>Comments</h3>
+  </div>
+  <div class="panel-body">
+    <p>{{ governance_doc.comments }}</p>
+  </div>
+ </div>
+</div>
+{% endif %}
+</div>
+
+
+</div>
+</div>
+</div>
+{% endblock %}

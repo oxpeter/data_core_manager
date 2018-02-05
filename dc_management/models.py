@@ -474,7 +474,10 @@ class Governance_Doc(models.Model):
             status = "primary"
         
         return status
-        
+    
+    def get_absolute_url(self):
+        return reverse('dc_management:govdocmeta', kwargs={'pk': self.pk})
+    
         
     class Meta:
         verbose_name = 'Governance Document'

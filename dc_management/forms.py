@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from .models import Server, Project, DC_User, Software, Software_Log, Project
-from .models import DCUAGenerator, Storage_Log, StorageCost
+from .models import DCUAGenerator, Storage_Log, StorageCost, Governance_Doc
 
 class CommentForm(forms.Form):
     name = forms.CharField()
@@ -163,6 +163,38 @@ class StorageChangeForm(forms.ModelForm):
         super(StorageChangeForm, self).__init__(*args, **kwargs)
         self.fields['storage_type'].queryset = qs
         #self.fields['project'].queryset = prj
+
+class GovernanceDocForm(forms.ModelForm):
+    class Meta:
+        model = Governance_Doc
+        fields = [  'sn_ticket',
+                    'doc_id',
+                    'date_issued',
+                    'expiry_date',
+                    'users_permitted',
+                    'access_allowed',
+                    'governance_type',
+                    'defers_to_doc',
+                    'supersedes_doc',
+                    'project',  
+                    'documentation',
+                    'comments',
+        ]
+        widgets = {
+                    'users_permitted' : autocomplete.ModelSelect2Multiple(
+                                        url='dc_management:autocomplete-user'
+                                        ),
+                    'defers_to_doc'  :  autocomplete.ModelSelect2Multiple(
+                                        url='dc_management:autocomplete-govdoc'
+                                        ),
+                    'supersedes_doc' :  autocomplete.ModelSelect2Multiple(
+                                        url='dc_management:autocomplete-govdoc'
+                                        ),
+                    'project' :         autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-project'
+                                        ),
+        }
+        
 
 class ProjectForm(forms.ModelForm):
     

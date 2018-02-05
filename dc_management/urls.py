@@ -28,6 +28,11 @@ urlpatterns = [
         views.SoftwareAutocomplete.as_view(),
         name='autocomplete-software',
         ),
+    url(r'autocomplete-govdoc/$', 
+        views.GovdocAutocomplete.as_view(),
+        name='autocomplete-govdoc',
+        ),
+
     # outlook email:
     url(r'outlook/$', views.OutlookConnection.as_view(), name='outlook'),
     url(r'outlook/gettoken/$', views.GetToken.as_view(), name='gettoken'),
@@ -43,6 +48,8 @@ urlpatterns = [
     url(r'^node/(?P<pk>[0-9]+)/$', views.ServerView.as_view(), name='node'),
     url(r'^dcuser/(?P<pk>[0-9]+)/$', views.DCUserView.as_view(), name='dcuser'),
     url(r'^govdoc/(?P<pk>[0-9]+)/$', views.pdf_view, name='govdoc'),
+    path('govdoc/meta/<int:pk>', views.GovernanceView.as_view(), name='govdocmeta'),
+    
     # add, modify, remove user
     url(r'^dcuser/add/$', views.DC_UserCreate.as_view(), name='dc_user-add'),
     url(r'^dcuser/update/(?P<pk>[0-9]+)/$', 
@@ -64,7 +71,14 @@ urlpatterns = [
     ),
     path('project/<int:ppk>/storage/change/',
             views.StorageChange.as_view(),
-            name='storage-change'),
+            name='storage-change',
+    ),
+    
+    path('govdoc/meta/add', views.GovernanceCreate.as_view(), name='govdocmeta-add'),
+    path('govdoc/meta/<int:pk>/update', 
+            views.GovernanceCreate.as_view(), 
+            name='govdocmeta-update'
+    ),
     
     # forms for adding user - project relationship:
     url(r'^dcuser/(?P<pk>[0-9]+)/connect$', 
