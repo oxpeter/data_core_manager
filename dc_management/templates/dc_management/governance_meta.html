@@ -37,7 +37,7 @@
 
 
 
-<a type="button" class="btn btn-info" href="{% url 'dc_management:govdoc' governance_doc.pk %}">View governance doc</a>
+<a type="button" class="btn btn-info" href="{% url 'dc_management:govdoc' governance_doc.pk %}"  target="_blank">View governance doc</a>
 <a type="button" class="btn btn-default" href="#">Update governance doc</a>
 
 </br>
@@ -54,34 +54,39 @@
         
         
         
-<tr><td>Ticket</td><td>{{ governance_doc.sn_ticket }}</td></tr>
-<tr><td>ID:</td><td>{{ governance_doc.doc_id }}</td></tr>
-<tr><td>Date Issued</td><td>{{ governance_doc.date_issued }}</td></tr>
+<tr><th>ID:</th><td>{{ governance_doc.doc_id }}</td></tr>
+<tr><th>Type</th><td>{{ governance_doc.get_governance_type_display }}</td></tr>
+
+{% if governance_doc.defers_to_doc %}
+<tr><th>Defers to gov. docs:</th><td>{{ governance_doc.defers_to_doc }}</td></tr>
+{% endif %}
+{% if governance_doc.supersedes_doc %}
+<tr><th>Supersedes to gov. docs:</th><td>{{ governance_doc.supersedes_doc }}</td></tr>
+{% endif %}
+
+<tr><th>Date Issued</th><td>{{ governance_doc.date_issued }}</td></tr>
     {% if governance_doc.expiry_date|days_until:0  %}
         <tr class="bg-danger" style="color:red;background:lightpink">
-            <td>Expiry Date</td><td>{{ governance_doc.expiry_date }}</td>
+            <th>Expiry Date</th><td>{{ governance_doc.expiry_date }}</td>
         </tr>
     {% elif governance_doc.expiry_date|days_until:10 %}
         <tr class="bg-warning" style="color:orange;">
-            <td>Expiry Date</td><td>{{ governance_doc.expiry_date }}</td>
+            <th>Expiry Date</th><td>{{ governance_doc.expiry_date }}</td>
         </tr>
     {% elif governance_doc.expiry_date|days_until:90  %}
         <tr class="bg-info" style="color:blue;">
-           <td>Expiry Date</td><td>{{ governance_doc.expiry_date }}</td>
+           <th>Expiry Date</th><td>{{ governance_doc.expiry_date }}</td>
         </tr>
     {% else %}
         <tr>
-            <td>Expiry Date</td><td>{{ governance_doc.expiry_date }}</td>
+            <th>Expiry Date</th><td>{{ governance_doc.expiry_date }}</td>
         </tr>
     {% endif %}
+<tr><th>Project</th><td><a href="{% url 'dc_management:project' governance_doc.project.pk %}">{{ governance_doc.project }}</a></td></tr>
+<tr><th>Users Permitted</th><td>{% for u in governance_doc.users_permitted.all %}{{ u }}<br/>{% endfor %}</td></tr>
+<tr><th>Access permitted</th><td>{{ governance_doc.access_allowed }}</td></tr>
 
-<tr><td>Users Permitted</td><td>{% for u in governance_doc.users_permitted.all %}{{ u }}<br/>{% endfor %}</td></tr>
-<tr><td>Access permitted</td><td>{{ governance_doc.access_allowed }}</td></tr>
-<tr><td>Type</td><td>{{ governance_doc.get_governance_type_display }}</td></tr>
-<tr><td>Defers to gov. docs:</td><td>{{ governance_doc.defers_to_doc }}</td></tr>
-<tr><td>Supersedes to gov. docs:</td><td>{{ governance_doc.supersedes_doc }}</td></tr>
-<tr><td>Project</td><td>{{ governance_doc.project }}</td></tr>
-<tr><td>File</td><td>{{ governance_doc.documentation }}</td></tr>
+<tr><th>Ticket</th><td>{{ governance_doc.sn_ticket }}</td></tr>
 
     </table>
   </div>
