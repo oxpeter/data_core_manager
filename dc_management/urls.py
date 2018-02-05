@@ -75,8 +75,8 @@ urlpatterns = [
     ),
     
     path('govdoc/meta/add', views.GovernanceCreate.as_view(), name='govdocmeta-add'),
-    path('govdoc/meta/<int:pk>/update', 
-            views.GovernanceCreate.as_view(), 
+    path('govdoc/meta/update/<int:pk>', 
+            views.GovernanceUpdate.as_view(), 
             name='govdocmeta-update'
     ),
     

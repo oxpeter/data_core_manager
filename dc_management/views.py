@@ -995,6 +995,7 @@ class GovernanceUpdate(LoginRequiredMixin, UpdateView):
     model = Governance_Doc
     form_class = GovernanceDocForm
     template_name = 'dc_management/governance_form.html'
+    #is_update_view = True
     
     #success_url = reverse_lazy("dc_management:index" )
     #default success_url should be to the object page defined in model.

@@ -195,7 +195,6 @@ class GovernanceDocForm(forms.ModelForm):
                                         ),
         }
         
-
 class ProjectForm(forms.ModelForm):
     
     class Meta:
@@ -245,7 +244,6 @@ class ProjectForm(forms.ModelForm):
                                         ),
                                     
                     }
-
 
 class ProjectUpdateForm(forms.ModelForm):
     
@@ -326,8 +324,7 @@ class AddSoftwareToProjectForm(forms.ModelForm):
                                         ),
                                     
                     }
-    
-    
+
 class BulkUserUploadForm(forms.Form):
     # To be updated for bulk upload of users:
     users_csv = forms.FileField(
