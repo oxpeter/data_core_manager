@@ -57,12 +57,45 @@
 <tr><th>ID:</th><td>{{ governance_doc.doc_id }}</td></tr>
 <tr><th>Type</th><td>{{ governance_doc.get_governance_type_display }}</td></tr>
 
-{% if governance_doc.defers_to_doc %}
-<tr><th>Defers to gov. docs:</th><td>{{ governance_doc.defers_to_doc }}</td></tr>
+{% comment %}
+{% if governance_doc.defers_to_doc or governance_doc.superseded_by_set.count > 0 %}
+{% endcomment %}
+<tr>
+  <th>Defers to gov. docs:</th>  
+  <td>
+    {% if governance_doc.defers_to_doc %}
+      <a href="{% url 'dc_management:govdocmeta' governance_doc.defers_to_doc.pk %}">
+        {{ governance_doc.defers_to_doc }}
+      </a>
+    {% endif %}
+    {% for gd in governance_doc.superseded_by_set.all %}
+      <br/>{{ gd }}
+    {% endfor %}
+  </td>
+</tr>
+{% comment %}
 {% endif %}
-{% if governance_doc.supersedes_doc %}
-<tr><th>Supersedes to gov. docs:</th><td>{{ governance_doc.supersedes_doc }}</td></tr>
+{% endcomment %}
+
+{% comment %}
+{% if governance_doc.supersedes_doc or governance_doc.overrules_set.count > 0 %}
+{% endcomment %}
+<tr>
+  <th>Supersedes gov. doc:</th>
+  <td>
+    {% if governance_doc.supersedes_doc %}
+      <a href="{% url 'dc_management:govdocmeta' governance_doc.supersedes_doc.pk %}">
+        {{ governance_doc.supersedes_doc }}
+      </a> 
+    {% endif %}
+    {% for gd in governance_doc.overrules_set.all %}
+      <br/>{{ gd }}
+    {% endfor %}
+  </td>
+</tr>
+{% comment %}
 {% endif %}
+{% endcomment %}
 
 <tr><th>Date Issued</th><td>{{ governance_doc.date_issued }}</td></tr>
     {% if governance_doc.expiry_date|days_until:0  %}

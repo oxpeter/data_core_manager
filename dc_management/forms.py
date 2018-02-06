@@ -184,10 +184,10 @@ class GovernanceDocForm(forms.ModelForm):
                     'users_permitted' : autocomplete.ModelSelect2Multiple(
                                         url='dc_management:autocomplete-user'
                                         ),
-                    'defers_to_doc'  :  autocomplete.ModelSelect2Multiple(
+                    'defers_to_doc'  :  autocomplete.ModelSelect2(
                                         url='dc_management:autocomplete-govdoc'
                                         ),
-                    'supersedes_doc' :  autocomplete.ModelSelect2Multiple(
+                    'supersedes_doc' :  autocomplete.ModelSelect2(
                                         url='dc_management:autocomplete-govdoc'
                                         ),
                     'project' :         autocomplete.ModelSelect2(
