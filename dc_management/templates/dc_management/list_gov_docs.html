@@ -17,7 +17,7 @@
         {% for gd in project.governance_doc_set.all %}
         
             <tr>
-                <td><a href="{% url 'dc_management:govdocmeta' gd.pk %}" target="_blank">{{ gd }}</a></td>
+                <td><a href="{% url 'dc_management:govdocmeta' gd.pk %}" >{{ gd }}</a></td>
                 <td>{{ gd.doc_id }}</td>
             
                 {% if gd.attention_required == "danger" %}
