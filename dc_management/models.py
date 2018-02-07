@@ -333,10 +333,12 @@ class Project(models.Model):
     RUNNING = "RU"
     COMPLETED = "CO"
     SUSPENDED = "SU"
+    SHUTTINGDOWN = "SD"
     STATUS_CHOICES = (
             (RUNNING, "Running"),
             (COMPLETED, "Completed"),
             (SUSPENDED, "Suspended"),
+            (SHUTTINGDOWN, "Shutting down"),
     )
     status = models.CharField(
                             max_length=2,
@@ -349,6 +351,12 @@ class Project(models.Model):
     predata_date = models.DateField(null=True, blank=True)
     postdata_ticket = models.CharField(max_length=32, null=True, blank=True)
     postdata_date = models.DateField(null=True, blank=True)
+    wrapup_ticket = models.CharField("ticket for request to complete", 
+                                        max_length=32, 
+                                        null=True, 
+                                        blank=True,
+    )
+    wrapup_date = models.DateField("date project close requested", null=True, blank=True)
     completion_ticket = models.CharField(max_length=32, null=True, blank=True)
     completion_date = models.DateField(null=True, blank=True)
     host = models.ForeignKey(Server, on_delete=models.CASCADE, null=True, blank=True)
@@ -357,7 +365,7 @@ class Project(models.Model):
                             related_name='db_host',
                             null=True, 
                             blank=True,
-                            )
+    )
     
     # finance fields
     user_cost = models.FloatField(null=True, blank=True)

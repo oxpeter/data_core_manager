@@ -265,6 +265,8 @@ class ProjectUpdateForm(forms.ModelForm):
                     'predata_date',
                     'postdata_ticket',
                     'postdata_date',
+                    'wrapup_ticket',
+                    'wrapup_date',
                     'completion_ticket',
                     'completion_date',
                     'host',
