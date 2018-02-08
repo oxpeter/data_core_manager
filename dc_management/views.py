@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from datetime import date
@@ -30,11 +31,13 @@ from dc_management.outlookservice import get_me, send_message
 from .models import Server, Project, DC_User, Access_Log, Governance_Doc
 from .models import Software, Software_Log, Storage_Log
 from .models import UserCost, SoftwareCost, StorageCost, DCUAGenerator
+from .models import FileTransfer
 
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
 from .forms import AddSoftwareToProjectForm, ProjectForm, ProjectUpdateForm
 from .forms import StorageChangeForm, BulkUserUploadForm, GovernanceDocForm
+from .forms import FileTransferForm
 
 #################################
 #### Basic information views ####
@@ -180,17 +183,21 @@ class SendMail(LoginRequiredMixin, generic.TemplateView):
                                         reverse('dc_management:gettoken'))
                                         )
         user_email = self.request.session['outlook_user_email']
+        
+        # get email parameters from session info (saved as json)
+        email_details = json.loads(self.request.session['email_json'])
+        
         payload = {
                   "Message": {
-                    "Subject": self.request.session['email_sbj'],
+                    "Subject": email_details['subject'],
                     "Body": {
                       "ContentType": "Text",
-                      "Content": self.request.session['email_msg']
+                      "Content": email_details['body']
                     },
                     "ToRecipients": [
                       {
                         "EmailAddress": {
-                          "Address": "oxpeter@gmail.com"
+                          "Address": email_details['to_email']
                         }
                       }
                     ],
@@ -321,8 +328,6 @@ class BulkUserUpload(LoginRequiredMixin, FormView):
     success_url = success_url = reverse_lazy('dc_management:home')
     
     def form_valid(self, form):
-        self.request.session['email_sbj'] = "n/a"
-        self.request.session['email_msg'] = "n/a"
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
         post_data = self.request.POST
@@ -351,7 +356,7 @@ class BulkUserUpload(LoginRequiredMixin, FormView):
                     print("USER INTEGRITY ERROR ENCOUNTERED FOR {}. SKIPPING".format(cw))
         
         form.save()                
-                
+                        
         return super(BulkUserUpload, self).form_valid(form)    
   
 class ProjectCreate(LoginRequiredMixin, CreateView):
@@ -394,7 +399,7 @@ class StorageChange(LoginRequiredMixin, CreateView):
         # update initial field defaults with custom set default values:
         initial.update({'project': chosen_project, })
         return initial
-
+ 
     
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
@@ -448,17 +453,13 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                                      prj.host.node,
                                      prj.host.ip_address,
                                     )
-        """
-        send_mail(
-            sbj_msg,
-            body_msg,
-            'from@example.com',     # set reply_to address?
-            ['oxpeter@gmail.com'],  # to field
-            fail_silently=True,
-        )
-        """
-        self.request.session['email_sbj'] = sbj_msg
-        self.request.session['email_msg'] = body_msg
+
+        email_dict = {  'subject' :subj_msg,
+                        'body'    :body_msg,
+                        'to_email':"oxpeter+dcore-ticket@gmail.com",
+        }
+        
+        self.request.session['email_json'] = json.dumps(email_dict)
     
     def email_change_node_software(self, changestr, node, sw):
         """
@@ -471,24 +472,21 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                              node.node,
                              node.ip_address,
                             )
-        """
-        send_mail(
-                sbj_msg,
-                body_msg,
-                'from@example.com',     # set reply_to address?
-                ['oxpeter@gmail.com'],  # to field
-                fail_silently=True,
-        )
-        """
-        self.request.session['email_sbj'] = sbj_msg
-        self.request.session['email_msg'] = body_msg
+
+        email_dict = {  'subject' :subj_msg,
+                        'body'    :body_msg,
+                        'to_email':"oxpeter+dcore-ticket@gmail.com",
+        }
+        
+        self.request.session['email_json'] = json.dumps(email_dict)
 
     def form_valid(self, form):
-        self.request.session['email_sbj'] = "n/a"
-        self.request.session['email_msg'] = "n/a"
-        # This method is called when valid form data has been POSTed.
-        # It should return an HttpResponse.
-        post_data = self.request.POST
+        # clear email fields in session
+        email_details = {   'subject' :"na",
+                            'body'    :"na",
+                            'to_email':"na",
+        }
+        self.request.session['email_json'] = json.dumps(email_details)
         
         # Check if user in project, then connect user to project
         sw = form.cleaned_data['software_changed']
@@ -574,8 +572,7 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
 
         else:
             changestr = "confirm presence of" # innocuous, not intended to be used.
-                
-            
+                     
         form.save()                
                 
         return super(UpdateSoftware, self).form_valid(form)    
@@ -593,11 +590,12 @@ class AddUserToProject(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('dc_management:sendtest')
     
     def form_valid(self, form):
-        # This method is called when valid form data has been POSTed.
-        # It should return an HttpResponse.
-        post_data = self.request.POST
-        self.request.session['email_sbj'] = "n/a"
-        self.request.session['email_msg'] = "n/a"
+        # clear email fields in session
+        email_details = {   'subject' :"na",
+                            'body'    :"na",
+                            'to_email':"na",
+        }
+        self.request.session['email_json'] = json.dumps(email_details)
              
         # Check if user in project, then connect user to project
         
@@ -656,10 +654,14 @@ Kind regards,
                             self.request.user,
                             email_comment,
                             )
+
+        email_dict = {  'subject' :subj_msg,
+                        'body'    :body_msg,
+                        'to_email':"oxpeter+dcore-ticket@gmail.com",
+        }
         
-        self.request.session['email_sbj'] = subj_msg
-        self.request.session['email_msg'] = body_msg
-        
+        self.request.session['email_json'] = json.dumps(email_dict)
+                
         return super(AddUserToProject, self).form_valid(form)
 
 class AddThisUserToProject(AddUserToProject):
@@ -701,8 +703,13 @@ class RemoveUserFromProject(LoginRequiredMixin, FormView ):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
         post_data = self.request.POST
-        self.request.session['email_sbj'] = "n/a"
-        self.request.session['email_msg'] = "n/a"
+        
+        # clear email fields in session
+        email_details = {   'subject' :"na",
+                            'body'    :"na",
+                            'to_email':"na",
+        }
+        self.request.session['email_json'] = json.dumps(email_details)
                 
         # Check if user in project, then connect user to project
         prj = form.cleaned_data['project']
@@ -761,9 +768,13 @@ Kind regards,
                             email_comment,
                             )
         
+        email_dict = {  'subject' :subj_msg,
+                        'body'    :body_msg,
+                        'to_email':"oxpeter+dcore-ticket@gmail.com",
+        }
+        
+        self.request.session['email_json'] = json.dumps(email_dict)
 
-        self.request.session['email_sbj'] = subj_msg
-        self.request.session['email_msg'] = body_msg
 
         return super(RemoveUserFromProject, self).form_valid(form)
 
@@ -974,8 +985,6 @@ def pdf_view(request, pk):
             raise Http404()
     else:
         raise Http404()
-
-
 
 class GovernanceView(LoginRequiredMixin, generic.DetailView):
     model = Governance_Doc
@@ -1220,4 +1229,87 @@ class ActiveProjectFinances(LoginRequiredMixin, generic.ListView):
         })
         return context
 
+###########################
+######  LOG  VIEWS   ######
+###########################
+
+class FileTransferView(LoginRequiredMixin, generic.DetailView):
+    model = FileTransfer
+    template_name = 'dc_management/file_transfer.html'
+
+class FileTransferCreate(LoginRequiredMixin, CreateView):
+    model = FileTransfer
+    form_class = FileTransferForm
+    success_url = reverse_lazy('dc_management:sendtest')
+
+    def form_valid(self, form):
+        # clear email fields in session
+        email_details = {   'subject' :"na",
+                            'body'    :"na",
+                            'to_email':"na",
+        }
+        self.request.session['email_json'] = json.dumps(email_details)
+
+        # log who made the record
+        form.instance.record_author = self.request.user
+        
+        # send email
+        if form.instance.ticket:
+            sbj_ticket = "Re: incident {}".format(form.instance.ticket)
+            toemail = 'oxpeter+support@gmail.com'
+        else:
+            sbj_ticket = ""
+            toemail = 'oxpeter+dcore-ticket@gmail.com'
+        
+            
+        if form.instance.file_num > 1:
+            plural = "s"
+        else:
+            plural = ""
+        
+        if form.instance.source:
+            src = "from {} ({})".format(form.instance.source.dc_prj_id, 
+                            form.instance.source.host.node,
+                            )
+        elif re.search("email|ticket", str(form.instance.transfer_method).lower()):
+            src = "attached to this ticket"
+        else:
+            src = "from {}".format(form.instance.transfer_method)
+            
+        if form.instance.destination:
+            dest = "to {} ({})".format(form.instance.destination.dc_prj_id, 
+                            form.instance.destination.host.node,
+                            )
+        else: 
+            dest = "to {} via {}".format(form.instance.external_destination, 
+                                        form.instance.transfer_method,
+                                        )
+        
+        subject_str = 'Transfer file{} {} {}'
+        body_str = '''Dear OPs,
+
+Please transfer the following {0} file{1} {2} {3}.
+
+{4}
+
+Kind regards,
+{5}'''
+        subj_msg = subject_str.format(plural, src, dest)
+        body_msg = body_str.format(form.instance.file_num,
+                                    plural,
+                                    src,
+                                    dest,
+                                    form.instance.comment,
+                                    )
+        
+        email_dict = {  'subject' :subj_msg,
+                        'body'    :body_msg,
+                        'to_email':toemail,
+        }
+        
+        self.request.session['email_json'] = json.dumps(email_dict)
+        
+        
+        self.object = form.save(commit=False)
+        return super(FileTransferCreate, self).form_valid(form)
 

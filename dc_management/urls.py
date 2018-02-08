@@ -109,6 +109,16 @@ urlpatterns = [
     # finance views:
     url(r'finances/$', views.ActiveProjectFinances.as_view(), name='finances-active'),
     
+    # log views:
+    path('logs/filetransfer/<int:pk>', 
+            views.FileTransferView.as_view(), 
+            name='file-transfer-view',
+    ),
+    path('logs/filetransfer/create', 
+            views.FileTransferCreate.as_view(), 
+            name='file-transfer-add',
+    ),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

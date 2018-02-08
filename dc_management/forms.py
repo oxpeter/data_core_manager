@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .models import Server, Project, DC_User, Software, Software_Log, Project
 from .models import DCUAGenerator, Storage_Log, StorageCost, Governance_Doc
+from .models import FileTransfer
 
 class CommentForm(forms.Form):
     name = forms.CharField()
@@ -335,3 +336,31 @@ class BulkUserUploadForm(forms.Form):
     comment = forms.CharField(required=False, 
                     label="Comment (will be appended to all users' comment fields)")
  
+class FileTransferForm(forms.ModelForm):
+    class Meta:
+        model = FileTransfer
+        fields = [  'change_date',
+                    'ticket',
+                    'external_source',
+                    'source',
+                    'external_destination',
+                    'destination',
+                    'transfer_method',
+                    'requester',
+                    'filenames',
+                    'file_num',
+                    'data_type',
+                    'reviewed_by',
+                    'comment',
+                ]
+
+        widgets =  {'source' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-project'
+                                        ),
+                    'destination' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-project'
+                                        ),
+                    'requester' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-user'
+                                        ),
+                    }

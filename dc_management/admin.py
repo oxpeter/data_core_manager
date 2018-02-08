@@ -66,6 +66,7 @@ class FileTransferAdmin(admin.ModelAdmin):
                     'source',
                     'external_destination',
                     'destination',
+                    'file_num',
                     'data_type',
                     'reviewed_by',
     )

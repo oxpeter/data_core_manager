@@ -56,7 +56,7 @@
 <div class="tab-pane active" id="details">
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:project-update' project.pk %}">Update project</a>
 <a type="button" class="btn btn-default" href="#">Decommission project</a>
-<a type="button" class="btn btn-default" href="#">Transfer file(s)</a>
+<a type="button" class="btn btn-warning" href="{% url 'dc_management:file-transfer-add' %}">Transfer file(s)</a>
 <a type="button" class="btn btn-default" href="#">Unmount project</a>
 <a type="button" class="btn btn-default" href="#">Mount project</a>
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:storage-change' project.pk %}">Change Storage</a>
