@@ -5,7 +5,7 @@ from .models import DC_Administrator, DC_User, EnvtSubtype, External_Access_Log
 from .models import Governance_Doc, Project, Server, Server_Change_Log, SN_Ticket
 from .models import Software, Software_License_Type, Software_Log, Software_Purchase
 from .models import Storage_Log, SubFunction, SoftwareCost, UserCost, StorageCost
-from .models import DCUAGenerator
+from .models import DCUAGenerator, FileTransfer, TransferMethod
 
 # customize the look of the admin site:
 admin.site.site_header = 'Data Core Management Site'
@@ -58,6 +58,23 @@ class ServerAdmin(admin.ModelAdmin):
 	)
 	list_filter = ('function','status', 'operating_sys', 'machine_type')
 
+@admin.register(FileTransfer)
+class FileTransferAdmin(admin.ModelAdmin):
+    list_display = ('change_date',
+                    'ticket',
+                    'external_source',
+                    'source',
+                    'external_destination',
+                    'destination',
+                    'data_type',
+                    'reviewed_by',
+    )
+    list_filter = ('change_date', 'data_type')
+    
+@admin.register(TransferMethod)
+class TransferMethodAdmin(admin.ModelAdmin):
+    list_display = ('transfer_method',)
+    
 @admin.register(SoftwareCost)
 class SoftwareCostAdmin(admin.ModelAdmin):
 	list_display = ('software',

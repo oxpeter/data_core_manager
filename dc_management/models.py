@@ -816,6 +816,81 @@ class Storage_Log(models.Model):
     def get_absolute_url(self):
         return reverse('dc_management:project', kwargs={'pk': self.project.pk})
 
+class TransferMethod(models.Model):
+    transfer_method  = models.CharField(max_length=32,)    
+
+class FileTransfer(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
+  
+    change_date = models.DateField(default=date.today)
+    ticket = models.CharField(max_length=32,null=True, blank=True)
+    
+    external_source = models.CharField(max_length=128,null=True, blank=True)
+    source = models.ForeignKey(Project, 
+                                null=True,
+                                blank=True,
+                                on_delete=models.CASCADE,
+                                related_name="source_project",
+                                )
+                                
+    external_destination = models.CharField(max_length=128,null=True, blank=True)
+    destination = models.ForeignKey(Project, 
+                                null=True,
+                                blank=True,
+                                on_delete=models.CASCADE,
+                                related_name="destination_project",
+                                )
+    transfer_method = models.ForeignKey(TransferMethod, on_delete=models.CASCADE)
+    
+    reviewed_by = models.ForeignKey(
+                            DC_Administrator, 
+                            on_delete=models.CASCADE,
+                            related_name='transfer_reviewer',
+                            blank=True,
+                            null=True,
+                            )
+
+    requester = models.ForeignKey(DC_User, on_delete=models.CASCADE)
+    filenames = models.TextField("files for transfer")
+
+    DEIDENTIFIED = 'DE'
+    IDENTIFIED = 'ID'
+    LIMITED = 'LM'
+    NOTDETERMINED = 'ND'
+    DATA_TYPE_CHOICES = (
+                    (DEIDENTIFIED, "Deidentified"),
+                    (IDENTIFIED, "PHI"),
+                    (LIMITED, "Limited Dataset"),
+                    (NOTDETERMINED, "Not determined"),
+    )  
+    data_type  = models.CharField(
+                            max_length=2,
+                            choices = DATA_TYPE_CHOICES,
+                            default = NOTDETERMINED,
+    )
+
+    comment = models.TextField()
+
+    def __str__(self):
+        if self.source:
+            src = self.source
+        else:
+            src = self.external_source
+            
+        if self.destination:
+            dest = self.destination
+        else:
+            dest = self.external_destination
+        
+        return "{}-{} ({})".format(src, dest, self.change_date)
+
+    class Meta:
+        verbose_name = 'File Transfer Log'
+        verbose_name_plural = 'File Transfer Logs'
+
+
 class Data_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
