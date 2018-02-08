@@ -819,6 +819,9 @@ class Storage_Log(models.Model):
 class TransferMethod(models.Model):
     transfer_method  = models.CharField(max_length=32,)    
 
+    def __str__(self):
+        return self.transfer_method
+
 class FileTransfer(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
@@ -844,17 +847,11 @@ class FileTransfer(models.Model):
                                 )
     transfer_method = models.ForeignKey(TransferMethod, on_delete=models.CASCADE)
     
-    reviewed_by = models.ForeignKey(
-                            DC_Administrator, 
-                            on_delete=models.CASCADE,
-                            related_name='transfer_reviewer',
-                            blank=True,
-                            null=True,
-                            )
 
     requester = models.ForeignKey(DC_User, on_delete=models.CASCADE)
     filenames = models.TextField("files for transfer")
-
+    file_num = models.IntegerField("number of files")
+    
     DEIDENTIFIED = 'DE'
     IDENTIFIED = 'ID'
     LIMITED = 'LM'
@@ -870,8 +867,15 @@ class FileTransfer(models.Model):
                             choices = DATA_TYPE_CHOICES,
                             default = NOTDETERMINED,
     )
+    reviewed_by = models.ForeignKey(
+                            DC_Administrator, 
+                            on_delete=models.CASCADE,
+                            related_name='transfer_reviewer',
+                            blank=True,
+                            null=True,
+                            )
 
-    comment = models.TextField()
+    comment = models.TextField(null=True, blank=True)
 
     def __str__(self):
         if self.source:
