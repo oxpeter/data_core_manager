@@ -213,7 +213,8 @@ class SendMail(LoginRequiredMixin, generic.TemplateView):
                   }
 
         context = super(SendMail, self).get_context_data(**kwargs)
-        context.update({'gettoken': access_token,
+        context.update({'email_details':email_details,
+                        'gettoken': access_token,
                         'sendtest': send_message(access_token,user_email,payload),
         })
         return context
@@ -1240,6 +1241,7 @@ class FileTransferView(LoginRequiredMixin, generic.DetailView):
 class FileTransferCreate(LoginRequiredMixin, CreateView):
     model = FileTransfer
     form_class = FileTransferForm
+    template_name = "dc_management/basic_form.html"
     success_url = reverse_lazy('dc_management:sendtest')
 
     def form_valid(self, form):
@@ -1255,7 +1257,7 @@ class FileTransferCreate(LoginRequiredMixin, CreateView):
         
         # send email
         if form.instance.ticket:
-            sbj_ticket = "Re: incident {}".format(form.instance.ticket)
+            sbj_ticket = "Re: incident {} ".format(form.instance.ticket)
             toemail = 'oxpeter+support@gmail.com'
         else:
             sbj_ticket = ""
@@ -1285,21 +1287,25 @@ class FileTransferCreate(LoginRequiredMixin, CreateView):
                                         form.instance.transfer_method,
                                         )
         
-        subject_str = 'Transfer file{} {} {}'
+        subject_str = '{}Transfer file{} {} {}'
         body_str = '''Dear OPs,
 
-Please transfer the following {0} file{1} {2} {3}.
+Please transfer the following {0} file{1} {2} {3}:
 
 {4}
 
+{5}
+
 Kind regards,
-{5}'''
-        subj_msg = subject_str.format(plural, src, dest)
+{6}'''
+        subj_msg = subject_str.format(sbj_ticket, plural, src, dest)
         body_msg = body_str.format(form.instance.file_num,
                                     plural,
                                     src,
                                     dest,
+                                    form.instance.filenames,
                                     form.instance.comment,
+                                    self.request.user,
                                     )
         
         email_dict = {  'subject' :subj_msg,

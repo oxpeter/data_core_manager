@@ -56,7 +56,7 @@
 <div class="tab-pane active" id="details">
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:project-update' project.pk %}">Update project</a>
 <a type="button" class="btn btn-default" href="#">Decommission project</a>
-<a type="button" class="btn btn-warning" href="{% url 'dc_management:file-transfer-add' %}">Transfer file(s)</a>
+<a type="button" class="btn btn-danger" href="{% url 'dc_management:file-transfer-add' %}">Transfer file(s)</a>
 <a type="button" class="btn btn-default" href="#">Unmount project</a>
 <a type="button" class="btn btn-default" href="#">Mount project</a>
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:storage-change' project.pk %}">Change Storage</a>
@@ -359,6 +359,85 @@
        <td>{{ l.storage_type }}</td>
        <td>{{ l.storage_amount }}</td>
        <td>{{ l.comments }}</td>
+       </tr>
+  {% endfor %}
+ </table>
+
+ <h4>
+    File Transfer logs
+ </h4>
+ <table class="table table-striped">
+  <thead class="thead-inverse">
+        <tr>
+            <th>Date</th>
+            <th>Ticket</th>
+            <th>Source</th>
+            <th>Destination</th>
+            <th>Data</th>
+        </tr>
+  </thead>
+  {% for ft in project.source_project.all %}
+   <tr>
+       <td>
+            <a href="{% url 'dc_management:file-transfer-view' ft.pk %}">
+              {{ ft.change_date }}
+            </a>
+        </td>
+       {% if ft.ticket %}
+       <td>{{ ft.ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ ft.ticket }}</td>
+       {% endif %}
+       
+        <td> 
+        {% if ft.source %}
+        {{ ft.source }}
+        {% elif ft.external_source %}
+        {{ ft.external_source }}
+        {% endif %}
+        </td>
+        <td>
+        {% if ft.destination %}
+        {{ ft.destination }}
+        {% elif ft.external_destination %}
+        {{ ft.external_destination }}
+        {% endif %}
+        </td>
+       
+       <td>{{ ft.get_data_type_display }}</td>
+       
+       </tr>
+  {% endfor %}
+  {% for ft in project.destination_project.all %}
+   <tr>
+       <td>
+         <a href="{% url 'dc_management:file-transfer-view' ft.pk %}">
+           {{ ft.change_date }}
+         </a>
+       </td>
+       {% if ft.ticket %}
+       <td>{{ ft.ticket }}</td>
+       {% else %}
+       <td class="bg-warning" style="color:orange;">{{ ft.ticket }}</td>
+       {% endif %}
+       
+        <td> 
+        {% if ft.source %}
+        {{ ft.source }}
+        {% elif ft.external_source %}
+        {{ ft.external_source }}
+        {% endif %}
+        </td>
+        <td>
+        {% if ft.destination %}
+        {{ ft.destination }}
+        {% elif ft.external_destination %}
+        {{ ft.external_destination }}
+        {% endif %}
+        </td>
+       
+       <td>{{ ft.get_data_type_display }}</td>
+       
        </tr>
   {% endfor %}
  </table>
