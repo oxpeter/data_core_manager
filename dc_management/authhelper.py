@@ -111,8 +111,11 @@ def get_access_token(request, redirect_uri):
     # Get current timestamp (seconds since Unix Epoch) and
     # add expires_in to get expiration time
     # Subtract 5 minutes to allow for clock differences
-    expiration = int(time.time()) + new_tokens['expires_in'] - 300
-
+    try:
+        expiration = int(time.time()) + new_tokens['expires_in'] - 300
+    except KeyError:
+        return ''
+        
     # Save the token in the session
     request.session['outlook_access_token'] = new_tokens['access_token']
     request.session['outlook_refresh_token'] = new_tokens['refresh_token']
