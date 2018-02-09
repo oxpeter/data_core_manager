@@ -868,7 +868,7 @@ class FileTransfer(models.Model):
                             default = NOTDETERMINED,
     )
     reviewed_by = models.ForeignKey(
-                            DC_Administrator, 
+                            User, 
                             on_delete=models.CASCADE,
                             related_name='transfer_reviewer',
                             blank=True,
