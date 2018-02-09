@@ -8,6 +8,7 @@ import datetime
 from django.utils import timezone
 
 from .models import Server, Project, DC_User, Access_Log, EnvtSubtype, SubFunction
+from .models import StorageCost
 
 from .forms import StorageChangeForm
 
@@ -26,6 +27,9 @@ class ProjectModelTests(TestCase):
         
 class StorageTestCase(TestCase):
     def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser', email='pro2004@med.cornell.edu', password='top_secret')
+        
         js = DC_User.objects.create(first_name='John', last_name='Smith', cwid='jos1234')
         jd = DC_User.objects.create(first_name='Jane', last_name='Doe', cwid='jed2001')
         env = EnvtSubtype.objects.create(name='cool_research')
@@ -47,7 +51,7 @@ class StorageTestCase(TestCase):
                             connection_date = datetime.date(2014, 6, 30),
                             comments = "This is an awesome test server for unittest",
         )
-        Project.objects.create( dc_prj_id = 'prj0006',
+        self.prj1 = Project.objects.create( dc_prj_id = 'prj0006',
                                 title = 'test project',
                                 nickname = 'testy',
                                 fileshare_storage = 100,
@@ -66,7 +70,7 @@ class StorageTestCase(TestCase):
                                 host = host,
                                 comments = "This is a test project for unittest",
         )
-        Project.objects.create( dc_prj_id = 'prj0007',
+        self.prj2 = Project.objects.create( dc_prj_id = 'prj0007',
                                 title = 'minimal test project',
                                 nickname = 'minitest',
                                 pi = jd,
@@ -76,12 +80,21 @@ class StorageTestCase(TestCase):
                                 requested_launch = datetime.date(2018, 2, 13),
                                 status = 'RU',
         )
-        StorageCost.objects.create(
-            record_author = models.ForeignKey(User, on_delete=models.CASCADE)
-    
-            storage_type = models.CharField(max_length=64)
-            st_cost_per_gb = models.FloatField()
-)
+        self.stor_direct = StorageCost.objects.create(
+            record_author = self.user,
+            storage_type = 'direct storage',
+            st_cost_per_gb = 0.3,
+        )
+        self.stor_fileshare = StorageCost.objects.create(
+            record_author = self.user,
+            storage_type = 'fileshare with replication',
+            st_cost_per_gb = 0.3,
+        )
+        self.stor_vbckup = StorageCost.objects.create(
+            record_author = self.user,
+            storage_type = 'versioned backup',
+            st_cost_per_gb = 1.2,
+        )
         
         
     def test_unique_cwid(self):
@@ -89,32 +102,33 @@ class StorageTestCase(TestCase):
             newbie = DC_User.objects.create(first_name='Tim', 
                                             last_name='Taylor', 
                                             cwid='jos1234')
-                                            
-    def test_init_without_entry(self):
-        with self.assertRaises(KeyError):
-            StorageChangeForm()
             
     def test_valid_data(self):
         form = StorageChangeForm({
-                    'sn_ticket':,
-                    'date_changed':,
-                    'project':,
+                    'sn_ticket':"INC1006733",
+                    'date_changed':"2017-12-26",
+                    'project':self.prj2.pk,
                     'storage_amount':200,
-                    'storage_type':"",
-                    'comments':"random comment"
-        }, entry=self.entry)
+                    'storage_type':self.stor_fileshare.pk,
+                    'comments':"random comment",
+                    'record_author':self.user.pk
+        })
+        
+        
+        #self.assertTrue(form.is_valid())
+        form.record_author = self.user
+        form.record_author_id = self.user.pk
         self.assertTrue(form.is_valid())
-        comment = form.save()
-        self.assertEqual(comment.name, "Turanga Leela")
-        self.assertEqual(comment.email, "leela@example.com")
-        self.assertEqual(comment.body, "Hi there")
-        self.assertEqual(comment.entry, self.entry)
+        changelog = form.save()
+        self.assertEqual(changelog.sn_ticket, "INC1006733")
+        self.assertEqual(changelog.date_changed, datetime.date(2017, 12, 26))
+        self.assertEqual(changelog.project, self.prj2.pk)
+        self.assertEqual(changelog.storage_amount, 200)
+        self.assertEqual(changelog.storage_type, self.stor_fileshare.pk)
+        self.assertEqual(changelog.comments, "random comment")
 
     def test_blank_data(self):
-        form = CommentForm({}, entry=self.entry)
+        form = StorageChangeForm({})
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors, {
-            'name': ['required'],
-            'email': ['required'],
-            'body': ['required'],
-        })
+        
+   
