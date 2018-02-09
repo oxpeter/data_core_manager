@@ -78,15 +78,32 @@ def get_token_from_refresh_token(refresh_token, redirect_uri):
     return 'Error retrieving token: {0} - {1}'.format(r.status_code, r.text)
     
 def get_access_token(request, redirect_uri):
-  current_token = request.session['outlook_access_token']
-  expiration = request.session['outlook_token_expires']
+  try:
+      current_token = request.session['outlook_access_token']
+  except KeyError:
+      current_token = None
+  try:
+      expiration = request.session['outlook_token_expires']
+  except KeyError:
+      expiration = 9999999
+      
   now = int(time.time())
   if (current_token and now < expiration):
     # Token still valid
     return current_token
   else:
     # Token expired
-    refresh_token = request.session['outlook_refresh_token']
+    try:
+        refresh_token = request.session['outlook_refresh_token']
+    except KeyError:
+        # adding this for sessions that cannot get a token
+        refresh_token = ''
+        request.session['outlook_access_token'] = ''
+        request.session['outlook_refresh_token'] = ''
+        request.session['outlook_token_expires'] = ''
+        request.session['outlook_user_email'] = ''
+        
+        return ''
     new_tokens = get_token_from_refresh_token(refresh_token, redirect_uri)
 
     # Update session
