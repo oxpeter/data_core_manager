@@ -638,7 +638,7 @@ class AddUserToProject(LoginRequiredMixin, FormView):
 This ticket refers to SOP "HowTo: Add or remove a user to a Data Core project"
 https://nexus.weill.cornell.edu/display/ops/HowTo%3A+Add+or+remove+a+user+to+a+Data+Core+project+group
 
-For the following {4} users, please add them to the AD group for project {0} ({1}, {2}) and create their corresponding fileshare directory "WorkArea-<CWID>":
+For the following {4} users, please add them to the AD group for project {0} ({1}, {2}) and create their corresponding fileshare directory (permissions indicated):
 
 {3}
 
@@ -650,9 +650,9 @@ Kind regards,
         body_msg = body_str.format(prj.dc_prj_id,
                             node,
                             ip,
-                            '\n'.join([str(u) for u in userlist]),
+                            '\n'.join(["{} ; WorkArea-{} ; (RWX)".format(u,u.cwid) for u in userlist]),
                             len(userlist),
-                            self.request.user,
+                            self.request.user.get_short_name(),
                             email_comment,
                             )
 
@@ -765,7 +765,7 @@ Kind regards,
                             node,
                             ip,
                             '\n'.join([str(u) for u in userlist]),
-                            self.request.user,
+                            self.request.user.get_short_name(),
                             email_comment,
                             )
         
@@ -1305,7 +1305,7 @@ Kind regards,
                                     dest,
                                     form.instance.filenames,
                                     form.instance.comment,
-                                    self.request.user,
+                                    self.request.user.get_short_name(),
                                     )
         
         email_dict = {  'subject' :subj_msg,
