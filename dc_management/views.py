@@ -400,12 +400,21 @@ class StorageChange(LoginRequiredMixin, CreateView):
         # update initial field defaults with custom set default values:
         initial.update({'project': chosen_project, })
         return initial
- 
-    
+
+    def get_success_url(self):
+        if self.update_server == True:
+            return reverse_lazy('dc_management:sendtest',)
+        else:
+            return reverse('dc_management:project', args=[self.project_pk])
+                
     def form_valid(self, form):
-        # This method is called when valid form data has been POSTed.
-        # It should return an HttpResponse.
-        post_data = self.request.POST 
+        # clear email fields in session
+        email_details = {   'subject' :"na",
+                            'body'    :"na",
+                            'to_email':"na",
+        }
+        self.request.session['email_json'] = json.dumps(email_details)
+
         log = form.save(commit=False)
         
         log.record_author = self.request.user
@@ -415,8 +424,15 @@ class StorageChange(LoginRequiredMixin, CreateView):
         
         # match storage type to project (this needs to be more robust)
         s_type = log.storage_type.storage_type
+        assess_server = False
         if re.search('direct', s_type.lower()):
-            project.direct_attach_storage = log.storage_amount
+            existing_project_storage = project.direct_attach_storage
+            if not existing_project_storage:
+                existing_project_storage = 0
+            new_project_storage = log.storage_amount
+            project.direct_attach_storage = new_project_storage
+            existing_server_storage = project.host.other_storage
+            assess_server = True
         elif re.search('backup', s_type.lower()):
             project.backup_storage = log.storage_amount
         elif re.search('share', s_type.lower()):
@@ -426,9 +442,73 @@ class StorageChange(LoginRequiredMixin, CreateView):
         
         project.save()
         log.save()
-        ## TODO: 
-        # send email requesting change:
         
+        ## TODO: 
+        # assess if this project change requires a server change
+        self.update_server = False
+        self.project_pk = project.pk
+        
+        if assess_server == True:
+            # was project biggest user of resources on node?
+            # get all other projects on node:
+            shared_prjs = Project.objects.filter(host=project.host).exclude(pk=project.pk)
+            # get the highest resource of the other projects:
+            if len(shared_prjs) == 0:  # ie, there is only one project on the node
+                new_server_amount = new_project_storage
+            elif max([p.direct_attach_storage for p in shared_prjs if p.direct_attach_storage]) == 0:
+                new_server_amount = new_project_storage
+            else:
+                highest_resource = max([p.direct_attach_storage for p in shared_prjs if p.direct_attach_storage])
+            
+                if new_project_storage > highest_resource:
+                    new_server_amount = new_project_storage 
+
+                elif existing_project_storage > highest_resource and \
+                     new_project_storage <= highest_resource:
+                        # change server direct_attach to highest of other projects
+                        new_server_amount = highest_resource
+                else:   # new amt < others, old amt <= others
+                    # no change necessary to server storage.
+                    new_server_amount = None  # not to be confused with 0
+                
+            if new_server_amount:
+                self.update_server = True
+                # update server storage amount:
+                host = project.host
+                host.other_storage = new_server_amount
+                host.save()
+                
+                # send email requesting change to server
+                if log.sn_ticket:
+                    ticket_redirect = "Re: incident {} ".format(log.sn_ticket)
+                else:
+                    ticket_redirect = ""
+                subject_str = '{}Change {} E: drive to {} GB'
+                body_str = '''Dear OPs, 
+        
+Please change the E: drive storage on node {0} to {1} GB.
+
+{2}
+
+Kind regards,
+{3}'''
+                subj_msg = subject_str.format(ticket_redirect,
+                                                project.host.node, 
+                                                new_server_amount
+                )
+                body_msg = body_str.format(project.host.node,
+                                    new_server_amount,
+                                    log.comments,
+                                    self.request.user.get_short_name(),
+                )
+
+                email_dict = {  'subject' :subj_msg,
+                                'body'    :body_msg,
+                                'to_email':"oxpeter+dcore-ticket@gmail.com",
+                }
+        
+                self.request.session['email_json'] = json.dumps(email_dict)
+
         return super(StorageChange, self).form_valid(form)
 
 ###############################
