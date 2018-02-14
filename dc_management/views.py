@@ -239,6 +239,10 @@ class IndexView(LoginRequiredMixin, generic.ListView):
             'onboarding_list' : Project.objects.filter(
                                         postdata_date__isnull=True,
                                         ).order_by('requested_launch'),
+            'shutting_list' : Project.objects.filter(
+                                        status='SD',
+                                        completion_date__isnull=True,
+                                        ).order_by('expected_completion'),                            
             'user_list': DC_User.objects.filter(
                                         project_pi__isnull=False,
                                         ).distinct().order_by('first_name'),

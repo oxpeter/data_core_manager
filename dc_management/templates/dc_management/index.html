@@ -79,6 +79,20 @@
       </div>
      </div>
     </div>
+
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>Projects shutting down</h4>
+      </div>
+      <div class="panel-body">
+         {% with shutting_list as project_list %}
+            {% include "dc_management/project_closing_list.html" %}
+        {% endwith %}
+      </div>
+     </div>
+    </div>
+
     <div class="container">
      <div class="panel panel-info">
       <div class="panel-heading">
@@ -142,7 +156,8 @@
     <h2>Active Projects</h2>
     <a type="button" class="btn btn-info" href="{% url 'dc_management:all_projects' %}">View all projects</a>
     <a type="button" class="btn btn-primary" href="{% url 'dc_management:project-add' %}">Add new project</a>
-    <a type="button" class="btn btn-default" href="#">Decommission project</a>
+    <a type="button" class="btn btn-default" href="#">Schedule project close</a>
+    <a type="button" class="btn btn-default" href="#">Close project</a>
     <a type="button" class="btn btn-primary"  href="{% url 'dc_management:govdocmeta-add' %}">Add governance document</a>
     <a type="button" class="btn btn-danger" href="{% url 'dc_management:file-transfer-add' %}">Transfer file(s)</a>
     {% include "dc_management/project_list.html" %}
@@ -151,8 +166,8 @@
   
   <div class="tab-pane" id="users">
     <h2>Data Core PIs</h2>
-    <a type="button" class="btn btn-primary" href="{% url 'dc_management:dc_user-add' %}">Create user</a>
     <a type="button" class="btn btn-info" href="{% url 'dc_management:all_users' %}">View all users</a>
+    <a type="button" class="btn btn-primary" href="{% url 'dc_management:dc_user-add' %}">Create user</a>
     <a type="button" class="btn btn-info" href="{% url 'dc_management:bulkuserupload' %}">Create users (bulk upload)</a>
     {% include "dc_management/user_list_multiproject.html" %}
     </br>

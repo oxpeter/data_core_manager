@@ -1,0 +1,59 @@
+{% load bootstrap3 %}
+
+{% load project_tags %}
+
+{% if project_list %}
+    <table class="table table-striped table-hover">
+    <thead class="thead-default">
+    <tr>
+        <th>Project</th>
+        <th>PI</th>
+        <th># users</th>
+        <th>Project title</th>
+        <th>Expected completion</th>
+    </tr>
+    </thead>
+
+    {% for project in project_list %}
+      <tr>
+        <td><a {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}
+        href="{% url 'dc_management:project' project.pk %}">{{ project.dc_prj_id }}</a></td>
+        <td><a {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}
+        href="{% url 'dc_management:dcuser' project.pi.pk %}">{{ project.pi }}</a> </td>
+        {% if project.expected_completion|days_until:0 and project.users.all.count != 0 %}
+            <td class="bg-danger" style="color:red;">
+            {{ project.users.all.count }}</td> 
+        {% elif project.expected_completion|days_until:10 and project.status == 'RU' %}
+            <td class="bg-warning" style="color:orange;">
+            {{ project.users.all.count }}</td>
+        {% else %}
+            <td>{{ project.users.all.count }}</td>
+        {% endif %}
+        <td {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}>
+        {{ project.title }}</td>
+        
+        <!-- highlight based on project status and days to expected completion --!>    
+        {% if project.expected_completion|days_until:0 and project.users.count != 0 %}
+            <td class="bg-danger" style="color:red;">
+            {{ project.expected_completion }}
+            <a type="button" class="btn btn-default" href="#">Close project</a>
+            </td>
+        {% elif project.expected_completion|days_until:1 and project.users.count != 0  %}
+            <td class="bg-warning" style="color:orange;">
+            {{ project.expected_completion }}
+            <a type="button" class="btn btn-default" href="#">Close project</a>
+            </td>
+        {% else %}
+            <td>
+            {{ project.expected_completion }}</td>
+        {% endif %}
+            
+         
+      </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>No projects are currently running.</p>
+{% endif %}
+</br>
+
