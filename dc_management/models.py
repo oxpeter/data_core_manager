@@ -349,8 +349,8 @@ class Project(models.Model):
     sn_tickets = models.CharField(max_length=32, null=True, blank=True)
     predata_ticket = models.CharField(max_length=32, null=True, blank=True)
     predata_date = models.DateField(null=True, blank=True)
-    postdata_ticket = models.CharField(max_length=32, null=True, blank=True)
-    postdata_date = models.DateField(null=True, blank=True)
+    postdata_ticket = models.CharField("Ticket confirming data loaded", max_length=32, null=True, blank=True)
+    postdata_date = models.DateField("Date data load confirmed", null=True, blank=True)
     wrapup_ticket = models.CharField("ticket for request to complete", 
                                         max_length=32, 
                                         null=True, 
