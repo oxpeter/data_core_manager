@@ -452,7 +452,12 @@ class Governance_Doc(models.Model):
     comments = models.TextField(null=True, blank=True)
 
     def __str__(self):
-            return "{0}_{2}_{1}".format(self.governance_type, self.doc_id, self.project)
+            return "{4}_{0}_{2}_{1}_{3}".format(self.governance_type, 
+                                                self.doc_id, 
+                                                self.project,
+                                                self.expiry_date,
+                                                self.pk,
+                                                )
 
     def allowed_user_string(self):
         return  ", ".join([u.cwid for u in self.users_permitted.all()])
