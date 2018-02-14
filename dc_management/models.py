@@ -485,7 +485,8 @@ class Governance_Doc(models.Model):
             status = "warning"
         elif td.days <= 90:
             status = "primary"
-        
+        else:
+            status = "danger"
         return status
     
     def get_absolute_url(self):

@@ -63,17 +63,29 @@
 <div class="tab-pane active" id="details">
 
 
-<h2>{{ dc_user.project_set.all.count }} projects</h2>
+<h2>User for {{ dc_user.project_set.all.count }} projects</h2>
 
 {% with dc_user.project_set.all as project_list %}
     {% include 'dc_management/project_list.html' %}
+{% endwith %}
+
+<h2>PI for {{ dc_user.project_pi.all.count }} projects</h2>
+
+{% with dc_user.project_pi.all as project_list %}
+    {% include 'dc_management/project_list.html' %}
+{% endwith %}
+
+
+<h2>Listed on {{ dc_user.governance_doc_set.all.count }} governance documents</h2>
+
+{% with dc_user.governance_doc_set.all as gov_doc_list %}
+    {% include "dc_management/gov_docs_list.html" %}
 {% endwith %}
 
 {% if dc_user.comments %}
 <h3>Comments</h3>
 <p>{{ dc_user.comments }}</p>
 {% endif %}
-
 
 </br>
 

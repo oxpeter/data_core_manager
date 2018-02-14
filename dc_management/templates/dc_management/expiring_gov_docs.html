@@ -7,7 +7,7 @@
         
         {% if gd.attention_required != "safe" %}
         <tr>
-        <td><a href="{% url 'dc_management:govdoc' gd.pk %}" target="_blank">{{ gd }}</a></td>
+        <td><a href="{% url 'dc_management:govdocmeta' gd.pk %}" target="_blank">{{ gd }}</a></td>
         <td>{{ gd.doc_id }}</td>
 
         {% if gd.attention_required == "danger" %}

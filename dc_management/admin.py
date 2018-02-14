@@ -16,7 +16,8 @@ admin.site.index_title = "Back end administration"
 @admin.register(Governance_Doc)
 class GovDocAdmin(admin.ModelAdmin):
     date_hierarchy = 'expiry_date'
-    list_display = ('doc_id', 
+    list_display = ('pk',
+                    'doc_id', 
                     'expiry_date',
                     'project', 
                     'defers_to_doc', 

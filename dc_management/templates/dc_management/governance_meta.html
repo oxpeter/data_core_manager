@@ -68,7 +68,7 @@
         {{ governance_doc.defers_to_doc }}
       </a>
     {% endif %}
-    {% for gd in governance_doc.superseded_by_set.all %}
+    {% for gd in governance_doc.superseded_by.all %}
       <br/>{{ gd }}
     {% endfor %}
   </td>
@@ -78,7 +78,7 @@
 {% endcomment %}
 
 {% comment %}
-{% if governance_doc.supersedes_doc or governance_doc.overrules_set.count > 0 %}
+{% if governance_doc.supersedes_doc or governance_doc.overrules.count > 0 %}
 {% endcomment %}
 <tr>
   <th>Supersedes gov. doc:</th>
@@ -88,7 +88,7 @@
         {{ governance_doc.supersedes_doc }}
       </a> 
     {% endif %}
-    {% for gd in governance_doc.overrules_set.all %}
+    {% for gd in governance_doc.overrules.all %}
       <br/>{{ gd }}
     {% endfor %}
   </td>
