@@ -29,7 +29,7 @@
         <th>Disk Storage</th>
         <th>Other Storage</th>
         <th>Connection Date</th>
-        <th>DNS name</th>
+        <th>OS</th>
         <th>Host</th>
     </tr>
     </thead>
@@ -40,7 +40,7 @@
         <td>{{ server.disk_storage }}</td>
         <td>{{ server.other_storage }}</td>
         <td>{{ server.connection_date }}</td>
-        <td>{{ server.dns_name }}</td>
+        <td>{{ server.get_operating_sys_display }}</td>
         <td>{{ server.host }}</td>
     </tr>
 </table>

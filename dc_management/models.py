@@ -103,11 +103,13 @@ class Server(models.Model):
 
     MWS2008 = "M8" 
     MWS2012 = "M2" 
+    MWS2016 = "M6"
     RHEL7 = "R7" 
     WINDOWS7 = "W7" 
     OS_CHOICES = (
             (MWS2008, "Microsoft Windows Server 2008 (64-bit)"),
             (MWS2012, "Microsoft Windows Server 2012 (64-bit)"),
+            (MWS2016, "Microsoft Windows Server 2016 (64-bit)"),
             (RHEL7, "Red Hat Enterprise Linux 7 (64-bit)"),
             (WINDOWS7, "Microsoft Windows 7 (64-bit)"),
     )
