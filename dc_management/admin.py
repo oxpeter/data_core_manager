@@ -24,20 +24,21 @@ class GovDocAdmin(admin.ModelAdmin):
                     "supersedes_doc",
                     'allowed_user_string',
                     )
-    list_filter = ('governance_type',)
-
+    list_filter = ('governance_type','expiry_date')
+    search_fields = ('pk', 'doc_id', 'project')
+    
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-	list_display = ('dc_prj_id',
+    list_display = ('dc_prj_id',
 					'nickname',
 					'pi',
 					'title',
 					'fileshare_storage',
 					'status',
 					'expected_completion',
-	)
-	list_filter = ('pi','status')
-	exlude = (  'user_cost',
+    )
+    list_filter = ('pi','status')
+    exlude = (  'user_cost',
 				'host_cost',
 				'db_cost',
 				'fileshare_cost',
@@ -46,18 +47,18 @@ class ProjectAdmin(admin.ModelAdmin):
 				'software_cost',
 				'project_total_cost',
     )
-
+    search_fields = ('dc_prj_id', 'nickname', 'title')
 @admin.register(Server)
 class ServerAdmin(admin.ModelAdmin):
-	list_display = ('node',
+    list_display = ('node',
 					'ip_address',
 					'status',
 					'function',
 					'machine_type',
 					'operating_sys',
 					
-	)
-	list_filter = ('function','status', 'operating_sys', 'machine_type')
+    )
+    list_filter = ('function','status', 'operating_sys', 'machine_type')
 
 @admin.register(FileTransfer)
 class FileTransferAdmin(admin.ModelAdmin):
@@ -79,30 +80,40 @@ class TransferMethodAdmin(admin.ModelAdmin):
     
 @admin.register(SoftwareCost)
 class SoftwareCostAdmin(admin.ModelAdmin):
-	list_display = ('software',
+    list_display = ('software',
 					'software_cost',
 					)
 
 @admin.register(UserCost)
 class UserCostAdmin(admin.ModelAdmin):
-	list_display = ('user_quantity',
+    list_display = ('user_quantity',
 					'user_cost',
 					)
 
 @admin.register(StorageCost)
 class StorageCostAdmin(admin.ModelAdmin):
-	list_display = ('storage_type',
+    list_display = ('storage_type',
 					'st_cost_per_gb',
 					)
 
 @admin.register(DCUAGenerator)
 class DCUAGeneratorAdmin(admin.ModelAdmin):
-	list_display = ('project',
+    list_display = ('project',
 					'ticket',
 					'startdate',
 					'enddate',
 					'url',
 					)
+
+@admin.register(DC_User)
+class DC_UserAdmin(admin.ModelAdmin):
+    list_display = ('first_name',
+					'last_name',
+					'cwid',
+					'role',
+					)
+
+    search_fields = ('first_name', 'last_name', 'cwid',)
 
 
 admin.site.register(Access_Log)
@@ -110,7 +121,6 @@ admin.site.register(AccessPermission)
 admin.site.register(Audit_Log)
 admin.site.register(Data_Log)
 admin.site.register(DC_Administrator)
-admin.site.register(DC_User)
 admin.site.register(EnvtSubtype)
 admin.site.register(External_Access_Log)
 admin.site.register(SN_Ticket)
