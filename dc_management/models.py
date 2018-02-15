@@ -252,6 +252,7 @@ class Software(models.Model):
                             Software_License_Type, 
                             on_delete=models.CASCADE
                             )
+    package = models.BooleanField(default=False)
     purchase_details = models.TextField(null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
 
@@ -359,6 +360,7 @@ class Project(models.Model):
     wrapup_date = models.DateField("date project close requested", null=True, blank=True)
     completion_ticket = models.CharField(max_length=32, null=True, blank=True)
     completion_date = models.DateField(null=True, blank=True)
+    
     host = models.ForeignKey(Server, on_delete=models.CASCADE, null=True, blank=True)
     db = models.ForeignKey(Server, 
                             on_delete=models.CASCADE, 
