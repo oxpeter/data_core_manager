@@ -58,7 +58,7 @@
 <tr><th>Type</th><td>{{ governance_doc.get_governance_type_display }}</td></tr>
 
 {% comment %}
-{% if governance_doc.defers_to_doc or governance_doc.superseded_by_set.count > 0 %}
+{% if governance_doc.defers_to_doc or governance_doc.superseded_by.count > 0 %}
 {% endcomment %}
 <tr>
   <th>Defers to gov. docs:</th>  

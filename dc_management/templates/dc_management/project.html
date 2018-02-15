@@ -228,6 +228,10 @@
     {% with project.software_installed.all as software_list %}
         {% include "dc_management/software_list.html" %}
     {% endwith %}
+    <h4>Other available software (already installed on node):</h4>
+    {% with available_software as software_list %}
+        {% include "dc_management/software_list.html" %}
+    {% endwith %}
   </div>
  </div>
 </div>
@@ -239,9 +243,7 @@
     <h4>Project billing</h4>
   </div>
   <div class="panel-body">
-    {% comment %}
-    {% include "dc_management/project_billing.html" %}
-    {% endcomment %}
+        {% include "dc_management/project_billing.html" %}
   </div>
  </div>
 </div>

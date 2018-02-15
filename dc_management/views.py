@@ -274,9 +274,42 @@ class ProjectView(LoginRequiredMixin, generic.DetailView):
     model = Project
     template_name = 'dc_management/project.html'
 
+    def get_context_data(self, **kwargs):
+        # get project cost
+        project_costs = []
+        
+        # get all software installed on the node, and thus available to the prj
+        qs = Software_Log.objects.all()
+        qs_node = qs.filter(applied_to_node=self.object.host 
+                            ).order_by('software_changed','-change_date'
+                            )
+        current_swl = ''
+        available_sw = []
+        for swl in qs_node:
+            if swl == current_swl:
+                continue
+            else:
+                current_swl = swl
+                
+                # see if last change was to add software to node:
+                if swl.change_type == "AA" and \
+                swl.software_changed not in self.object.software_installed.all() and \
+                swl.software_changed not in available_sw:   
+                
+                    available_sw.append(swl.software_changed) 
+
+        # update context        
+        context = super(ProjectView, self).get_context_data(**kwargs)
+        context.update({
+                        'project_costs': project_costs,
+                        'available_software':available_sw,
+        })
+        return context
+
 class ServerView(LoginRequiredMixin, generic.DetailView):
     model = Server
     template_name = 'dc_management/server.html'
+
     def get_context_data(self, **kwargs):
         # get a non-redundant list of all users on the server
         server_users =  DC_User.objects.filter(project__host=self.kwargs['pk']
