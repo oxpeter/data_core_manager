@@ -5,7 +5,8 @@
 {% for gd in project.governance_doc_set.all %}
         
         
-        {% if gd.attention_required != "safe" and (gd.governance_type == "IR" or gd.governance_type == "DU") %}
+        {% if gd.attention_required != "safe" %}
+        {% if gd.governance_type == "IR" or gd.governance_type == "DU" %}
         <tr>
         <td><a href="{% url 'dc_management:govdocmeta' gd.pk %}" target="_blank">{{ gd.doc_id }}</a></td>
         <td>{{ gd.pk }}</td>
@@ -30,6 +31,7 @@
             </td>
         {% endif %}
         </tr>
+        {% endif %}
         {% endif %}
         
         
