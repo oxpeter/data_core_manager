@@ -119,6 +119,9 @@ urlpatterns = [
             name='file-transfer-add',
     ),
     
+    # search view:
+    path('search/all', views.FullSearch.as_view(), name="full-search"),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
