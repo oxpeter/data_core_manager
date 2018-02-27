@@ -1082,8 +1082,12 @@ class ExportFromThisProject(ExportRequest):
 @login_required()
 def pdf_view(request, pk):
     gov_doc = Governance_Doc.objects.get(pk=pk)
-    print("### GOV DOC:", gov_doc)
-    print("### GOV DOC FILE:", gov_doc.documentation.file)
+    # check to see if file is associated:
+    try:
+        gd_file = gov_doc.documentation.file
+    except FileNotFoundError:
+        raise Http404()
+        
     if gov_doc.documentation.name[-3:] == "pdf":
         try:
             # open(gov_doc.documentation.file, 'rb')
