@@ -954,7 +954,7 @@ class CreateDCAgreementURL(LoginRequiredMixin, CreateView):
         
         qualtrics_link += "?startdate={}&enddate={}".format(startdate,enddate)
         qualtrics_link += "{}".format(folders)
-        if len(ticket)>0 and re.search("INC\d{6,8}", ticket):
+        if ticket and re.search("INC\d{6,8}", ticket):
             qualtrics_link += "&ticket={}".format(ticket)
         
         # add qualtrics link to model instance and save:
