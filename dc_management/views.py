@@ -3,6 +3,7 @@ import os
 import re
 from datetime import date
 import time
+from urllib.parse import quote
 
 from dal import autocomplete
 
@@ -20,7 +21,7 @@ from django.urls import reverse_lazy, reverse
 from django.http import HttpResponse, Http404, FileResponse
 
 from django.urls import reverse_lazy
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
 from django.db.models import Q, Max, Sum
 from django.db.utils import IntegrityError
@@ -447,9 +448,11 @@ class StorageChange(LoginRequiredMixin, CreateView):
                 
     def form_valid(self, form):
         # clear email fields in session
-        email_details = {   'subject' :"na",
-                            'body'    :"na",
-                            'to_email':"na",
+        email_details = {   'subject'       :"na",
+                            'body'          :"na",
+                            'to_email'      :"na",
+                            'subject_html'  :"na",
+                            'body_html'     :"na",
         }
         self.request.session['email_json'] = json.dumps(email_details)
 
@@ -540,9 +543,11 @@ Kind regards,
                                     self.request.user.get_short_name(),
                 )
 
-                email_dict = {  'subject' :subj_msg,
-                                'body'    :body_msg,
-                                'to_email':"oxpeter+dcore-ticket@gmail.com",
+                email_dict = {  'subject'       :subj_msg,
+                                'body'          :body_msg,
+                                'to_email'      :"dcore-ticket@med.cornell.edu",
+                                'subject_html'  :quote(subj_msg),
+                                'body_html'     :quote(body_msg),
                 }
         
                 self.request.session['email_json'] = json.dumps(email_dict)
@@ -573,9 +578,11 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                                      prj.host.ip_address,
                                     )
 
-        email_dict = {  'subject' :sbj_msg,
-                        'body'    :body_msg,
-                        'to_email':"dcore-ticket@med.cornell.edu",
+        email_dict = {  'subject'       :sbj_msg,
+                        'body'          :body_msg,
+                        'to_email'      :"dcore-ticket@med.cornell.edu",
+                        'subject_html'  :quote(subj_msg),
+                        'body_html'     :quote(body_msg),
         }
         
         self.request.session['email_json'] = json.dumps(email_dict)
@@ -592,18 +599,22 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                              node.ip_address,
                             )
 
-        email_dict = {  'subject' :sbj_msg,
-                        'body'    :body_msg,
-                        'to_email':"dcore-ticket@med.cornell.edu",
+        email_dict = {  'subject'       :sbj_msg,
+                        'body'          :body_msg,
+                        'to_email'      :"dcore-ticket@med.cornell.edu",
+                        'subject_html'  :quote(subj_msg),
+                        'body_html'     :quote(body_msg),
         }
         
         self.request.session['email_json'] = json.dumps(email_dict)
 
     def form_valid(self, form):
         # clear email fields in session
-        email_details = {   'subject' :"na",
-                            'body'    :"na",
-                            'to_email':"na",
+        email_details = {   'subject'       :"na",
+                            'body'          :"na",
+                            'to_email'      :"na",
+                            'subject_html'  :"na",
+                            'body_html'     :"na",
         }
         self.request.session['email_json'] = json.dumps(email_details)
         
@@ -644,7 +655,8 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                     # breakage for null sets looking for [-1]
                     node = prj.host
                     form.instance.applied_to_node = node
-                    
+            else:
+                return redirect('dc_management:index')        
                     
             # if node specified (and not a project), and not already on node:
             if node and not prj:
@@ -658,7 +670,9 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                 # check if the last change to the node was to remove the software:
                 elif qs_node[0].change_type == "RA":
                     self.email_change_node_software(changestr, node, sw)
-        
+            else:
+                return redirect('dc_management:index')
+                
         elif change == "RA":
             changestr = "uninstall" # set language for emails:
             # if project specified, and not already uninstalled:
@@ -710,9 +724,11 @@ class AddUserToProject(LoginRequiredMixin, FormView):
     
     def form_valid(self, form):
         # clear email fields in session
-        email_details = {   'subject' :"na",
-                            'body'    :"na",
-                            'to_email':"na",
+        email_details = {   'subject'       :"na",
+                            'body'          :"na",
+                            'to_email'      :"na",
+                            'subject_html'  :"na",
+                            'body_html'     :"na",
         }
         self.request.session['email_json'] = json.dumps(email_details)
              
@@ -774,9 +790,11 @@ Kind regards,
                             email_comment,
                             )
 
-        email_dict = {  'subject' :subj_msg,
-                        'body'    :body_msg,
-                        'to_email':"oxpeter+dcore-ticket@gmail.com",
+        email_dict = {  'subject'       :subj_msg,
+                        'body'          :body_msg,
+                        'to_email'      :"dcore-ticket@med.cornell.edu",
+                        'subject_html'  :quote(subj_msg),
+                        'body_html'     :quote(body_msg),
         }
         
         self.request.session['email_json'] = json.dumps(email_dict)
@@ -824,9 +842,11 @@ class RemoveUserFromProject(LoginRequiredMixin, FormView ):
         post_data = self.request.POST
         
         # clear email fields in session
-        email_details = {   'subject' :"na",
-                            'body'    :"na",
-                            'to_email':"na",
+        email_details = {   'subject'       :"na",
+                            'body'          :"na",
+                            'to_email'      :"na",
+                            'subject_html'  :"na",
+                            'body_html'     :"na",
         }
         self.request.session['email_json'] = json.dumps(email_details)
                 
@@ -887,9 +907,11 @@ Kind regards,
                             email_comment,
                             )
         
-        email_dict = {  'subject' :subj_msg,
-                        'body'    :body_msg,
-                        'to_email':"oxpeter+dcore-ticket@gmail.com",
+        email_dict = {  'subject'       :subj_msg,
+                        'body'          :body_msg,
+                        'to_email'      :"dcore-ticket@med.cornell.edu",
+                        'subject_html'  :quote(subj_msg),
+                        'body_html'     :quote(body_msg),
         }
         
         self.request.session['email_json'] = json.dumps(email_dict)
@@ -1368,9 +1390,11 @@ class FileTransferCreate(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         # clear email fields in session
-        email_details = {   'subject' :"na",
-                            'body'    :"na",
-                            'to_email':"na",
+        email_details = {   'subject'       :"na",
+                            'body'          :"na",
+                            'to_email'      :"na",
+                            'subject_html'  :"na",
+                            'body_html'     :"na",
         }
         self.request.session['email_json'] = json.dumps(email_details)
 
@@ -1380,10 +1404,10 @@ class FileTransferCreate(LoginRequiredMixin, CreateView):
         # send email
         if form.instance.ticket:
             sbj_ticket = "Re: incident {} ".format(form.instance.ticket)
-            toemail = 'oxpeter+support@gmail.com'
+            toemail = 'support@med.cornell.edu'
         else:
             sbj_ticket = ""
-            toemail = 'oxpeter+dcore-ticket@gmail.com'
+            toemail = 'dcore-ticket@med.cornell.edu'
         
             
         if form.instance.file_num > 1:
@@ -1430,9 +1454,11 @@ Kind regards,
                                     self.request.user.get_short_name(),
                                     )
         
-        email_dict = {  'subject' :subj_msg,
-                        'body'    :body_msg,
-                        'to_email':toemail,
+        email_dict = {  'subject'       :subj_msg,
+                        'body'          :body_msg,
+                        'to_email'      :toemail,
+                        'subject_html'  :quote(subj_msg),
+                        'body_html'     :quote(body_msg),
         }
         
         self.request.session['email_json'] = json.dumps(email_dict)

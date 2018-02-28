@@ -22,10 +22,12 @@
 <p>"{{ sendtest }}"</p>
 
 </br>
-<h3>Email generated but not sent:</h3>
+<h3>Send email manually:</h3>
 <p>To: {{ email_details.to_email }}</p>
 <p>Subject: <strong>{{ email_details.subject }}</strong></p>
 <p>{{ email_details.body|linebreaks }}</p>
+<a class="btn btn-success" href="mailto:{{ email_details.to_email }}?subject={{ email_details.subject_html }}&body={{ email_details.body_html }}"">Send email!</a>
+
 
 {% endif %}
 {% endblock %}
