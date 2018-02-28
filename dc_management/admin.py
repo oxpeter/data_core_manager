@@ -5,7 +5,8 @@ from .models import DC_Administrator, DC_User, EnvtSubtype, External_Access_Log
 from .models import Governance_Doc, Project, Server, Server_Change_Log, SN_Ticket
 from .models import Software, Software_License_Type, Software_Log, Software_Purchase
 from .models import Storage_Log, SubFunction, SoftwareCost, UserCost, StorageCost
-from .models import DCUAGenerator, FileTransfer, TransferMethod
+from .models import DCUAGenerator, FileTransfer, TransferMethod, Department
+from .models import ResourceLog
 
 # customize the look of the admin site:
 admin.site.site_header = 'Data Core Management Site'
@@ -120,9 +121,11 @@ admin.site.register(Access_Log)
 admin.site.register(AccessPermission)
 admin.site.register(Audit_Log)
 admin.site.register(Data_Log)
+admin.site.register(Department)
 admin.site.register(DC_Administrator)
 admin.site.register(EnvtSubtype)
 admin.site.register(External_Access_Log)
+admin.site.register(ResourceLog)
 admin.site.register(SN_Ticket)
 admin.site.register(Software)
 admin.site.register(Software_License_Type)

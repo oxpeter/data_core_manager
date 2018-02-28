@@ -157,6 +157,11 @@ class EnvtSubtype(models.Model):
     def __str__(self):
             return self.name
 
+class Department(models.Model):
+    name = models.CharField(max_length=128, unique=True)
+    def __str__(self):
+        return "{}".format(self.name)
+   
 class DC_User(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
@@ -165,7 +170,15 @@ class DC_User(models.Model):
     cwid = models.CharField(max_length=16, unique=True)
     first_name = models.CharField(max_length=32)
     last_name = models.CharField(max_length=32)
-    
+    email = models.CharField("Primary email address", 
+                            max_length=32, 
+                            null=True, 
+                            blank=True
+    )
+    department = models.ForeignKey(Department, 
+                                    null=True, 
+                                    blank=True, 
+                                    on_delete=models.CASCADE,)
     WCM = "WC"
     NYP = "NP"
     ROCKU = "RU"
@@ -301,6 +314,13 @@ class Project(models.Model):
                     DC_User, 
                     on_delete=models.CASCADE,
                     related_name='project_pi')
+    prj_admin = models.ForeignKey(
+                    DC_User, 
+                    on_delete=models.CASCADE,
+                    null=True,
+                    blank=True,
+                    related_name='prj_admin')
+
     software_installed = models.ManyToManyField(
                                             Software,
                                             related_name='software_installed',
@@ -452,7 +472,7 @@ class Governance_Doc(models.Model):
                             null=True,
                             blank=True,
     )
-
+    destroy_data = models.NullBooleanField()
     comments = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -826,6 +846,29 @@ class Storage_Log(models.Model):
     def get_absolute_url(self):
         return reverse('dc_management:project', kwargs={'pk': self.project.pk})
 
+class ResourceLog(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
+    date_changed = models.DateField(default=date.today)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    new_RAM = models.IntegerField(null=True, blank=True)
+    new_CPU = models.IntegerField(null=True, blank=True)
+    comments = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return "{}: {} RAM {} CPUs".format(self.date_changed, self.new_RAM, self.new_CPU)
+
+    class Meta:
+        verbose_name = 'Computing Resource Log'
+        verbose_name_plural = 'Computing Resource Logs'
+    
+    def get_absolute_url(self):
+        return reverse('dc_management:project', kwargs={'pk': self.project.pk})
+
+
 class TransferMethod(models.Model):
     transfer_method  = models.CharField(max_length=32,)    
 
@@ -903,7 +946,6 @@ class FileTransfer(models.Model):
     class Meta:
         verbose_name = 'File Transfer Log'
         verbose_name_plural = 'File Transfer Logs'
-
 
 class Data_Log(models.Model):
     record_creation = models.DateField(auto_now_add=True)
