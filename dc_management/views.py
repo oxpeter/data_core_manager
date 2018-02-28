@@ -573,9 +573,9 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                                      prj.host.ip_address,
                                     )
 
-        email_dict = {  'subject' :subj_msg,
+        email_dict = {  'subject' :sbj_msg,
                         'body'    :body_msg,
-                        'to_email':"oxpeter+dcore-ticket@gmail.com",
+                        'to_email':"dcore-ticket@med.cornell.edu",
         }
         
         self.request.session['email_json'] = json.dumps(email_dict)
@@ -592,9 +592,9 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
                              node.ip_address,
                             )
 
-        email_dict = {  'subject' :subj_msg,
+        email_dict = {  'subject' :sbj_msg,
                         'body'    :body_msg,
-                        'to_email':"oxpeter+dcore-ticket@gmail.com",
+                        'to_email':"dcore-ticket@med.cornell.edu",
         }
         
         self.request.session['email_json'] = json.dumps(email_dict)
