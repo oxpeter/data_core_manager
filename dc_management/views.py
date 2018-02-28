@@ -1086,7 +1086,7 @@ def pdf_view(request, pk):
     # check to see if file is associated:
     try:
         gd_file = gov_doc.documentation.file
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError) as e:
         raise Http404()
         
     if gov_doc.documentation.name[-3:] == "pdf":
