@@ -48,7 +48,7 @@
               <h4>{{ s }}</h4>
               <ul>
               {% for u in s.duplicate_users %}
-              <li>{{ u }}</li>
+              <li><a href="{% url 'dc_management:dcuser' u.pk %}">{{ u }}</a></li>
               {% endfor %}
               </ul>
             {% endif %}
@@ -184,7 +184,11 @@
     <a type="button" class="btn btn-default" href="#">Close project</a>
     <a type="button" class="btn btn-primary"  href="{% url 'dc_management:govdocmeta-add' %}">Add governance document</a>
     <a type="button" class="btn btn-danger" href="{% url 'dc_management:file-transfer-add' %}">Transfer file(s)</a>
-    {% include "dc_management/project_list.html" %}
+    {% with  project_list as project_list %}
+    {% with 'dc_management/project_list.html' as passthroughhtml %}
+        {% include 'dc_management/project_list_template.html' %}
+    {% endwith %}
+    {% endwith %}
     
   </div>
   

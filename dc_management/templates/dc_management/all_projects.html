@@ -6,7 +6,9 @@
 <h2>All Projects</h2>
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:dc_user-add' %}">Create user</a>
 
-{% include 'dc_management/project_list.html' %}
+    {% with 'dc_management/project_list.html' as passthroughhtml %}
+        {% include 'dc_management/project_list_template.html' %}
+    {% endwith %}
 
 {% endblock %}
 

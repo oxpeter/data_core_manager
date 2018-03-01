@@ -87,19 +87,25 @@
 <h2>User for {{ dc_user.project_set.all.count }} projects</h2>
 
 {% with dc_user.project_set.all as project_list %}
-    {% include 'dc_management/project_list.html' %}
+    {% with 'dc_management/project_list.html' as passthroughhtml %}
+        {% include 'dc_management/project_list_template.html' %}
+    {% endwith %}
 {% endwith %}
 
 <h2>PI for {{ dc_user.project_pi.all.count }} projects</h2>
 
 {% with dc_user.project_pi.all as project_list %}
-    {% include 'dc_management/project_list.html' %}
+    {% with 'dc_management/project_list.html' as passthroughhtml %}
+        {% include 'dc_management/project_list_template.html' %}
+    {% endwith %}
 {% endwith %}
 
 <h2>Administrator for {{ dc_user.prj_admin.all.count }} projects</h2>
 
 {% with dc_user.prj_admin.all as project_list %}
-    {% include 'dc_management/project_list.html' %}
+    {% with 'dc_management/project_list.html' as passthroughhtml %}
+        {% include 'dc_management/project_list_template.html' %}
+    {% endwith %}
 {% endwith %}
 
 
