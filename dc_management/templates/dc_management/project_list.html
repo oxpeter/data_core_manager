@@ -7,9 +7,10 @@
     <thead class="thead-default">
     <tr>
         <th>Project</th>
+        <th>Name</th>
         <th>PI</th>
+        <th>Administrator</th>
         <th># users</th>
-        <th>Project title</th>
         <th>Expected completion</th>
     </tr>
     </thead>
@@ -18,12 +19,20 @@
       <tr>
         <td><a {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}
         href="{% url 'dc_management:project' project.pk %}">{{ project.dc_prj_id }}</a></td>
+        <td {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}>
+            {{ project.nickname }}
+        </td>
         <td><a {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}
         href="{% url 'dc_management:dcuser' project.pi.pk %}">{{ project.pi }}</a> </td>
+        {% if project.prj_admin %}
+            <td><a {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}
+            href="{% url 'dc_management:dcuser' project.prj_admin.pk %}">{{ project.prj_admin }}</a> </td>
+        {% else %}
+        <td></td>
+        {% endif %}
         <td {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}>
         {{ project.users.all.count }}</td> 
-        <td {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}>
-        {{ project.title }}</td>
+        
         
         <!-- highlight based on project status and days to expected completion --!>    
         {% if project.expected_completion|days_until:0 and project.status == 'RU' %}
