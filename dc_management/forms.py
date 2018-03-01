@@ -255,6 +255,7 @@ class ProjectUpdateForm(forms.ModelForm):
                     'requested_ram', 
                     'requested_cpu', 
                     'pi',
+                    'prj_admin',
                     'software_requested',
                     'env_type',
                     'env_subtype',
@@ -281,6 +282,9 @@ class ProjectUpdateForm(forms.ModelForm):
                     'pi' : autocomplete.ModelSelect2(
                                         url='dc_management:autocomplete-user'
                                         ),
+                    'prj_admin' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-user'
+                                        ),                    
                     'host' : autocomplete.ModelSelect2(
                                         url='dc_management:autocomplete-node'
                                         ),

@@ -81,7 +81,11 @@
         <tr>
             <td>PI </td><td> {{ project.pi }}</td><td></td>
         </tr>
-
+        {% if project.prj_admin %}
+            <tr>
+                <td>Project administrator </td><td> {{ project.prj_admin }}</td><td></td>
+            </tr>
+        {% endif %}
         {% if project.expected_completion|days_until:0 and project.status == 'RU' %}
             <tr class="bg-danger" style="color:red;background:lightpink">
                 <td>Expiry</td><td> {{ project.expected_completion }}</td><td></td>
@@ -257,7 +261,7 @@
     <h3>Comments</h3>
   </div>
   <div class="panel-body">
-    <p>{{ project.comments }}</p>
+    <p>{{ project.comments|linebreaks }}</p>
   </div>
  </div>
 </div>
@@ -364,7 +368,7 @@
        <td>{{ l.date_changed }}</td>
        <td>{{ l.storage_type }}</td>
        <td>{{ l.storage_amount }}</td>
-       <td>{{ l.comments }}</td>
+       <td>{{ l.comments|linebreaks }}</td>
        </tr>
   {% endfor %}
  </table>
