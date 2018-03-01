@@ -71,7 +71,7 @@
 
 {% if server.comments %}
 <h3>Comments</h3>
-<p>{{ server.comments }}</p>
+<p>{{ server.comments|linebreaks }}</p>
 {% endif %}
 
 {% endblock %}
