@@ -79,7 +79,13 @@
         </thead>
         
         <tr>
-            <td>PI </td><td> {{ project.pi }}</td><td></td>
+            <td>PI </td>
+            <td> 
+                <a href="{% url 'dc_management:dcuser' project.pi.pk %}">
+                    {{ project.pi }}
+                </a>
+            </td>
+            <td></td>
         </tr>
         {% if project.prj_admin %}
             <tr>

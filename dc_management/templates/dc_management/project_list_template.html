@@ -14,6 +14,7 @@
     <th>Administrator</th>
     <th># users</th>
     <th>Expected completion</th>
+    <th>Status</th>
 </tr>
 </thead>
 
@@ -46,7 +47,9 @@
         <!-- Hopefully this variable will pass on the template to include --!> 
         <!-- This is for the last two columns, which have variable formatting --!> 
         {% include passthroughhtml %}
-         
+        <td {% if project.status == "CO" %}style="color:#896E4E;"{% endif %}>
+            {{ project.get_status_display }}
+        </td>
       </tr>
     {% endfor %}
 </table>
