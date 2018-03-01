@@ -371,7 +371,15 @@ class DC_UserCreate(LoginRequiredMixin, CreateView):
 
 class DC_UserUpdate(LoginRequiredMixin, UpdateView):
     model = DC_User
-    fields = ['first_name', 'last_name', 'cwid', 'affiliation', 'role', 'comments']  
+    fields = ['first_name', 
+                'last_name', 
+                'cwid', 
+                'affiliation', 
+                'role', 
+                'email', 
+                'department',
+                'comments'
+                ]  
 
 #############################
 ######  PROJECT VIEWS  ######
