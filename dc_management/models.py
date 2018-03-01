@@ -236,7 +236,7 @@ class DC_User(models.Model):
         verbose_name_plural = 'Data Core Users'
 
     def get_absolute_url(self):
-        return reverse('dcuser-detail', kwargs={'pk': self.pk})
+        return reverse('dc_management:dcuser', kwargs={'pk': self.pk})
 
 #########################
 #### Software Models ####
