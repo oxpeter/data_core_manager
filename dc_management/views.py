@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from datetime import date
+from datetime import date, timedelta
 import time
 from urllib.parse import quote
 
@@ -237,22 +237,37 @@ class IndexView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
         context.update({
-            'onboarding_list' : Project.objects.filter(
+            'expiring_list'     : Project.objects.filter(
+                                        status='RU',
+                                        completion_date__isnull=True,
+                                        expected_completion__lte=date.today(),
+                                        ).order_by('expected_completion'),  
+            'onboarding_list'   : Project.objects.filter(
                                         postdata_date__isnull=True,
                                         ).order_by('requested_launch'),
-            'shutting_list' : Project.objects.filter(
+            'undocumented_list' : Project.objects.filter(
+                                        governance_doc__isnull=True,
+                                        ).order_by('dc_prj_id'),                           
+            'shutting_list'     : Project.objects.filter(
                                         status='SD',
                                         completion_date__isnull=True,
                                         ).order_by('expected_completion'),                            
-            'user_list': DC_User.objects.filter(
+            'user_list'         : DC_User.objects.filter(
                                         project_pi__isnull=False,
                                         ).distinct().order_by('first_name'),
-            'server_list': Server.objects.filter(
+            'server_list'       : Server.objects.filter(
                                         status="ON"
                                         ).filter(
                                             function="PR"
                                         ).order_by('node'),
             'unsigned_user_list':[],
+            'undoc_user_list'   :DC_User.objects.exclude(
+                governance_doc__date_issued__gte=date.today()-timedelta(days=360),
+                                        ).filter(
+                project__status__in=['RU', 'SD'],
+                                        ).distinct(
+                                        ).order_by('first_name'
+                                        ),
         })
         return context
 

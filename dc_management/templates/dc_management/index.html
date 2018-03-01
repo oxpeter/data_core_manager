@@ -46,13 +46,18 @@
         <h4>User mounted twice on node</h4>
       </div>
       <div class="panel-body">
-        <ul>
+        
         {% for s in server_list %}
-            {% if s.duplicate_users|length >= 1 %}
-              <li>{{ s }} : {{ s.duplicate_users }}</li>
+            {% if s.duplicate_users|length > 0 %}
+              <h4>{{ s }}</h4>
+              <ul>
+              {% for u in s.duplicate_users %}
+              <li>{{ u }}</li>
+              {% endfor %}
+              </ul>
             {% endif %}
         {% endfor %}
-        </ul>
+        
       </div>
      </div>
     </div>
@@ -75,7 +80,12 @@
         <h4>Projects expiring in less than 90 days</h4>
       </div>
       <div class="panel-body">
-         {% include "dc_management/expiring_projects.html" %}
+        {% with expiring_list as project_list %}
+        {% with "dc_management/expiring_projects.html" as passthroughhtml %}
+            {% include "dc_management/project_list_template.html" %}
+        {% endwith %}
+        {% endwith %}
+
       </div>
      </div>
     </div>
@@ -86,9 +96,15 @@
         <h4>Projects shutting down</h4>
       </div>
       <div class="panel-body">
-         {% with shutting_list as project_list %}
-            {% include "dc_management/project_closing_list.html" %}
+        
+        {% with shutting_list as project_list %}
+        {% with "dc_management/project_closing_list.html" as passthroughhtml %}
+            {% include "dc_management/project_list_template.html" %}
         {% endwith %}
+        {% endwith %}
+        
+        
+        
       </div>
      </div>
     </div>
@@ -126,7 +142,11 @@
       </div>
       <div class="panel-body">
             
-               {% include "dc_management/missing_gov_docs.html" %}
+        {% with undocumented_list as project_list %}
+        {% with "dc_management/missing_gov_docs.html" as passthroughhtml %}
+            {% include "dc_management/project_list_template.html" %}
+        {% endwith %}
+        {% endwith %}
             
       </div>
      </div>
@@ -137,7 +157,13 @@
         <h4>Users not audited in last 9 months</h4>
       </div>
       <div class="panel-body">
-
+            <p>
+                List of all users in active projects and whose governance 
+                documentation is more than a year old. This is not yet project-specific.
+            </p>
+            {% with  undoc_user_list  as user_list %}
+                {% include "dc_management/user_list_multiproject.html" %}
+            {% endwith %}
       </div>
      </div>
     </div>

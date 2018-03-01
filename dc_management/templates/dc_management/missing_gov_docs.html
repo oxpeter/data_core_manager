@@ -1,45 +1,18 @@
-{% load bootstrap3 %}
-
 {% load project_tags %}
 
+<td>{{ project.users.all.count }}</td> 
 
-    <table class="table table-striped table-hover">
-    <thead class="thead-default">
-    <tr>
-        <th>Project</th>
-        <th>PI</th>
-        <th># users</th>
-        <th>Project title</th>
-        <th>Expected completion</th>
-    </tr>
-    </thead>
-
-    {% for project in project_list %}
-      {% if project.governance_doc_set.all.count == 0 %}
-      <tr>
-        <td><a href="{% url 'dc_management:project' project.pk %}">{{ project.dc_prj_id }}</a></td>
-        <td><a href="{% url 'dc_management:dcuser' project.pi.pk %}">{{ project.pi }}</a> </td>
-        <td>{{ project.users.all.count }}</td> 
-        <td>{{ project.title }}</td>
-        
-        <!-- highlight based on project status and days to expected completion --!>    
-        {% if project.expected_completion|days_until:0 and project.status == 'RU' %}
-            <td class="bg-danger" style="color:red;">
-            {{ project.expected_completion }}</td>
-        {% elif project.expected_completion|days_until:10 and project.status == 'RU' %}
-            <td class="bg-warning" style="color:orange;">
-            {{ project.expected_completion }}</td>
-        {% elif project.expected_completion|days_until:90 and project.status == 'RU' %}
-            <td class="bg-info" style="color:blue;">
-            {{ project.expected_completion }}</td>
-        {% else %}
-            <td>
-            {{ project.expected_completion }}</td>
-        {% endif %}
-            
-         
-      </tr>
-      {% endif %}
-    {% endfor %}
-    </table>
-        
+<!-- highlight based on project status and days to expected completion --!>    
+{% if project.expected_completion|days_until:0 and project.status == 'RU' %}
+    <td class="bg-danger" style="color:red;">
+    {{ project.expected_completion }}</td>
+{% elif project.expected_completion|days_until:10 and project.status == 'RU' %}
+    <td class="bg-warning" style="color:orange;">
+    {{ project.expected_completion }}</td>
+{% elif project.expected_completion|days_until:90 and project.status == 'RU' %}
+    <td class="bg-info" style="color:blue;">
+    {{ project.expected_completion }}</td>
+{% else %}
+    <td>
+    {{ project.expected_completion }}</td>
+{% endif %}

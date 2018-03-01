@@ -146,10 +146,10 @@ class Server(models.Model):
     def duplicate_users(self):
         # pull all users from all projects. Return users/projects when a user
         # is present in more than one project on the node
-        mounted_projects = self.projects_set.all()
-        users = [ p.dc_users_set.all() for p in mounted_projects ]
+        mounted_projects = Project.objects.filter(host=self.pk)
+        users = [ u for p in mounted_projects for u in p.users.all() ]
         
-        return [ item for item, count in collections.Counter(users).items() if count > 1 ]
+        return [ item for item, count in collections.Counter(users).items() if count > 1]
            
 class EnvtSubtype(models.Model):
     name = models.CharField(max_length=32, unique=True)
