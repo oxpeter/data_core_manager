@@ -146,7 +146,7 @@ class Server(models.Model):
     def duplicate_users(self):
         # pull all users from all projects. Return users/projects when a user
         # is present in more than one project on the node
-        mounted_projects = Project.objects.filter(host=self.pk)
+        mounted_projects = Project.objects.filter(host=self.pk, status='RU')
         users = [ u for p in mounted_projects for u in p.users.all() ]
         
         return [ item for item, count in collections.Counter(users).items() if count > 1]
