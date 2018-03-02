@@ -319,30 +319,14 @@ class ProjectView(LoginRequiredMixin, generic.DetailView):
         
         # get all software installed on the node, and thus available to the prj
         node=self.object.host
-        available_sw = node.software_installed.exclude(
+        if node:
+            available_sw = node.software_installed.exclude(
                                             pk__in=self.object.software_installed.all()
-        )
+            )
+        else:
+            available_sw = []
+                    
         
-        # get all software installed on the node, (DEPRECATED METHOD)
-        qs = Software_Log.objects.all()
-        qs_node = qs.filter(applied_to_node=self.object.host 
-                            ).order_by('software_changed','-change_date'
-                            )
-        current_swl = ''
-        available_sw = []
-        for swl in qs_node:
-            if swl == current_swl:
-                continue
-            else:
-                current_swl = swl
-                
-                # see if last change was to add software to node:
-                if swl.change_type == "AA" and \
-                swl.software_changed not in self.object.software_installed.all() and \
-                swl.software_changed not in available_sw:   
-                
-                    available_sw.append(swl.software_changed) 
-
         # update context        
         context = super(ProjectView, self).get_context_data(**kwargs)
         context.update({
