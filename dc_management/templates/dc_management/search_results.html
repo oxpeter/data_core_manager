@@ -15,9 +15,10 @@
 
 <h2>Projects</h2>
 {% with qs_prj as project_list %}
-    {% include "dc_management/project_list.html" %}
+{% with "dc_management/project_list.html" as passthroughhtml %}
+    {% include "dc_management/project_list_template.html" %}
 {% endwith %}
-
+{% endwith %}
 <h2>Governance Docs</h2>
 {% with qs_gov as gov_doc_list %}
     {% include "dc_management/gov_docs_list.html" %}
