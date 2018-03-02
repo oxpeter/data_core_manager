@@ -296,7 +296,68 @@ class ProjectUpdateForm(forms.ModelForm):
                                         ),
                                     
                     }
-   
+
+class ServerForm(forms.ModelForm):
+    class Meta:
+        model = Server
+        fields = [  'status', 
+                    'function', 
+                    'machine_type', 
+                    'vm_size', 
+                    'backup',
+                    'operating_sys',
+                    'node',
+                    'sub_function',
+                    'name_address',
+                    'ip_address',
+                    'processor_num',
+                    'ram',
+                    'disk_storage',
+                    'other_storage',  
+                    'software_installed',
+                    'connection_date',
+                    'dns_name',
+                    'host',
+                    'comments',
+                ]
+
+        widgets =  {'software_installed' : autocomplete.ModelSelect2Multiple(
+                                        url='dc_management:autocomplete-software'
+                                        ),
+                                    
+                    }
+
+class ServerUpdateForm(forms.ModelForm):
+    
+    class Meta:
+        model = Server
+        fields = [  'status', 
+                    'function', 
+                    'machine_type', 
+                    'vm_size', 
+                    'backup',
+                    'operating_sys',
+                    'node',
+                    'sub_function',
+                    'name_address',
+                    'ip_address',
+                    'processor_num',
+                    'ram',
+                    'disk_storage',
+                    'other_storage',  
+                    'software_installed',
+                    'connection_date',
+                    'dns_name',
+                    'host',
+                    'comments',
+                ]
+
+        widgets =  {'software_installed' : autocomplete.ModelSelect2Multiple(
+                                        url='dc_management:autocomplete-software'
+                                        ),
+                                    
+                    }
+                       
 class AddSoftwareToProjectForm(forms.ModelForm):
     
     class Meta:

@@ -9,7 +9,69 @@ from datetime import date
 
 import collections
 
-## Models 
+
+#########################
+#### Software Models ####
+#########################
+
+class Software_License_Type(models.Model):
+    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
+    name = models.CharField(max_length=32, unique=True)
+    user_assigned = models.BooleanField()
+    concurrent = models.BooleanField()
+    monitored = models.BooleanField()
+
+    def __str__(self):
+            return self.name
+
+    class Meta:
+        verbose_name = 'Software License Type'
+        verbose_name_plural = 'Software License Types'
+
+class Software(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+
+    name = models.CharField(max_length=64, unique=False)
+    vendor = models.CharField(max_length=64)
+    version = models.CharField(max_length=32)
+    license_type = models.ForeignKey(
+                            Software_License_Type, 
+                            on_delete=models.CASCADE
+                            )
+    package = models.BooleanField(default=False)
+    purchase_details = models.TextField(null=True, blank=True)
+    comments = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+            return "{} (version {})".format(self.name, self.version)
+
+    class Meta:
+        verbose_name = 'Software'
+        verbose_name_plural = 'Software'
+
+class SoftwareUnit(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    unit = models.CharField(max_length=64)
+    
+    def __str__(self):
+            return self.unit
+
+#########################
+####  Server Models  ####
+#########################
+class SubFunction(models.Model):
+    name = models.CharField(max_length=16, default="project")
+
+    def __str__(self):
+            return self.name
+
+class EnvtSubtype(models.Model):
+    name = models.CharField(max_length=32, unique=True)
+
+    def __str__(self):
+            return self.name
 
 class SN_Ticket(models.Model):
     "deprecated class, not referenced by any other model"
@@ -22,13 +84,7 @@ class SN_Ticket(models.Model):
     class Meta:
         verbose_name = 'SN Ticket'
         verbose_name_plural = 'SN Tickets'
-            
-class SubFunction(models.Model):
-    name = models.CharField(max_length=16, default="project")
-
-    def __str__(self):
-            return self.name
-        
+                
 class Server(models.Model):
     record_creation = models.DateField(auto_now_add=True)
     record_update = models.DateField(auto_now=True)
@@ -127,6 +183,14 @@ class Server(models.Model):
     ram = models.IntegerField() # to be entered in GB
     disk_storage = models.IntegerField("System storage") # to be entered in GB
     other_storage = models.IntegerField("Direct attach storage") # to be entered in GB    
+
+    software_installed = models.ManyToManyField(
+                                            Software,
+                                            related_name='software_on_server',
+                                            db_table='server_soft_install_tbl',
+                                            blank=True,
+                                            )
+
     connection_date = models.DateField(default=date.today)
     dns_name = models.CharField(
                         max_length=32, 
@@ -150,13 +214,10 @@ class Server(models.Model):
         users = [ u for p in mounted_projects for u in p.users.all() ]
         
         return [ item for item, count in collections.Counter(users).items() if count > 1]
+
+    def get_absolute_url(self):
+        return reverse('dc_management:node', kwargs={'pk': self.pk})
            
-class EnvtSubtype(models.Model):
-    name = models.CharField(max_length=32, unique=True)
-
-    def __str__(self):
-            return self.name
-
 class Department(models.Model):
     name = models.CharField(max_length=128, unique=True)
     def __str__(self):
@@ -238,53 +299,6 @@ class DC_User(models.Model):
     def get_absolute_url(self):
         return reverse('dc_management:dcuser', kwargs={'pk': self.pk})
 
-#########################
-#### Software Models ####
-#########################
-
-class Software_License_Type(models.Model):
-    sn_ticket = models.CharField(max_length=32, null=True, blank=True)
-    name = models.CharField(max_length=32, unique=True)
-    user_assigned = models.BooleanField()
-    concurrent = models.BooleanField()
-    monitored = models.BooleanField()
-
-    def __str__(self):
-            return self.name
-
-    class Meta:
-        verbose_name = 'Software License Type'
-        verbose_name_plural = 'Software License Types'
-
-class Software(models.Model):
-    record_creation = models.DateField(auto_now_add=True)
-    record_update = models.DateField(auto_now=True)
-
-    name = models.CharField(max_length=64, unique=False)
-    vendor = models.CharField(max_length=64)
-    version = models.CharField(max_length=32)
-    license_type = models.ForeignKey(
-                            Software_License_Type, 
-                            on_delete=models.CASCADE
-                            )
-    package = models.BooleanField(default=False)
-    purchase_details = models.TextField(null=True, blank=True)
-    comments = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-            return "{} (version {})".format(self.name, self.version)
-
-    class Meta:
-        verbose_name = 'Software'
-        verbose_name_plural = 'Software'
-
-class SoftwareUnit(models.Model):
-    record_creation = models.DateField(auto_now_add=True)
-    record_update = models.DateField(auto_now=True)
-    unit = models.CharField(max_length=64)
-    
-    def __str__(self):
-            return self.unit
 
 ########################
 #### Project Models ####

@@ -16,7 +16,12 @@
 {{ server.ip_address }}</br>
 {{ server.name_address }}</br></br>
 
-<a type="button" class="btn btn-default" href="#">Add project</a>
+
+<a  type="button" class="btn btn-primary" 
+    href="{% url 'dc_management:server-update' server.pk %}">
+    Update server
+</a>
+<a type="button" class="btn btn-default" href="#">Mount project</a>
 <a type="button" class="btn btn-default" href="#">Complete project</a>
 <a type="button" class="btn btn-default" href="#">Migrate project</a>
 <a type="button" class="btn btn-default" href="#">Decommission node</a>
@@ -49,7 +54,9 @@
 
 
 {% with server.project_set.all as project_list %}
-    {% include 'dc_management/project_list.html' %}
+    {% with 'dc_management/project_list.html' as passthroughhtml %}
+        {% include 'dc_management/project_list_template.html' %}
+    {% endwith %}
 {% endwith %}
 
 <h2>{{ server_users|length }} users associated with {{ server.node }}</h2>
@@ -59,13 +66,19 @@
     {% endwith %}
 {% endif %}
 
-<h2>{{ installed_software|length }} software installed on {{ server.node }}</h2>
-{% if installed_software %}
-    {% with installed_software as software_list %}
+<h2>{{ server.software_installed.all|length }} software installed on {{ server.node }}</h2>
+{% if server.software_installed.all|length > 0 %}
+    {% with server.software_installed.all as software_list %}
         {% include 'dc_management/software_list.html' %}
     {% endwith %}
 {% endif %}
 
+<h2>{{ installed_software_bylogs|length }} software installed according to logs</h2>
+{% if installed_software_bylogs %}
+    {% with installed_software_bylogs as software_list %}
+        {% include 'dc_management/software_list.html' %}
+    {% endwith %}
+{% endif %}
 
 
 

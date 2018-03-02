@@ -1,4 +1,13 @@
+{% extends 'base.html' %}
 
+{% block content %}
+<h1>
+All {{ server_list|length }} Software:
+</h1>
+
+{% load project_tags %}
+
+{% if software_list %}
 <table class="table table-striped table-hover">
     <thead class="thead-default">
         <tr>
@@ -12,5 +21,5 @@
             <td>{{ sw.license_type }}</td>
         </tr>
         {% endfor %}
-
 </table>
+{% endblock content %}

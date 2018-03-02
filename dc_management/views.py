@@ -38,7 +38,7 @@ from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
 from .forms import AddSoftwareToProjectForm, ProjectForm, ProjectUpdateForm
 from .forms import StorageChangeForm, BulkUserUploadForm, GovernanceDocForm
-from .forms import FileTransferForm
+from .forms import FileTransferForm, ServerUpdateForm, ServerForm
 
 #################################
 #### Basic information views ####
@@ -271,14 +271,6 @@ class IndexView(LoginRequiredMixin, generic.ListView):
         })
         return context
 
-class AllProjectsView(LoginRequiredMixin, generic.ListView):
-    template_name = 'dc_management/all_projects.html'
-    context_object_name = 'project_list'
-    
-    def get_queryset(self):
-        """Return  all active projects."""
-        return Project.objects.all().order_by('dc_prj_id')
-
 class AllDCUserView(LoginRequiredMixin, generic.ListView):
     template_name = 'dc_management/all_users.html'
     context_object_name = 'user_list'
@@ -286,74 +278,7 @@ class AllDCUserView(LoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         """Return  all active projects."""
         return DC_User.objects.all().order_by('first_name')
-   
-class ProjectView(LoginRequiredMixin, generic.DetailView):
-    model = Project
-    template_name = 'dc_management/project.html'
-
-    def get_context_data(self, **kwargs):
-        # get project cost
-        project_costs = []
-        
-        # get all software installed on the node, and thus available to the prj
-        qs = Software_Log.objects.all()
-        qs_node = qs.filter(applied_to_node=self.object.host 
-                            ).order_by('software_changed','-change_date'
-                            )
-        current_swl = ''
-        available_sw = []
-        for swl in qs_node:
-            if swl == current_swl:
-                continue
-            else:
-                current_swl = swl
-                
-                # see if last change was to add software to node:
-                if swl.change_type == "AA" and \
-                swl.software_changed not in self.object.software_installed.all() and \
-                swl.software_changed not in available_sw:   
-                
-                    available_sw.append(swl.software_changed) 
-
-        # update context        
-        context = super(ProjectView, self).get_context_data(**kwargs)
-        context.update({
-                        'project_costs': project_costs,
-                        'available_software':available_sw,
-        })
-        return context
-
-class ServerView(LoginRequiredMixin, generic.DetailView):
-    model = Server
-    template_name = 'dc_management/server.html'
-
-    def get_context_data(self, **kwargs):
-        # get a non-redundant list of all users on the server
-        server_users =  DC_User.objects.filter(project__host=self.kwargs['pk']
-                        ).order_by('first_name').distinct()
-        
-        # get a list of all software installed for various projects:
-
-        qs = Software_Log.objects.all()
-        qs_node = qs.filter(applied_to_node=self.kwargs['pk'] 
-                            ).order_by('software_changed','-change_date')
-        current_swl = ''
-        installed_sw = []
-        for swl in qs_node:
-            if swl == current_swl:
-                continue
-            else:
-                current_swl = swl
-                if swl.change_type == "AA":   # last change was to add software to node
-                    installed_sw.append(swl.software_changed) 
- 
-        context = super(ServerView, self).get_context_data(**kwargs)
-        context.update({
-                        'server_users': server_users,
-                        'installed_software':installed_sw,
-        })
-        return context
-    
+       
 class DCUserView(LoginRequiredMixin, generic.DetailView):
     model = DC_User
     template_name = 'dc_management/dcuser.html'
@@ -384,6 +309,55 @@ class DC_UserUpdate(LoginRequiredMixin, UpdateView):
 #############################
 ######  PROJECT VIEWS  ######
 #############################
+class ProjectView(LoginRequiredMixin, generic.DetailView):
+    model = Project
+    template_name = 'dc_management/project.html'
+
+    def get_context_data(self, **kwargs):
+        # get project cost
+        project_costs = []
+        
+        # get all software installed on the node, and thus available to the prj
+        node=self.object.host
+        available_sw = node.software_installed.exclude(
+                                            pk__in=self.object.software_installed.all()
+        )
+        
+        # get all software installed on the node, (DEPRECATED METHOD)
+        qs = Software_Log.objects.all()
+        qs_node = qs.filter(applied_to_node=self.object.host 
+                            ).order_by('software_changed','-change_date'
+                            )
+        current_swl = ''
+        available_sw = []
+        for swl in qs_node:
+            if swl == current_swl:
+                continue
+            else:
+                current_swl = swl
+                
+                # see if last change was to add software to node:
+                if swl.change_type == "AA" and \
+                swl.software_changed not in self.object.software_installed.all() and \
+                swl.software_changed not in available_sw:   
+                
+                    available_sw.append(swl.software_changed) 
+
+        # update context        
+        context = super(ProjectView, self).get_context_data(**kwargs)
+        context.update({
+                        'project_costs': project_costs,
+                        'available_software':available_sw,
+        })
+        return context
+
+class AllProjectsView(LoginRequiredMixin, generic.ListView):
+    template_name = 'dc_management/projects_all.html'
+    context_object_name = 'project_list'
+    
+    def get_queryset(self):
+        """Return  all projects."""
+        return Project.objects.all().order_by('dc_prj_id')
 
 class BulkUserUpload(LoginRequiredMixin, FormView):
     template_name = 'dc_management/bulkuseruploadform.html'
@@ -577,6 +551,68 @@ Kind regards,
 
         return super(StorageChange, self).form_valid(form)
 
+#############################
+######  SERVER VIEWS  ######
+#############################
+
+class ServerView(LoginRequiredMixin, generic.DetailView):
+    model = Server
+    template_name = 'dc_management/server.html'
+
+    def get_context_data(self, **kwargs):
+        # get a non-redundant list of all users on the server
+        server_users =  DC_User.objects.filter(project__host=self.kwargs['pk']
+                        ).order_by('first_name').distinct()
+        
+        # get a list of all software installed for various projects:
+
+        qs = Software_Log.objects.all()
+        qs_node = qs.filter(applied_to_node=self.kwargs['pk'] 
+                            ).order_by('software_changed','-change_date')
+        current_swl = ''
+        installed_sw = []
+        for swl in qs_node:
+            if swl == current_swl:
+                continue
+            else:
+                current_swl = swl
+                if swl.change_type == "AA":   # last change was to add software to node
+                    installed_sw.append(swl.software_changed) 
+ 
+        context = super(ServerView, self).get_context_data(**kwargs)
+        context.update({
+                        'server_users': server_users,
+                        'installed_software_bylogs':installed_sw,
+        })
+        return context
+
+class AllServersView(LoginRequiredMixin, generic.ListView):
+    template_name = 'dc_management/server_all.html'
+    context_object_name = 'server_list'
+    
+    def get_queryset(self):
+        """Return  all servers."""
+        return Server.objects.all().order_by('node')
+
+class ServerCreate(LoginRequiredMixin, CreateView):
+    model = Server
+    form_class = ServerForm
+    template_name = "dc_management/basic_form.html"
+    
+    # default success_url should be to the object page defined in model.
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        return super(ServerCreate, self).form_valid(form)
+
+class ServerUpdate(LoginRequiredMixin, UpdateView):
+    model = Server
+    form_class = ServerUpdateForm
+    template_name = "dc_management/basic_form.html"
+    
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        return super(ServerUpdate, self).form_valid(form)
+        
 ###############################
 ######  UPDATE SOFTWARE  ######
 ###############################
@@ -604,7 +640,7 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
         email_dict = {  'subject'       :sbj_msg,
                         'body'          :body_msg,
                         'to_email'      :"dcore-ticket@med.cornell.edu",
-                        'subject_html'  :quote(subj_msg),
+                        'subject_html'  :quote(sbj_msg),
                         'body_html'     :quote(body_msg),
         }
         
@@ -625,7 +661,7 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
         email_dict = {  'subject'       :sbj_msg,
                         'body'          :body_msg,
                         'to_email'      :"dcore-ticket@med.cornell.edu",
-                        'subject_html'  :quote(subj_msg),
+                        'subject_html'  :quote(sbj_msg),
                         'body_html'     :quote(body_msg),
         }
         
@@ -661,38 +697,18 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
 
                 self.email_change_project_software(changestr, prj, sw)
             
-            
                 # add to node if not already:
-                qs = Software_Log.objects.all()
-                qs_node = qs.filter(Q(applied_to_node=prj.host) &
-                             Q(software_changed=sw)
-                             ).order_by('-change_date')
-                
                 # check to see if any changes have been applied to the node:
-                if len(qs_node) == 0:  
-                    node = prj.host
+                node = prj.host
+                if sw not in node.software_installed.all():
                     form.instance.applied_to_node = node
-                # check if the last change to the node was to remove the software:
-                elif qs_node[0].change_type == "RA":
-                    # this is same as above, but put as elif statement to prevent
-                    # breakage for null sets looking for [-1]
-                    node = prj.host
-                    form.instance.applied_to_node = node
-            else:
-                return redirect('dc_management:index')        
-                    
+                    node.software_installed.add(sw)  
             # if node specified (and not a project), and not already on node:
-            if node and not prj:
-                qs = Software_Log.objects.all()
-                qs_node = qs.filter(Q(applied_to_node=node) &
-                                    Q(software_changed=sw)
-                                    ).order_by('-change_date')
+            elif node and not prj:
                 # check to see if any changes have been applied to the node:
-                if len(qs_node) == 0:                    
+                if sw not in node.software_installed.all():                    
                     self.email_change_node_software(changestr, node, sw)
-                # check if the last change to the node was to remove the software:
-                elif qs_node[0].change_type == "RA":
-                    self.email_change_node_software(changestr, node, sw)
+                    node.software_installed.add(sw)
             else:
                 return redirect('dc_management:index')
                 
@@ -706,25 +722,20 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
 
                 self.email_change_project_software(changestr, prj, sw)
             
-                # remove from node if not already:
-                qs = Software_Log.objects.all()
-                qs_node = qs.filter(Q(applied_to_node=prj.host) &
-                                        Q(software_changed=sw)
-                                        ).order_by('-change_date')
+                # remove from node if only project requiring it, and it is licensed.
+                node = prj.host
+                qs = Project.objects.all()
+                qs_wsw = qs.filter(software_requested=sw)
                                         
-                if qs_node and qs_node[0].change_type == "AA":  
-                    node = prj.host
+                if not qs_wsw or len(qs_wsw) == 0:  
                     form.instance.applied_to_node = node
+                    node.software_requested.remove(sw)
         
             # if node specified (and not a project), and sw still on node:
             if node and not prj:
-                qs = Software_Log.objects.all()
-                qs_node = qs.filter(Q(applied_to_node=node) &
-                                    Q(software_changed=sw)
-                                     ).order_by('-change_date')
-                if qs_node[0].change_type == "AA":
+                if sw in node.software_installed.all():
                     self.email_change_node_software(changestr, node, sw)
-
+                    node.software_requested.remove(sw)
 
         else:
             changestr = "confirm presence of" # innocuous, not intended to be used.

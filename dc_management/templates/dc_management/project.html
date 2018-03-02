@@ -89,7 +89,13 @@
         </tr>
         {% if project.prj_admin %}
             <tr>
-                <td>Project administrator </td><td> {{ project.prj_admin }}</td><td></td>
+                <td>Project administrator </td>
+                <td>
+                    <a href="{% url 'dc_management:dcuser' project.prj_admin.pk %}">
+                        {{ project.prj_admin }}
+                    </a>
+                </td>
+                <td></td>
             </tr>
         {% endif %}
         {% if project.expected_completion|days_until:0 and project.status == 'RU' %}

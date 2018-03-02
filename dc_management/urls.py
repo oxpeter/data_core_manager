@@ -39,9 +39,10 @@ urlpatterns = [
     url(r'outlook/sendtest/$', views.SendMail.as_view(), name='sendtest'),
     url(r'outlook/reset/$', views.ResetOutlookTokens.as_view(), name='reset-outlook'),
     
-    # index showing all users:
+    # index showing all items:
     url(r'^dcuser/all/$', views.AllDCUserView.as_view(), name='all_users'),
     url(r'^project/all/$', views.AllProjectsView.as_view(), name='all_projects'),
+    path('node/all', views.AllServersView.as_view(), name='all_servers'),
     
     # detail views of projects, nodes and users:
     url(r'^project/(?P<pk>[0-9]+)/$', views.ProjectView.as_view(), name='project'),
@@ -57,6 +58,7 @@ urlpatterns = [
         name='dc_user-update',
     ),
     path('dcuser/add/bulk', views.BulkUserUpload.as_view(), name='bulkuserupload'),
+    
     # views related to onboarding:
     url(r'onboarding/dcua_generator/$', views.CreateDCAgreementURL.as_view(), 
         name='url_generator',
@@ -64,6 +66,8 @@ urlpatterns = [
     path('onboarding/dcua_url/<int:pk>', views.ViewDCAgreementURL.as_view(), 
         name='url_result',
     ),
+    path('server/add', views.ServerCreate.as_view(), name='server-add'),
+    path('server/update/<int:pk>/', views.ServerUpdate.as_view(), name='server-update'),
     path('project/add/', views.ProjectCreate.as_view(), name='project-add'),
     path('project/update/<int:pk>/', 
             views.ProjectUpdate.as_view(), 
