@@ -475,9 +475,11 @@ class StorageChange(LoginRequiredMixin, CreateView):
             # get all other projects on node:
             shared_prjs = Project.objects.filter(host=project.host).exclude(pk=project.pk)
             # get the highest resource of the other projects:
-            if len(shared_prjs) == 0:  # ie, there is only one project on the node
+            mounted_storage = [p.direct_attach_storage for p in shared_prjs if p.direct_attach_storage]
+            if len(shared_prjs) == 0 or len(mounted_storage) == 0:  
+            # ie, this is the only project on the node with storage assigned
                 new_server_amount = new_project_storage
-            elif max([p.direct_attach_storage for p in shared_prjs if p.direct_attach_storage]) == 0:
+            elif max(mounted_storage) == 0:
                 new_server_amount = new_project_storage
             else:
                 highest_resource = max([p.direct_attach_storage for p in shared_prjs if p.direct_attach_storage])
