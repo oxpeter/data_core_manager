@@ -28,6 +28,8 @@
 			</li>
   		    <li><a href="#servers" data-toggle="tab">Servers</a>
 			</li>
+			<li><a href="#software" data-toggle="tab">Software</a>
+			</li>
 		</ul>
 		
 		
@@ -217,11 +219,19 @@
     <a type="button" class="btn btn-default" href="#">Reactivate server</a>
 
     {% include 'dc_management/server_list.html' %}
-    
-
   </div>
     
+    
+  <div class="tab-pane" id="software">
+    <h2>{{ user_list|length }} Software</h2>
+    <a type="button" class="btn btn-default" href="#">View all software</a>
+    <a type="button" class="btn btn-default" href="#">Create software</a>
+    
+    {% include "dc_management/software_all.html" %}
+    </br>
+  </div>
   
+    
 </div>
 </div>  
 
