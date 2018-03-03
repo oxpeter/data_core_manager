@@ -242,13 +242,18 @@ class IndexView(LoginRequiredMixin, generic.ListView):
                                         completion_date__isnull=True,
                                         expected_completion__lte=date.today(),
                                         ).order_by('expected_completion'),  
-            'onboarding_list'   : Project.objects.filter(
-                                        postdata_date__isnull=True,
-                                        ).order_by('requested_launch'),
-            'migration_list'    : Project.objects.filter(
-                                        Q(migrationlog__envt_date__isnull=True) |
-                                        Q(migrationlog__data_date__isnull=True)
-                                        ).order_by('dc_prj_id'),
+            'onboarding_list'   : MigrationLog.objects.filter(
+                                        Q(access_date__isnull=True) |
+                                        Q(envt_date__isnull=True)   |
+                                        Q(data_date__isnull=True)
+                                        ).filter(
+                                        project__status='ON'
+                                        ).order_by('record_creation'),
+            'migration_list'    : MigrationLog.objects.filter(
+                                        Q(access_date__isnull=True) |
+                                        Q(envt_date__isnull=True) |
+                                        Q(data_date__isnull=True)
+                                        ).order_by('record_creation'),
                                         
             'undocumented_list' : Project.objects.filter(
                                         governance_doc__isnull=True,
@@ -1495,10 +1500,28 @@ class MigrationCreate(LoginRequiredMixin, CreateView):
     model = MigrationLog
     form_class = MigrationForm
     template_name = "dc_management/basic_form.html"
+
+    def get_initial(self):
+        initial = super(MigrationCreate, self).get_initial()
+        # get the project from the url
+        chosen_project = Project.objects.get(pk=self.kwargs['ppk'])
+        try: 
+            current_node = chosen_project.host
+        except:
+            current_node = None
+        
+        # update initial field defaults with custom set default values:
+        initial.update({'project': chosen_project,
+                        'node_origin':current_node,
+        })
+        return initial
+
     
     # default success_url should be to the object page defined in model.
     def form_valid(self, form):
         self.object = form.save(commit=False)
+        self.object.record_author = self.request.user
+        self.object.save()
         return super(MigrationCreate, self).form_valid(form)
 
 class MigrationUpdate(LoginRequiredMixin, UpdateView):

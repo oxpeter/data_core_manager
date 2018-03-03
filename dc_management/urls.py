@@ -126,7 +126,7 @@ urlpatterns = [
             views.MigrationUpdate.as_view(), 
             name='migration-update',
     ),
-    path('logs/migration/create', 
+    path('logs/migration/<int:ppk>/create', 
             views.MigrationCreate.as_view(), 
             name='migration-add',
     ),

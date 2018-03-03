@@ -456,3 +456,24 @@ class MigrationForm(forms.ModelForm):
                                         url='dc_management:autocomplete-node'
                                         ),
                     }
+
+class MigrationNewForm(forms.ModelForm):
+    
+    class Meta:
+        model = MigrationLog
+        fields = [  'project',
+                    'node_origin', 
+                    'node_destination', 
+                    'comments',
+                ]
+
+        widgets =  {'project' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-project'
+                                        ),
+                    'node_origin' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-node'
+                                        ),
+                    'node_destination' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-node'
+                                        ),
+                    }

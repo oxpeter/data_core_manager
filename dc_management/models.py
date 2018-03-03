@@ -1131,6 +1131,8 @@ class MigrationLog(models.Model):
     node_origin = models.ForeignKey(Server, 
                                     on_delete=models.CASCADE,
                                     related_name='migration_origin',
+                                    null=True,
+                                    blank=True,
                                     )
     node_destination = models.ForeignKey(Server, 
                                     on_delete=models.CASCADE,
@@ -1143,7 +1145,6 @@ class MigrationLog(models.Model):
                                     blank=True
     )
     access_date = models.DateField("access confirmation date", 
-                                    default=date.today,
                                     null=True,
                                     blank=True,
     )
@@ -1153,7 +1154,6 @@ class MigrationLog(models.Model):
                                     blank=True
     )
     envt_date = models.DateField("environment confirmation date", 
-                                    default=date.today,
                                     null=True,
                                     blank=True,
     )
@@ -1163,7 +1163,6 @@ class MigrationLog(models.Model):
                                     blank=True
     )
     data_date = models.DateField("data integrity confirmation date", 
-                                    default=date.today,
                                     null=True,
                                     blank=True,
     )

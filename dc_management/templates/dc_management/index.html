@@ -66,7 +66,9 @@
         <h4>Projects being onboarded</h4>
       </div>
       <div class="panel-body">
-        {% include "dc_management/onboarding_projects_list.html" %}
+        {% with onboarding_list as migration_list %}
+            {% include "dc_management/migration_tracking.html" %}
+        {% endwith %}
       </div>
      </div>
     </div>
