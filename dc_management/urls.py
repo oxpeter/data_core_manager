@@ -122,6 +122,14 @@ urlpatterns = [
             views.FileTransferCreate.as_view(), 
             name='file-transfer-add',
     ),
+    path('logs/migration/<int:pk>', 
+            views.MigrationUpdate.as_view(), 
+            name='migration-update',
+    ),
+    path('logs/migration/create', 
+            views.MigrationCreate.as_view(), 
+            name='migration-add',
+    ),
     
     # search view:
     path('search/all', views.FullSearch.as_view(), name="full-search"),

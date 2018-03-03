@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .models import Server, Project, DC_User, Software, Software_Log, Project
 from .models import DCUAGenerator, Storage_Log, StorageCost, Governance_Doc
-from .models import FileTransfer
+from .models import FileTransfer, MigrationLog
 
 class CommentForm(forms.Form):
     name = forms.CharField()
@@ -427,5 +427,32 @@ class FileTransferForm(forms.ModelForm):
                                         ),
                     'requester' : autocomplete.ModelSelect2(
                                         url='dc_management:autocomplete-user'
+                                        ),
+                    }
+
+class MigrationForm(forms.ModelForm):
+    
+    class Meta:
+        model = MigrationLog
+        fields = [  'project',
+                    'node_origin', 
+                    'node_destination', 
+                    'access_ticket', 
+                    'access_date', 
+                    'envt_ticket',
+                    'envt_date', 
+                    'data_ticket', 
+                    'data_date',
+                    'comments',
+                ]
+
+        widgets =  {'project' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-project'
+                                        ),
+                    'node_origin' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-node'
+                                        ),
+                    'node_destination' : autocomplete.ModelSelect2(
+                                        url='dc_management:autocomplete-node'
                                         ),
                     }

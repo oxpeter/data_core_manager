@@ -32,13 +32,13 @@ from dc_management.outlookservice import get_me, send_message
 from .models import Server, Project, DC_User, Access_Log, Governance_Doc
 from .models import Software, Software_Log, Storage_Log
 from .models import UserCost, SoftwareCost, StorageCost, DCUAGenerator
-from .models import FileTransfer
+from .models import FileTransfer, MigrationLog
 
 from .forms import AddUserToProjectForm, RemoveUserFromProjectForm
 from .forms import ExportFileForm, CreateDCAgreementURLForm
 from .forms import AddSoftwareToProjectForm, ProjectForm, ProjectUpdateForm
 from .forms import StorageChangeForm, BulkUserUploadForm, GovernanceDocForm
-from .forms import FileTransferForm, ServerUpdateForm, ServerForm
+from .forms import FileTransferForm, ServerUpdateForm, ServerForm, MigrationForm
 
 #################################
 #### Basic information views ####
@@ -1490,6 +1490,25 @@ Kind regards,
         
         self.object = form.save(commit=False)
         return super(FileTransferCreate, self).form_valid(form)
+
+class MigrationCreate(LoginRequiredMixin, CreateView):
+    model = MigrationLog
+    form_class = MigrationForm
+    template_name = "dc_management/basic_form.html"
+    
+    # default success_url should be to the object page defined in model.
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        return super(MigrationCreate, self).form_valid(form)
+
+class MigrationUpdate(LoginRequiredMixin, UpdateView):
+    model = MigrationLog
+    form_class = MigrationForm
+    template_name = "dc_management/basic_form.html"
+    
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        return super(MigrationUpdate, self).form_valid(form)
 
 ##############################
 ######  SEARCH  VIEWS   ######
