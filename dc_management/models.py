@@ -1134,28 +1134,40 @@ class MigrationLog(models.Model):
                                     null=True, 
                                     blank=True
     )
-    access_date = models.DateField("access confirmation date", default=date.today)
+    access_date = models.DateField("access confirmation date", 
+                                    default=date.today,
+                                    null=True,
+                                    blank=True,
+    )
     envt_ticket = models.CharField("environment confirmation ticket", 
                                     max_length=32, 
                                     null=True, 
                                     blank=True
     )
-    envt_date = models.DateField("environment confirmation date", default=date.today)
+    envt_date = models.DateField("environment confirmation date", 
+                                    default=date.today,
+                                    null=True,
+                                    blank=True,
+    )
     data_ticket = models.CharField("data integrity confirmation ticket", 
                                     max_length=32, 
                                     null=True, 
                                     blank=True
     )
-    data_date = models.DateField("data integrity confirmation date", default=date.today)
+    data_date = models.DateField("data integrity confirmation date", 
+                                    default=date.today,
+                                    null=True,
+                                    blank=True,
+    )
 
     comments = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return "{} {}".format( self.storage_amount, self.date_changed)
+        return "{} {}".format( self.project.dc_prj_id, self.record_update)
 
     class Meta:
-        verbose_name = 'Storage Log'
-        verbose_name_plural = 'Storage Logs'
+        verbose_name = 'Migration Log'
+        verbose_name_plural = 'Migration Logs'
     
     def get_absolute_url(self):
         return reverse('dc_management:project', kwargs={'pk': self.project.pk})

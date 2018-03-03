@@ -245,6 +245,11 @@ class IndexView(LoginRequiredMixin, generic.ListView):
             'onboarding_list'   : Project.objects.filter(
                                         postdata_date__isnull=True,
                                         ).order_by('requested_launch'),
+            'migration_list'    : Project.objects.filter(
+                                        Q(migrationlog__envt_date__isnull=True) |
+                                        Q(migrationlog__data_date__isnull=True)
+                                        ).order_by('dc_prj_id'),
+                                        
             'undocumented_list' : Project.objects.filter(
                                         governance_doc__isnull=True,
                                         ).order_by('dc_prj_id'),                           
@@ -324,8 +329,7 @@ class ProjectView(LoginRequiredMixin, generic.DetailView):
                                             pk__in=self.object.software_installed.all()
             )
         else:
-            available_sw = []
-                    
+            available_sw = []            
         
         # update context        
         context = super(ProjectView, self).get_context_data(**kwargs)
