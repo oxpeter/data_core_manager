@@ -10,9 +10,9 @@ from datetime import date
 import collections
 
 
-#########################
-#### Software Models ####
-#########################
+############################
+####  Software Models   ####
+############################
 
 class Software_License_Type(models.Model):
     sn_ticket = models.CharField(max_length=32, null=True, blank=True)
@@ -58,9 +58,10 @@ class SoftwareUnit(models.Model):
     def __str__(self):
             return self.unit
 
-#########################
-####  Server Models  ####
-#########################
+############################
+####   Server Models    ####
+############################
+
 class SubFunction(models.Model):
     name = models.CharField(max_length=16, default="project")
 
@@ -299,10 +300,9 @@ class DC_User(models.Model):
     def get_absolute_url(self):
         return reverse('dc_management:dcuser', kwargs={'pk': self.pk})
 
-
-########################
-#### Project Models ####
-########################
+############################
+####   Project Models   ####
+############################
   
 class Project(models.Model):
     record_creation = models.DateField(auto_now_add=True)
@@ -367,11 +367,13 @@ class Project(models.Model):
     expected_completion = models.DateField()
     requested_launch = models.DateField()
     
+    ONBOARDING = "ON"
     RUNNING = "RU"
     COMPLETED = "CO"
     SUSPENDED = "SU"
     SHUTTINGDOWN = "SD"
     STATUS_CHOICES = (
+            (ONBOARDING, "Onboarding"),
             (RUNNING, "Running"),
             (COMPLETED, "Completed"),
             (SUSPENDED, "Suspended"),
@@ -434,9 +436,9 @@ def project_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/prj<id>/<filename>
     return '{0}/{1}'.format(instance.project.dc_prj_id, filename)
 
-###########################
-#### Governance Models ####
-###########################
+############################
+#### Governance Models  ####
+############################
 
 class Governance_Doc(models.Model):
     record_creation = models.DateField(auto_now_add=True)
@@ -612,9 +614,9 @@ class Protocols(models.Model):
     ticket_description = models.TextField("Description for tickets")
     dc_description = models.TextField("Description for Data Core")
 
-########################
-#### Finance Models ####
-########################
+############################
+####   Finance Models   ####
+############################
                           
 class SoftwareCost(models.Model):
     record_creation = models.DateField(auto_now_add=True)
@@ -882,7 +884,6 @@ class ResourceLog(models.Model):
     def get_absolute_url(self):
         return reverse('dc_management:project', kwargs={'pk': self.project.pk})
 
-
 class TransferMethod(models.Model):
     transfer_method  = models.CharField(max_length=32,)    
 
@@ -1121,6 +1122,44 @@ class AlertTag(models.Model):
                             blank=True,
                             )
   
+class MigrationLog(models.Model):
+    record_creation = models.DateField(auto_now_add=True)
+    record_update = models.DateField(auto_now=True)
+    record_author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    
+    access_ticket = models.CharField("user access confirmation ticket", 
+                                    max_length=32, 
+                                    null=True, 
+                                    blank=True
+    )
+    access_date = models.DateField("access confirmation date", default=date.today)
+    envt_ticket = models.CharField("environment confirmation ticket", 
+                                    max_length=32, 
+                                    null=True, 
+                                    blank=True
+    )
+    envt_date = models.DateField("environment confirmation date", default=date.today)
+    data_ticket = models.CharField("data integrity confirmation ticket", 
+                                    max_length=32, 
+                                    null=True, 
+                                    blank=True
+    )
+    data_date = models.DateField("data integrity confirmation date", default=date.today)
+
+    comments = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return "{} {}".format( self.storage_amount, self.date_changed)
+
+    class Meta:
+        verbose_name = 'Storage Log'
+        verbose_name_plural = 'Storage Logs'
+    
+    def get_absolute_url(self):
+        return reverse('dc_management:project', kwargs={'pk': self.project.pk})
+
 
 
     
