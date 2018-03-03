@@ -55,13 +55,23 @@
 <!-- Attributes of project --!>
 <div class="tab-pane active" id="details">
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:project-update' project.pk %}">Update project</a>
+
+</br>
+</br>
+
 <a type="button" class="btn btn-default" href="#">Decommission project</a>
 <a type="button" class="btn btn-danger" href="{% url 'dc_management:file-transfer-add' %}">Transfer file(s)</a>
-<a type="button" class="btn btn-default" href="{% url 'dc_management:migration-add' project.pk %}">Migrate project</a>
+<a type="button" class="btn btn-primary" href="{% url 'dc_management:storage-change' project.pk %}">Change Storage</a>
+
+</br>
+</br>
+
+<a type="button" class="btn btn-primary" href="{% url 'dc_management:migration-add' project.pk %}">Migrate project</a>
+<a type="button" class="btn btn-default" href="#">Find available node</a>
 <a type="button" class="btn btn-default" href="#">Unmount project</a>
 <a type="button" class="btn btn-default" href="#">Mount project</a>
 <a type="button" class="btn btn-default" href="#">Login instructions</a>
-<a type="button" class="btn btn-primary" href="{% url 'dc_management:storage-change' project.pk %}">Change Storage</a>
+
 </br>
 </br>
 </br>
@@ -489,6 +499,11 @@
        </tr>
   {% endfor %}
  </table>
+
+<h4>Migration logs</h4>
+  {% with  project.migrationlog_set.all as migration_list %}
+    {% include 'dc_management/migration_log.html' %}
+  {% endwith %}
 
 </div>
 </div>

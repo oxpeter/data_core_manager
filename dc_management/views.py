@@ -1533,6 +1533,10 @@ class MigrationUpdate(LoginRequiredMixin, UpdateView):
         self.object = form.save(commit=False)
         return super(MigrationUpdate, self).form_valid(form)
 
+class MigrationDetailView(LoginRequiredMixin, generic.DetailView):
+    model = MigrationLog
+    template_name = 'dc_management/migration_record.html'
+
 ##############################
 ######  SEARCH  VIEWS   ######
 ##############################
