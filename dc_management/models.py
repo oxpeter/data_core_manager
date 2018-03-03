@@ -1128,6 +1128,14 @@ class MigrationLog(models.Model):
     record_author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    node_origin = models.ForeignKey(Server, 
+                                    on_delete=models.CASCADE,
+                                    related_name='migration_origin',
+                                    )
+    node_destination = models.ForeignKey(Server, 
+                                    on_delete=models.CASCADE,
+                                    related_name='migration_destination',
+                                    )
     
     access_ticket = models.CharField("user access confirmation ticket", 
                                     max_length=32, 
