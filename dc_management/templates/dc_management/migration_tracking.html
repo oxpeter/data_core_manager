@@ -6,6 +6,10 @@
 <tr>
     <th colspan="3">Migration</th>
     <th colspan="3">Confirmation Date</th>
+    {% if startdate == True %}
+        <th></th>
+    {% endif %}
+
     <th></th>
 </tr>
 <tr>
@@ -47,7 +51,23 @@
         <td>{{ mig.envt_date }}</td>
         <td>{{ mig.data_date }}</td>
         {% if startdate == True %}
-            <td>{{ mig.project.requested_launch }}</td>
+            {% if mig.project.requested_launch|days_until:7  %}
+                <td class="bg-danger" style="color:red;">
+                    {{ mig.project.requested_launch }}
+                </td>
+            {% elif mig.project.requested_launch|days_until:14 %}
+                <td class="bg-warning" style="color:orange;">
+                    {{ mig.project.requested_launch }}
+                </td>
+            {% elif mig.project.requested_launch|days_until:21 %}
+                <td class="bg-info" style="color:blue;">
+                    {{ mig.project.requested_launch }}
+                </td>
+            {% else %}
+                <td>
+                    {{ mig.project.requested_launch }}
+                </td>
+            {% endif %}
         {% endif %}
         <td><a type="button" class="btn btn-primary"
                href="{% url 'dc_management:migration-update' mig.pk %}">Update</a>
