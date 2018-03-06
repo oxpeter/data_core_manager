@@ -6,7 +6,7 @@ from .models import Governance_Doc, Project, Server, Server_Change_Log, SN_Ticke
 from .models import Software, Software_License_Type, Software_Log, Software_Purchase
 from .models import Storage_Log, SubFunction, SoftwareCost, UserCost, StorageCost
 from .models import DCUAGenerator, FileTransfer, TransferMethod, Department
-from .models import ResourceLog
+from .models import ResourceLog, MigrationLog
 
 # customize the look of the admin site:
 admin.site.site_header = 'Data Core Management Site'
@@ -115,6 +115,17 @@ class DC_UserAdmin(admin.ModelAdmin):
 					)
 
     search_fields = ('first_name', 'last_name', 'cwid',)
+
+@admin.register(MigrationLog)
+class MigrationLogAdmin(admin.ModelAdmin):
+    list_display = ('project',
+					'node_origin',
+					'node_destination',
+					'comments',
+					)
+
+    search_fields = ('project', 'node_origin', 'node_destination','comments')
+
 
 
 admin.site.register(Access_Log)

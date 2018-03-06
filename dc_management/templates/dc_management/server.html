@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
+{% comment this stops the option working. No need for message formatting currently %}
 {% load bootstrap3 %}
-
-{% block content %}
-
 {# Load CSS and JavaScript #}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
-
 {# Display django.contrib.messages as Bootstrap alerts #}
 {% bootstrap_messages %}
+{% endcomment %}
+
+{% block content %}
 
 <h1>{{ server.node }}</h1>
 
