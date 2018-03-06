@@ -38,9 +38,13 @@
             </a>
         </td>
         <td>
+            {% if mig.node_origin %}
             <a href="{% url 'dc_management:node' mig.node_origin.pk %}">
             {{ mig.node_origin }}
             </a>
+            {% else %}
+            Unmounted
+            {% endif %}
         </td>
         <td>
             <a href="{% url 'dc_management:node' mig.node_destination.pk %}">

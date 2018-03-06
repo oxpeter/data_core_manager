@@ -253,8 +253,13 @@ class IndexView(LoginRequiredMixin, generic.ListView):
                                         Q(access_date__isnull=True) |
                                         Q(envt_date__isnull=True) |
                                         Q(data_date__isnull=True)
+                                        ).exclude(
+                                        project__status='ON'
                                         ).order_by('record_creation'),
-                                        
+            'onboarding_prj_list': Project.objects.filter(
+                                        status='ON',
+                                        migrationlog=None,
+                                        ).order_by('requested_launch'),                            
             'undocumented_list' : Project.objects.filter(
                                         governance_doc__isnull=True,
                                         ).order_by('dc_prj_id'),                           
@@ -1531,6 +1536,13 @@ class MigrationUpdate(LoginRequiredMixin, UpdateView):
     
     def form_valid(self, form):
         self.object = form.save(commit=False)
+        
+        # if all dates filled, change onboarding project status to running
+        if self.object.access_date and self.object.envt_date and self.object.data_date:
+            if self.object.project.status == 'ON':
+                self.object.project.status = 'RU'
+                self.object.project.save()
+                
         return super(MigrationUpdate, self).form_valid(form)
 
 class MigrationDetailView(LoginRequiredMixin, generic.DetailView):

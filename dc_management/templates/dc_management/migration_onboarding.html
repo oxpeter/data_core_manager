@@ -15,9 +15,6 @@
     <th>Access</th>
     <th>Environment</th>
     <th>Data</th>
-    {% if startdate == True %}
-        <th>Start Date</th>
-    {% endif %}
     <th>Update</th>
 </tr>
 </thead>
@@ -30,13 +27,9 @@
             </a>
         </td>
         <td>
-            {% if mig.node_origin %}
             <a href="{% url 'dc_management:node' mig.node_origin.pk %}">
             {{ mig.node_origin }}
             </a>
-            {% else %}
-            Unmounted
-            {% endif %}
         </td>
         <td>
             <a href="{% url 'dc_management:node' mig.node_destination.pk %}">
@@ -46,9 +39,6 @@
         <td>{{ mig.access_date }}</td>
         <td>{{ mig.envt_date }}</td>
         <td>{{ mig.data_date }}</td>
-        {% if startdate == True %}
-            <td>{{ mig.project.requested_launch }}</td>
-        {% endif %}
         <td><a type="button" class="btn btn-primary"
                href="{% url 'dc_management:migration-update' mig.pk %}">Update</a>
         </td>
