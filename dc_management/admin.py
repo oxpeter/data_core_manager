@@ -35,6 +35,8 @@ class ProjectAdmin(admin.ModelAdmin):
 					'pi',
 					'title',
 					'fileshare_storage',
+					'requested_ram',
+					'requested_cpu',
 					'status',
 					'expected_completion',
 					'env_type',
