@@ -37,8 +37,9 @@ class ProjectAdmin(admin.ModelAdmin):
 					'fileshare_storage',
 					'status',
 					'expected_completion',
+					'env_type',
     )
-    list_filter = ('pi','status')
+    list_filter = ('env_type','status')
     exlude = (  'user_cost',
 				'host_cost',
 				'db_cost',

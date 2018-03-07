@@ -57,12 +57,9 @@
 <div class="tab-pane active" id="details">
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:project-update' project.pk %}">Update project</a>
 
-</br>
-</br>
-
-<a type="button" class="btn btn-default" href="#">Decommission project</a>
 <a type="button" class="btn btn-danger" href="{% url 'dc_management:file-transfer-add' %}">Transfer file(s)</a>
 <a type="button" class="btn btn-primary" href="{% url 'dc_management:storage-change' project.pk %}">Change Storage</a>
+<a type="button" class="btn btn-default" href="#">Change RAM/CPU</a>
 
 </br>
 </br>
@@ -72,7 +69,7 @@
 <a type="button" class="btn btn-default" href="#">Unmount project</a>
 <a type="button" class="btn btn-default" href="#">Mount project</a>
 <a type="button" class="btn btn-default" href="#">Login instructions</a>
-
+<a type="button" class="btn btn-default" href="#">Decommission project</a>
 </br>
 </br>
 </br>
