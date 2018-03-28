@@ -45,7 +45,18 @@ class Software(models.Model):
 
     def __str__(self):
             return "{} (version {})".format(self.name, self.version)
+    
+    def swusers(self):
+        sw_users = DC_User.objects.filter(project__software_installed=self.pk
+                                        ).distinct()    
+        return sw_users
 
+    def seatcount(self):
+        sw_prjs = Project.objects.filter(software_installed=self.pk)    
+        usercount = [ prj.users.count() for prj in sw_prjs ]
+        return sum(usercount)
+
+        
     class Meta:
         verbose_name = 'Software'
         verbose_name_plural = 'Software'

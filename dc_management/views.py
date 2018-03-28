@@ -235,6 +235,9 @@ class IndexView(LoginRequiredMixin, generic.ListView):
         return Project.objects.filter(status="RU").order_by('dc_prj_id')
     
     def get_context_data(self, **kwargs):
+        swqs = Software.objects.all()
+        swqs = sorted(swqs, key=lambda i: i.seatcount())
+        
         context = super(IndexView, self).get_context_data(**kwargs)
         context.update({
             'expiring_list'     : Project.objects.filter(
@@ -275,6 +278,7 @@ class IndexView(LoginRequiredMixin, generic.ListView):
                                         ).filter(
                                             function="PR"
                                         ).order_by('node'),
+            'sw_list'                  : swqs,
             'unsigned_user_list':[],
             'undoc_user_list'   :DC_User.objects.exclude(
                 governance_doc__date_issued__gte=date.today()-timedelta(days=360),
