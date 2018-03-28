@@ -751,6 +751,10 @@ class UpdateSoftware(LoginRequiredMixin, FormView):
 class EmailResults(LoginRequiredMixin, generic.TemplateView):
     template_name = 'dc_management/email_result.html'
     
+class SoftwareView(LoginRequiredMixin, generic.DetailView):
+    model = Software
+    template_name = 'dc_management/software.html'
+    
 #################################################
 ######  UPDATE USER - PROJECT RELATIONSHIP ######
 #################################################

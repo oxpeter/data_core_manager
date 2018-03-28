@@ -105,6 +105,7 @@ urlpatterns = [
     ),
 
     # software views:
+    path('software/<int:pk>', views.SoftwareView.as_view(), name='software-detail'),
     url(r'^software/$', views.UpdateSoftware.as_view(), name='change_software'),
     url(r'^software/email/$', 
         views.EmailResults.as_view(), 

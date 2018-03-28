@@ -12,23 +12,19 @@ All {{ sw_list|length }} Software:
             <th>Software</th>
             <th>Version</th>
             <th>License type</th>
-            <th>Projects</th>
             <th>Project count</th>
             <th>Seat count</th>
             <th>User count</th>
-            <th>User list</th>
         </tr>
     </thead>
         {% for sw in sw_list %}
         <tr>
-            <td>{{ sw.name }}</td>
+            <td><a href="{% url 'dc_management:software-detail' sw.pk %}">{{ sw.name }}</a></td>
             <td>{{ sw.version }}</td>
             <td>{{ sw.license_type }}</td>
-            <td>{{ sw.software_installed.all }}</td>
             <td>{{ sw.software_installed.count }}</td>
             <td>{{ sw.seatcount }}</td>
             <td>{{ sw.swusers.count }}</td>
-            <td>{{ sw.swusers }}</td>
         </tr>
         {% endfor %}
 </table>
