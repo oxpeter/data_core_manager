@@ -236,7 +236,7 @@ class IndexView(LoginRequiredMixin, generic.ListView):
     
     def get_context_data(self, **kwargs):
         swqs = Software.objects.all()
-        swqs = sorted(swqs, key=lambda i: i.seatcount())
+        swqs = sorted(swqs, key=lambda i: i.seatcount(), reverse=True)
         
         context = super(IndexView, self).get_context_data(**kwargs)
         context.update({
