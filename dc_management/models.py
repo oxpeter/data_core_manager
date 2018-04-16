@@ -48,11 +48,13 @@ class Software(models.Model):
     
     def swusers(self):
         sw_users = DC_User.objects.filter(project__software_installed=self.pk
+                                        ).exclude(project__status='CO'
                                         ).distinct()    
         return sw_users
 
     def seatcount(self):
-        sw_prjs = Project.objects.filter(software_installed=self.pk)    
+        sw_prjs = Project.objects.filter(software_installed=self.pk
+                                        ).exclude(status="CO")    
         usercount = [ prj.users.count() for prj in sw_prjs ]
         return sum(usercount)
 
