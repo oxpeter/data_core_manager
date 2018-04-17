@@ -223,7 +223,101 @@ class SendMail(LoginRequiredMixin, generic.TemplateView):
 #######################
 #### Basic views ####
 #######################
- 
+class IndexProjectView(LoginRequiredMixin, generic.ListView):
+    login_url='/login/'
+    
+    template_name = 'dc_management/index_projects.html'
+    context_object_name = 'project_list'
+
+    def get_queryset(self):
+        """Return  all active projects."""
+        return  Project.objects.filter(
+                    Q(status="RU") |
+                    Q(status="ON")
+                ).order_by('dc_prj_id'
+                )
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexProjectView, self).get_context_data(**kwargs)
+        context.update({
+            'empty_list'     : [],
+        })
+        return context
+        
+class IndexUserView(LoginRequiredMixin, generic.ListView):
+    login_url='/login/'
+    
+    template_name = 'dc_management/index_users.html'
+    context_object_name = 'user_list'
+
+    def get_queryset(self):
+        """Return  all active projects."""
+        return  DC_User.objects.filter(project_pi__isnull=False,
+                                        ).distinct().order_by('first_name')
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexUserView, self).get_context_data(**kwargs)
+        context.update({
+            'empty_list'     : [],
+        })
+        return context
+    
+class IndexServerView(LoginRequiredMixin, generic.ListView):
+    login_url='/login/'
+    
+    template_name = 'dc_management/index_servers.html'
+    context_object_name = 'server_list'
+
+    def get_queryset(self):
+        """Return  all active production servers."""
+        return  Server.objects.filter(status="ON"
+                                        ).filter(
+                                            function="PR"
+                                        ).order_by('node')
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexServerView, self).get_context_data(**kwargs)
+        context.update({
+            'empty_list'     : [],
+        })
+        return context
+
+class IndexSoftwareView(LoginRequiredMixin, generic.ListView):
+    login_url='/login/'
+    
+    template_name = 'dc_management/index_software.html'
+    context_object_name = 'sw_list'
+
+    def get_queryset(self):
+        """Return  all software."""
+        swqs = Software.objects.all()
+        swqs = sorted(swqs, key=lambda i: i.seatcount(), reverse=True)
+        return  swqs
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexSoftwareView, self).get_context_data(**kwargs)
+        context.update({
+            'empty_list'     : [],
+        })
+        return context
+
+class IndexGovdocView(LoginRequiredMixin, generic.ListView):
+    login_url='/login/'
+    
+    template_name = 'dc_management/index_gov_docs.html'
+    context_object_name = 'govdoc_list'
+
+    def get_queryset(self):
+        """Return  all software."""
+        return Governance_Doc.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexGovdocView, self).get_context_data(**kwargs)
+        context.update({
+            'empty_list'     : [],
+        })
+        return context
+                    
 class IndexView(LoginRequiredMixin, generic.ListView):
     login_url='/login/'
     
@@ -294,15 +388,11 @@ class IndexView(LoginRequiredMixin, generic.ListView):
                                         status='SD',
                                         completion_date__isnull=True,
                                         ).order_by('expected_completion'),                            
-            'user_list'         : DC_User.objects.filter(
-                                        project_pi__isnull=False,
-                                        ).distinct().order_by('first_name'),
             'server_list'       : Server.objects.filter(
                                         status="ON"
                                         ).filter(
                                             function="PR"
                                         ).order_by('node'),
-            'sw_list'                  : swqs,
             'unsigned_user_list':[],
             'undoc_user_list'   :DC_User.objects.exclude(
                 governance_doc__date_issued__gte=date.today()-timedelta(days=360),

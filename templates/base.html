@@ -40,6 +40,38 @@
                           <a href="{% url 'dc_management:index' %}">Dashboard</a>
                         </li>
                     </ul>
+                    
+                    <ul class="nav navbar-nav navbar-left">
+                        <li class="dropdown">
+                
+                            <a class="dropdown-toggle" 
+                                id="dropblast" 
+                                data-toggle="dropdown"
+                                href="#">
+                                View Details <b class="caret"></b>
+                            </a>
+                                <ul class="dropdown-menu" 
+                                    role="menu" 
+                                    aria-labelledby="dropblast">
+                                    <li><a href="{% url 'dc_management:idx-project' %}">
+                                        Projects</a>
+                                    </li>
+                                    <li><a href="{% url 'dc_management:idx-server' %}">
+                                        Servers</a>
+                                    </li>
+                                    <li><a href="{% url 'dc_management:idx-user' %}">
+                                        Users</a>
+                                    </li>
+                                    <li><a href="{% url 'dc_management:idx-software' %}">
+                                        Software</a>
+                                    </li>
+                                    <li><a href="{% url 'dc_management:idx-govdoc' %}">
+                                        Governance Docs</a>
+                                    </li>
+                                    
+                                </ul>
+                            </li>
+                    </ul>
 
                     <div class="col-sm-3 col-md-3 pull-right">
                         <form   class="navbar-form" 
@@ -75,6 +107,9 @@
                               <ul class="dropdown-menu" 
                                     role="menu" 
                                     aria-labelledby="dropblast">
+                                    <li><a href="{% url 'admin:index' %}" 
+                                           target="_blank">Change password</a>
+                                    </li>
                                     <li><a href="/logout/">Logout </a></li>
                               </ul>
                               
@@ -98,7 +133,7 @@
                                         Reset password</a>
                                     </li>
                                     <li><a href="{% url 'dc_management:url_generator' %}">
-                                        Qualtrics URL generator</a>
+                                        DCUA generator</a>
                                     </li>
                                     <li><a href="{% url 'dc_management:change_software' %}">
                                         Install/remove software</a>

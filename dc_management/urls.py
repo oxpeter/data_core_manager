@@ -7,9 +7,16 @@ from . import views
 
 app_name = 'dc_management'
 urlpatterns = [
-    # index showing all running projects:
+    # index showing dashboard of high priority items:
     url(r'^$', views.IndexView.as_view(), name='index'),
 
+    # index views of projects, users, servers, software and gov docs:
+    path('project', views.IndexProjectView.as_view(), name='idx-project'),
+    path('server', views.IndexServerView.as_view(), name='idx-server'),
+    path('user', views.IndexUserView.as_view(), name='idx-user'),
+    path('softwareidx', views.IndexSoftwareView.as_view(), name='idx-software'),
+    path('govdoc', views.IndexGovdocView.as_view(), name='idx-govdoc'),
+    
     # autocomplete functions:
     url(r'autocomplete-user/$', 
         views.DCUserAutocomplete.as_view(), 
