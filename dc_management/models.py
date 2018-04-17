@@ -437,7 +437,11 @@ class Project(models.Model):
     
     def get_absolute_url(self):
         return reverse('dc_management:project', kwargs={'pk': self.pk})
-        
+    
+    def days_to_completion(self):
+    	td = self.expected_completion - datetime.date.today()
+    	return td.days
+    	    
 class AccessPermission(models.Model):
     name = models.CharField(max_length=32)
     description = models.TextField()    

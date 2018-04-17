@@ -235,16 +235,19 @@ class IndexView(LoginRequiredMixin, generic.ListView):
         return Project.objects.filter(status="RU").order_by('dc_prj_id')
     
     def get_context_data(self, **kwargs):
+        still_running = Project.objects.filter(status='RU',
+												completion_date__isnull=True,
+												).order_by('expected_completion'
+												)
+        
+        expiring_soon = [ p for p in still_running if p.days_to_completion() <= 60 ]
+        
         swqs = Software.objects.all()
         swqs = sorted(swqs, key=lambda i: i.seatcount(), reverse=True)
         
         context = super(IndexView, self).get_context_data(**kwargs)
         context.update({
-            'expiring_list'     : Project.objects.filter(
-                                        status='RU',
-                                        completion_date__isnull=True,
-                                        expected_completion__lte=date.today(),
-                                        ).order_by('expected_completion'),  
+            'expiring_list'     : expiring_soon,  
             'onboarding_list'   : MigrationLog.objects.filter(
                                         Q(access_date__isnull=True) |
                                         Q(envt_date__isnull=True)   |
