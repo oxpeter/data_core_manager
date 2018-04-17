@@ -37,7 +37,7 @@
                 <div id="navbar-main" class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
                         <li>
-                          <a href="{% url 'dc_management:index' %}">Data Core Home</a>
+                          <a href="{% url 'dc_management:index' %}">Dashboard</a>
                         </li>
                     </ul>
 
@@ -65,16 +65,32 @@
                     
                     <ul class="nav navbar-nav navbar-right">
                         {% if user.is_authenticated %}
-                            <li>
-                              <a href="/logout/">Logout</a>
+                            <li class="dropdown">
+                              <a class="dropdown-toggle" 
+                                id="dropblast" 
+                                data-toggle="dropdown"
+                                href="#">
+                                {{ user.get_username }} <b class="caret"></b>
+                              </a>
+                              <ul class="dropdown-menu" 
+                                    role="menu" 
+                                    aria-labelledby="dropblast">
+                                    <li><a href="/logout/">Logout </a></li>
+                              </ul>
+                              
                             </li>
                           
                             <li class="dropdown">
                 
-                            <a class="dropdown-toggle" id="dropblast" data-toggle="dropdown"
-                                href="#">Options <b class="caret"></b>
+                            <a class="dropdown-toggle" 
+                                id="dropblast" 
+                                data-toggle="dropdown"
+                                href="#">
+                                Options <b class="caret"></b>
                             </a>
-                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropblast">
+                                <ul class="dropdown-menu" 
+                                    role="menu" 
+                                    aria-labelledby="dropblast">
                                     <li><a href="{% url 'admin:index' %}" 
                                            target="_blank">DC Admin</a>
                                     </li>
