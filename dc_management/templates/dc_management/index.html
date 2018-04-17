@@ -154,6 +154,7 @@
       </div>
      </div>
     </div>
+
     <div class="container">
      <div class="panel panel-info">
       <div class="panel-heading">
@@ -170,6 +171,41 @@
       </div>
      </div>
     </div>
+
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>Projects without any IRB documentation</h4>
+      </div>
+      <div class="panel-body">
+            
+        {% with irb_invalid as project_list %}
+        {% with "dc_management/missing_gov_docs.html" as passthroughhtml %}
+            {% include "dc_management/project_list_template.html" %}
+        {% endwith %}
+        {% endwith %}
+            
+      </div>
+     </div>
+    </div>
+
+    <div class="container">
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h4>Projects with expired DUAs</h4>
+      </div>
+      <div class="panel-body">
+            
+        {% with dua_invalid as project_list %}
+        {% with "dc_management/missing_gov_docs.html" as passthroughhtml %}
+            {% include "dc_management/project_list_template.html" %}
+        {% endwith %}
+        {% endwith %}
+            
+      </div>
+     </div>
+    </div>
+
     <div class="container">
      <div class="panel panel-info">
       <div class="panel-heading">

@@ -235,12 +235,31 @@ class IndexView(LoginRequiredMixin, generic.ListView):
         return Project.objects.filter(status="RU").order_by('dc_prj_id')
     
     def get_context_data(self, **kwargs):
+        # all projects running and without a completed date
         still_running = Project.objects.filter(status='RU',
-												completion_date__isnull=True,
-												).order_by('expected_completion'
-												)
-        
+                                                completion_date__isnull=True,
+                                                ).order_by('expected_completion'
+                                                )
+        # for the expiring list
         expiring_soon = [ p for p in still_running if p.days_to_completion() <= 60 ]
+        
+        # all projects with valid IRB documentation
+        irb_valid_projects = Project.objects.filter(
+                                governance_doc__governance_type='IR',
+                                governance_doc__expiry_date__gte=date.today(),
+                                                    )
+        irb_invalid_projects = still_running.difference(irb_valid_projects)
+        
+        # get all projects with expired DUAs that DON'T have currently valid DUAs
+        dua_invalid_projects = Project.objects.filter(
+                                    ~Q(governance_doc__expiry_date__gte=date.today()) &
+                                    Q(governance_doc__governance_type='DU')
+                                ).exclude(
+                                    governance_doc__expiry_date__gte=date.today(),
+                                    governance_doc__governance_type='DU'
+                                ).exclude(
+                                    status='CO',
+                                )
         
         swqs = Software.objects.all()
         swqs = sorted(swqs, key=lambda i: i.seatcount(), reverse=True)
@@ -266,6 +285,8 @@ class IndexView(LoginRequiredMixin, generic.ListView):
                                         status='ON',
                                         migrationlog=None,
                                         ).order_by('requested_launch'),                            
+            'irb_invalid'       : irb_invalid_projects,
+            'dua_invalid'       : dua_invalid_projects,
             'undocumented_list' : Project.objects.filter(
                                         governance_doc__isnull=True,
                                         ).order_by('dc_prj_id'),                           
@@ -1577,6 +1598,7 @@ class FullSearch(LoginRequiredMixin, generic.TemplateView):
         qs_usr = DC_User.objects.all()
         qs_usr = qs_usr.filter( Q(first_name__icontains=st) |
                                 Q(last_name__icontains=st) |
+                                Q(cwid__icontains=st) |
                                 Q(comments__icontains=st)
         )
         qs_gov = Governance_Doc.objects.all()
