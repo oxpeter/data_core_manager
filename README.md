@@ -1,4 +1,4 @@
-# Data Core Manager
+# Data Core Manager (ARCHIVE)
 _A django app for managing institutional data cores_
 
 **NB: This repository has been deprecated, and is being held for archival purposes only. For the latest development on this project, please look at [Datacore Web Manager](https://github.com/oxpeter/datacore_web_manager)**
