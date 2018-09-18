@@ -1,5 +1,7 @@
 # Data Core Manager
-__A django app for managing institutional data cores__
+_A django app for managing institutional data cores_
+
+**NB: This repository has been deprecated, and is being held for archival purposes only. For the latest development on this project, please look at [Datacore Web Manager](https://github.com/oxpeter/datacore_web_manager)**
 
 ```
 Peter Oxley
@@ -21,5 +23,9 @@ This app will need to be installed into an existing Django project.
 4. run `python manage.py migrate`
 
 ## Dependencies
-Django 11
+django==2.0
+python>=3.6
+django-autocomplete-light==3.3.0rc1
+django-bootstrap3==9.1.0
+django-crispy-forms==1.7.0
 
